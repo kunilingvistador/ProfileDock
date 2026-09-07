@@ -24,7 +24,7 @@ These checks used window and tab identifiers plus window state. This public reco
 
 **37 core test methods and 247 assertions passed through a local Command Line Tools-compatible harness.** The checks cover model and parsing behavior such as binding resolution, route validation, filenames, configuration storage, profile discovery, and favicon discovery.
 
-This was not an XCTest runner execution. The standalone Command Line Tools installation on the test machine lacked the XCTest module, so a normal `swift test` run could not complete there. The repository includes a GitHub Actions workflow using a macOS runner with full Xcode for the standard test command. A successful CI run is not claimed by this local validation record.
+This was not an XCTest runner execution. The standalone Command Line Tools installation on the test machine lacked the XCTest module, so a normal `swift test` run could not complete there. The repository includes a GitHub Actions workflow using a macOS runner with full Xcode for the standard test command. The subsequent GitHub CI run used the standard XCTest runner and passed all 37 tests; see the linked result below.
 
 ## Generated shortcut update fixture
 
@@ -47,8 +47,7 @@ The package is **ad-hoc signed and unnotarized**. Signature integrity checks do 
 
 ## Still to verify
 
-- Standard XCTest execution and a successful GitHub Actions run.
-- Live Finder/Dock reference preservation through shortcut rename and icon updates.
+- Clicking an existing Dock pin after rename/icon updates; file identity, bookmarks, and the live Finder path have already been checked.
 - Runtime behavior on an Intel Mac and on older supported macOS versions.
 - Multiple Spaces, fullscreen windows, multiple monitors, and Stage Manager.
 - App-wide Hide and its interaction with focus handoff.

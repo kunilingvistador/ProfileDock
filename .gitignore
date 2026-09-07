@@ -9,3 +9,8 @@ dist/
 *.p12
 *.mobileprovision
 local-qa/
+
+website/node_modules/
+website/dist/
+website/.vinext/
+website/.next/
