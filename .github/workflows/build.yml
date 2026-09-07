@@ -16,6 +16,16 @@ jobs:
       - uses: actions/checkout@v4
       - name: Test core behavior
         run: swift test --scratch-path "$RUNNER_TEMP/ProfileDock-tests"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: website/package-lock.json
+      - name: Build static website
+        working-directory: website
+        run: |
+          npm ci
+          npm run build
       - name: Build ad-hoc development app
         run: python3 scripts/build.py --scratch-path "$RUNNER_TEMP/ProfileDock-build"
       - name: Upload development artifacts
