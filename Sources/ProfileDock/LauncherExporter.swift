@@ -15,7 +15,7 @@ enum LauncherExporter {
         let existing = try files.contentsOfDirectory(at: directory, includingPropertiesForKeys: [.isSymbolicLinkKey], options: [.skipsHiddenFiles])
             .filter { $0.pathExtension == "app" && isOwned($0, shortcutID: shortcut.id, bundleID: expectedID) }
             .sorted { $0.lastPathComponent < $1.lastPathComponent }
-        // Retaining the path preserves existing Dock bookmarks after a display-name change.
+        // Updates retain both this path and the app directory's filesystem identity.
         let destination = existing.first ?? directory.appendingPathComponent(SafeFilename.make(shortcut.name, id: shortcut.id), isDirectory: true)
         if files.fileExists(atPath: destination.path), !isOwned(destination, shortcutID: shortcut.id, bundleID: expectedID) {
             throw ExportError.foreignDestination
@@ -75,16 +75,20 @@ enum LauncherExporter {
 
         if files.fileExists(atPath: destination.path) {
             guard isOwned(destination, shortcutID: shortcut.id, bundleID: expectedID) else { throw ExportError.foreignDestination }
-            let previous = stagingRoot.appendingPathComponent("previous.app", isDirectory: true)
-            try files.moveItem(at: destination, to: previous)
+            // Finder and Dock bookmark the app directory by filesystem identity,
+            // not just its path. Replacing that directory breaks existing file
+            // references, so install only the preverified Contents directory.
+            let installedContents = destination.appendingPathComponent("Contents", isDirectory: true)
+            let previousContents = stagingRoot.appendingPathComponent("previous-Contents", isDirectory: true)
+            try files.moveItem(at: installedContents, to: previousContents)
             do {
-                try files.moveItem(at: stagedApp, to: destination)
+                try files.moveItem(at: contents, to: installedContents)
             } catch {
                 // Restore the working shortcut if installing the prepared replacement fails.
-                do { try files.moveItem(at: previous, to: destination) }
+                do { try files.moveItem(at: previousContents, to: installedContents) }
                 catch {
                     preserveStaging = true
-                    throw ExportError.restoreFailed(previous.path)
+                    throw ExportError.restoreFailed(previousContents.path)
                 }
                 throw error
             }
@@ -134,7 +138,7 @@ private enum ExportError: LocalizedError {
         case .signingFailed(let detail):
             return L("macOS could not prepare the shortcut: \(detail)", "macOS не удалось подготовить ярлык: \(detail)")
         case .restoreFailed(let path):
-            return L("The shortcut could not be replaced. Its previous copy is at \(path).", "Не удалось заменить ярлык. Его предыдущая копия находится здесь: \(path).")
+            return L("The shortcut could not be updated. Its previous Contents folder was preserved at \(path).", "Не удалось обновить ярлык. Его предыдущая папка Contents сохранена здесь: \(path).")
         }
     }
 }
