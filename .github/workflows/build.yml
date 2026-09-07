@@ -1,0 +1,29 @@
+name: Build development app
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  macos:
+    runs-on: macos-14
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test core behavior
+        run: swift test --scratch-path "$RUNNER_TEMP/ProfileDock-tests"
+      - name: Build ad-hoc development app
+        run: python3 scripts/build.py --scratch-path "$RUNNER_TEMP/ProfileDock-build"
+      - name: Upload development artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ProfileDock-development-unnotarized
+          path: |
+            dist/*.zip
+            dist/SHA256SUMS
+          if-no-files-found: error
+          retention-days: 14
