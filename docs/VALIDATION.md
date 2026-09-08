@@ -1,6 +1,10 @@
 # Validation record
 
-## Current candidate: 0.1.1 (4)
+## Current beta: 0.1.2 (5)
+
+The interface, website, SEO, package and exact-source CI checks for this release are recorded in [DESIGN-VALIDATION.md](DESIGN-VALIDATION.md). The earlier window-activation measurements below retain their original candidate and scope.
+
+## Historical candidate: 0.1.1 (4)
 
 Validated **8 September 2026**, source commit `9155f134705cdb4d69d0f04c4143e7edf0e65462`. Live desktop: **macOS 26.5.2, arm64, Chrome 152.0.7977.76**. The exact local universal archive has SHA-256 `041e658d634ed0a98b179ba452de1ac7942b5f30389f4d8efcdc8414f1a21758`.
 

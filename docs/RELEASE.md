@@ -1,6 +1,6 @@
 # Build and release
 
-The current output is a **local beta**, not a notarized public download. GitHub Actions builds development artifacts; it does not create a GitHub Release or publish a site.
+The current published download is an **ad-hoc-signed, unnotarized beta**. The normal Developer ID distribution process below remains future release work. GitHub Actions builds development artifacts; it does not create a GitHub Release or publish a site.
 
 ## Local build
 

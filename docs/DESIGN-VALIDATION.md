@@ -1,6 +1,6 @@
 # Design and website validation
 
-Date: **8 September 2026**. The local native candidate reports **0.1.2 (5)**. This record covers the interface implementation and locally built website. It does not replace the window-activation regression record in [VALIDATION.md](VALIDATION.md), or establish a successful public deployment.
+Date: **8 September 2026**. The local native candidate reports **0.1.2 (5)**. This record covers the interface implementation, local verification and published beta/website. It does not replace the separately scoped window-activation regression record in [VALIDATION.md](VALIDATION.md).
 
 ## Native interface implementation
 
@@ -30,7 +30,7 @@ The following local checks passed after these corrections:
 | GitHub Pages copy | Source export and copied `docs` tree both passed the validator; 34 local HTML references checked in each tree. Both preview images are included. |
 | Source hygiene | Python/YAML syntax and `git diff --check` passed. Generated Next type declarations and TypeScript build state are ignored. |
 
-The export handles the pinned Vinext trailing-slash redirect issue by copying rendered `en.html` to `en/index.html`. Both pages require static rendering, so a skipped locale cannot silently produce a successful release check. The CI website job now exercises this same export and validation. The new CI configuration still needs a completed run for the exact published candidate.
+The export handles the pinned Vinext trailing-slash redirect issue by copying rendered `en.html` to `en/index.html`. Both pages require static rendering, so a skipped locale cannot silently produce a successful release check. The CI website job now exercises this same export and validation. [CI 34214729730](https://github.com/kunilingvistador/ProfileDock/actions/runs/34214729730) passed all five jobs for exact source `d2649d3a588f1aab238be6736e3869bcfecf0af7`: each macOS 15/26 × Apple Silicon/Intel runner passed 37 XCTest methods and package-integrity checks; the website job passed static export and SEO validation.
 
 See [SEO.md](SEO.md) for primary Google documentation, robots.txt scope, the absence of genuine ratings for software-app rich results, and the distinction between valid metadata and actual indexing. Search Console submissions and indexing outcomes are not claimed here.
 
@@ -62,4 +62,10 @@ Observed on macOS 26.5.2 / Apple Silicon, local candidate **0.1.2 (5)**:
 
 The final local universal archive is `ProfileDock-0.1.2-macos-universal-local.zip`, SHA-256 `85b956a1dc0c0b6bbb225a0a3f95a96986563690ba774d65918aaf4571273d26`. It is ad-hoc signed and not notarized.
 
-Still outside this pass: VoiceOver end-to-end, live Chrome GUI behavior on Intel/macOS 13–14, fullscreen/Spaces/Stage Manager, exhaustive runtime network tracing, measured website paint/input latency, and an actual reduced-motion OS/browser emulation. Reduced-motion CSS and focus styles were inspected in source. Do not treat artifact-size reductions as measured load-time improvements. CI and deployment results are recorded separately when available.
+Still outside this pass: VoiceOver end-to-end, live Chrome GUI behavior on Intel/macOS 13–14, fullscreen/Spaces/Stage Manager, exhaustive runtime network tracing, measured website paint/input latency, and an actual reduced-motion OS/browser emulation. Reduced-motion CSS and focus styles were inspected in source. Do not treat artifact-size reductions as measured load-time improvements.
+
+## Publication verification
+
+[Version 0.1.2 beta](https://github.com/kunilingvistador/ProfileDock/releases/tag/v0.1.2-beta) is published as an explicit prerelease. Its uploaded archive digest and checksum file match the verified local files. The release targets merge commit `2ede45db09f34d6d2e9ab19badb03d33b801cdb1`; its source tree matches the CI-tested source commit above.
+
+GitHub Pages reported a successful build of that merge commit. HTTPS checks on the Russian page, English page, sitemap, social PNG and app JPEG returned **200** with bytes identical to the verified export. The live browser displayed the new Russian title, headline and English navigation link. The origin-level `/robots.txt` returned **404**, so no root robots file was observed; no ineffective project-subpath robots file was added. These checks establish published content, not Google indexing or ranking.
