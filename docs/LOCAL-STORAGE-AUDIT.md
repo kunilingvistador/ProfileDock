@@ -1,8 +1,8 @@
 # Local storage and launcher chain review
 
-Reviewed 2026-09-08 for **release candidate 0.1.5, build 11**, exact source
+Reviewed 2026-09-08 for **published beta 0.1.5, build 11**, exact source
 [`addbc13`](https://github.com/kunilingvistador/ProfileDock/commit/addbc132f018310a713642cac32c3e58e08e9c9b),
-**not yet published**. This review covers profile discovery, shortcut storage, controller selection,
+published as [v0.1.5-beta](https://github.com/kunilingvistador/ProfileDock/releases/tag/v0.1.5-beta) at merged commit [`0fc79dd`](https://github.com/kunilingvistador/ProfileDock/commit/0fc79dd40542e9e210eb9aa21be9ac4a1c0e15db). This review covers profile discovery, shortcut storage, controller selection,
 legacy import and maintenance, generated launchers, local diagnostics and the
 native build/signing path. This is a source review with isolated filesystem
 fixtures, not a penetration test or a guarantee against another malicious
@@ -31,7 +31,7 @@ Removing an entry from ProfileDock currently removes its configuration entry.
 Previously exported apps, image files and migration backups can remain on disk.
 Treat this as removal from the manager, not secure deletion of all related data.
 
-## Storage hardening implemented in the release candidate
+## Storage hardening in 0.1.5
 
 `PrivateStorage` protects the known app-owned data root and immediate owned
 subdirectories with POSIX mode `0700`. JSON/image replacements use mode `0600`,
@@ -59,7 +59,7 @@ roots, and preservation of the original backup contents. See
 `Tests/ProfileDockCoreTests/PrivateStorageTests.swift` and the existing launcher
 filesystem harness.
 
-## Candidate validation status
+## Published-release validation status
 
 [CI 34235067293](https://github.com/kunilingvistador/ProfileDock/actions/runs/34235067293)
 passed all five jobs for the source above. Each native macOS 15/26 × arm64/x86_64
@@ -68,8 +68,11 @@ assertions**, with zero failures, plus its package checks. A separate fresh
 extraction of the final local build-11 ZIP passed
 checksum, CRC, both universal-binary architecture checks and deep strict
 signature verification. See [VALIDATION.md](VALIDATION.md) for the archive hash
-and the complete validation scope. This was not a download of a published 0.1.5
-release.
+and the complete validation scope. After publication, the ZIP and checksum were
+downloaded from GitHub into a fresh temporary directory: the hash matched, CRC
+passed, and the extracted 0.1.5/build-11 app passed both universal-binary checks
+and deep strict signature verification. Clean-Mac Gatekeeper and fresh
+Automation consent were not tested by these integrity checks.
 
 Read-only before/after checks of the existing installation found the four
 shortcut paths, root inodes, bundle IDs and ICNS hashes unchanged. The saved

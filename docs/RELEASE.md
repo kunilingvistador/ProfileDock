@@ -22,9 +22,10 @@ Run `swift test` with a full Xcode installation selected before releasing. XCTes
 
 No signing certificate, personal browser data, account name, custom photo, or user configuration belongs in the source tree or archive. Packaging includes the compiled executables, generated original icon, and app metadata only.
 
-## 0.1.5 privacy release candidate
+## Published 0.1.5 privacy beta
 
-**0.1.5, build 11** is an **unpublished candidate** from exact source
+**0.1.5, build 11** is published as [v0.1.5-beta](https://github.com/kunilingvistador/ProfileDock/releases/tag/v0.1.5-beta),
+targeting merged commit [`0fc79dd`](https://github.com/kunilingvistador/ProfileDock/commit/0fc79dd40542e9e210eb9aa21be9ac4a1c0e15db), from exact tested source
 [`addbc13`](https://github.com/kunilingvistador/ProfileDock/commit/addbc132f018310a713642cac32c3e58e08e9c9b).
 It minimizes incognito metadata in the window picker, restricts optional favicon
 requests and image decoding, protects managed local data paths, and explains
@@ -40,8 +41,13 @@ checks and has SHA-256
 See [VALIDATION.md](VALIDATION.md) for local UI, existing-shortcut preservation,
 signature/architecture checks and their limits, and [the privacy review](PRIVACY-AND-SECURITY.md)
 for remaining security boundaries and website development-dependency findings.
-Publication and a fresh download of the eventual release assets are pending.
-This candidate is ad-hoc signed and unnotarized; updating remains manual.
+The published ZIP and `SHA256SUMS` were downloaded into a fresh temporary
+directory. The hash matched the value above; CRC passed; the extracted app
+reported 0.1.5/build 11, contained arm64 and x86_64 in both binaries, and passed
+deep strict signature verification. [Pages deployment 34235919810](https://github.com/kunilingvistador/ProfileDock/actions/runs/34235919810)
+succeeded for the merged commit. These checks do not establish clean-Mac
+Gatekeeper behavior or fresh Automation consent. This release is ad-hoc signed
+and unnotarized; updating remains manual.
 
 ## Published 0.1.4 performance beta
 
