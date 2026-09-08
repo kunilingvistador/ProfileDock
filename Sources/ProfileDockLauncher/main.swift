@@ -1,5 +1,6 @@
 import AppKit
 import Foundation
+import ProfileDockCore
 
 private func localize(_ english: String, _ russian: String) -> String {
     Locale.preferredLanguages.first?.lowercased().hasPrefix("ru") == true ? russian : english
@@ -27,13 +28,14 @@ private final class LauncherDelegate: NSObject, NSApplicationDelegate {
             return
         }
 
-        let installed = NSWorkspace.shared.urlForApplication(withBundleIdentifier: "io.github.profiledock.app")
+        let registry = ControllerLocationRegistry()
+        let installed = NSWorkspace.shared.urlForApplication(withBundleIdentifier: ControllerResolver.bundleID)
+        let running = NSRunningApplication.runningApplications(withBundleIdentifier: ControllerResolver.bundleID)
+            .filter { !$0.isTerminated }.compactMap(\.bundleURL)
         let fallback = (Bundle.main.object(forInfoDictionaryKey: "ProfileDockControllerPath") as? String)
             .map { URL(fileURLWithPath: $0, isDirectory: true) }
-        guard let controller = [installed, fallback].compactMap({ $0 }).first(where: { candidate in
-            FileManager.default.fileExists(atPath: candidate.path)
-                && Bundle(url: candidate)?.bundleIdentifier == "io.github.profiledock.app"
-        }) else {
+        guard let controller = ControllerResolver.resolve(preferred: registry.controllerURL(), running: running,
+                                                           registered: installed, fallback: fallback) else {
             fail(localize("ProfileDock could not be found. Move ProfileDock to Applications and open it once, then try this shortcut again.", "Не удалось найти ProfileDock. Переместите его в «Программы» и один раз откройте, затем нажмите ярлык снова."))
             return
         }

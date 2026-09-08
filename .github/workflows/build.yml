@@ -66,10 +66,12 @@ jobs:
           (Path(os.environ["RUNNER_TEMP"]) / "ci-environment.txt").write_text(report)
           with Path(os.environ["GITHUB_STEP_SUMMARY"]).open("a") as summary:
               summary.write("### Native test environment\n\n```text\n" + report + "\n```\n")
-              summary.write("Core XCTest and package integrity checks only; no live Chrome UI test.\n")
+              summary.write("Core XCTest, launcher filesystem compatibility and package integrity checks; no live Chrome UI test.\n")
           PY
       - name: Test core behavior
         run: swift test --scratch-path "$RUNNER_TEMP/ProfileDock-tests"
+      - name: Test launcher update and legacy migration compatibility
+        run: python3 scripts/test-launcher-compatibility.py
       - name: Typecheck the standalone performance harness
         run: xcrun swiftc -typecheck -swift-version 5 scripts/measure-launcher-latency.swift
       - name: Build ad-hoc development app

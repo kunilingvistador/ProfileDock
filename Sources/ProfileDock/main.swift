@@ -61,6 +61,12 @@ import ProfileDockCore
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }
 
     @objc func showWindow() {
+        if let model, !model.demoMode {
+            try? ControllerLocationRegistry(directory: model.store.directory).record(controllerURL: Bundle.main.bundleURL)
+            // A background Dock click should spend its time focusing the window,
+            // not signing other helpers. Maintenance runs when setup is opened.
+            Task { model.synchronizeLaunchers() }
+        }
         previewPanel?.orderOut(nil)
         window?.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true)
     }
@@ -94,6 +100,7 @@ import ProfileDockCore
     }
     @objc func quit() { NSApp.terminate(nil) }
     @objc func refresh() { Task { await model.refresh() } }
+    @objc func updateLaunchers() { model.updateLaunchers() }
     @objc func focusMenuItem(_ item: NSMenuItem) {
         guard let id = item.representedObject as? UUID, let shortcut = model.shortcuts.first(where: { $0.id == id }) else { return }
         Task { await model.switchTo(shortcut); if model.errorMessage != nil { showWindow() } }
@@ -133,6 +140,10 @@ import ProfileDockCore
         if !model.shortcuts.isEmpty { menu.addItem(.separator()) }
         let refresh = NSMenuItem(title: L("Refresh windows", "Обновить окна"), action: #selector(refresh), keyEquivalent: "r")
         refresh.target = self; menu.addItem(refresh)
+        let update = NSMenuItem(title: L("Update shortcuts", "Обновить ярлыки"), action: #selector(updateLaunchers), keyEquivalent: "")
+        update.target = self
+        update.isEnabled = !model.demoMode && !model.isBusy && !model.isMaintainingLaunchers
+        menu.addItem(update)
         let quit = NSMenuItem(title: L("Quit ProfileDock", "Завершить ProfileDock"), action: #selector(quit), keyEquivalent: "q")
         quit.target = self; menu.addItem(quit)
         statusItem.menu = menu

@@ -17,6 +17,7 @@ A small, open-source macOS utility for people who keep several Chrome profiles o
 - Restores a minimized target and brings that window forward.
 - Reports missing or ambiguous bindings instead of opening a blank window.
 - Keeps Chrome control in one app, so each shortcut does not need its own Automation permission.
+- Refreshes existing compatible Dock helpers when you open ProfileDock after an app update.
 
 The switching command does not open windows or tabs, change the selected tab, or resize/reposition windows. Native focus behavior still needs broader testing across macOS configurations; see [known limits](#known-limits).
 
@@ -51,6 +52,16 @@ python3 scripts/build.py --scratch-path /tmp/ProfileDock-build
 The first command builds both Apple Silicon and Intel binaries. Without `--universal`, the app targets the build machine's architecture. CI produces development artifacts only and does not publish releases.
 
 See the [Mac test matrix](docs/TEST-MATRIX.md) and the [repeatable launcher latency measurement](scripts/measure-launcher-latency.md) for separate automated, performance, and live desktop checks.
+
+## Update without recreating your shortcuts
+
+ProfileDock does not download or install its own updates. Download a new release, quit ProfileDock, replace the app, and open that copy once. Settings and custom images remain in `~/Library/Application Support/ProfileDock/`. The existing UUID routes and version-1 shortcut data format are unchanged in the 0.1.3 compatibility update.
+
+Opening the manager records that app's location and refreshes owned helpers in the managed folder, the Dock, and previously recorded locations. The usual Dock click continues to ask the controller to focus an existing window; it does not run this maintenance. If you move ProfileDock, open it once from the new location.
+
+For compatible older AppleScript shortcuts, use **Update shortcuts** in the banner or menu. **Import existing shortcuts… → Import and update** also upgrades the original app files, including shortcuts already imported. Conversion keeps the original app path and filesystem identity, bundle ID, name, image, and Chrome window binding, and backs up the old contents first. Later name and picture edits apply to those migrated helpers too.
+
+See [shortcut compatibility and backups](docs/SHORTCUT-COMPATIBILITY.md) for the exact scope and the 0.1.3 validation status. An app update does not restore a Chrome window that was closed or lost its name; reconnect that window separately.
 
 ## Privacy and permissions
 
@@ -90,3 +101,5 @@ The original app icon is drawn with AppKit by `scripts/make-app-icon.swift`. The
 ProfileDock делает отдельные значки в Dock для уже открытых окон Chrome. Один раз связываете значок с нужным окном, задаёте название и картинку — дальше переключаетесь одним нажатием.
 
 Это локальная бета. Привязка использует уникальное название окна: после закрытия окна или изменения его названия понадобится связать его заново. Новые пустые окна при переключении не создаются. Для удобного публичного скачивания ещё нужны подпись Developer ID, нотариализация Apple и проверка на разных Mac.
+
+При обновлении замените приложение ProfileDock и откройте новую копию один раз: настройки и картинки сохраняются, существующие совместимые ярлыки обновляются. Для старых ярлыков есть кнопка **«Обновить ярлыки»**; она сохраняет их расположение, имя и изображение, предварительно создавая резервную копию. После переноса приложения также откройте его из нового места. Автоматического скачивания обновлений пока нет. [Подробнее о совместимости](docs/SHORTCUT-COMPATIBILITY.md).
