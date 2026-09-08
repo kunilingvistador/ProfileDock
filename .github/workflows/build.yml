@@ -70,6 +70,8 @@ jobs:
           PY
       - name: Test core behavior
         run: swift test --scratch-path "$RUNNER_TEMP/ProfileDock-tests"
+      - name: Typecheck the standalone performance harness
+        run: xcrun swiftc -typecheck -swift-version 5 scripts/measure-launcher-latency.swift
       - name: Build ad-hoc development app
         run: |
           if [ "$PACKAGE_KIND" = universal ]; then

@@ -83,7 +83,7 @@ failure; already collected samples remain in the JSON. No apps are killed.
   animation completion, page paint, input acceptance, or perceived visual latency.
   Use a screen recording/high-speed camera or a dedicated render/instrumentation
   method for those questions; do not describe this result as click-to-photon latency.
-- ProfileDock's manager must be visible in the current workspace. A hidden/closed
+- In warm mode, ProfileDock's manager must be visible in the current workspace. A hidden/closed
   manager that does not respond to reopen fails the baseline instead of warming up
   by activating Chrome. Preparation changes the foreground window but does not
   minimize, move, resize, rename, create, or close Chrome windows.
@@ -106,15 +106,23 @@ failure; already collected samples remain in the JSON. No apps are killed.
 
 ## One cold-controller sample
 
-The caller must first quit **only ProfileDock** through its ordinary interface and
-bring a different application, such as Finder or Codex, to the foreground. Keep
-Chrome and the target window open. Then add `--cold-controller` to the command above
+The caller must first quit **only ProfileDock** through its ordinary interface. Keep
+Chrome and the target window open. Add `--cold-controller` to the command above
 and omit `--iterations` (its cold default is 1) or set it to 1 explicitly. Other
 iteration counts are rejected. Repeat the manual preparation for another cold run.
 
-The harness verifies that the controller is not running, Chrome is not frontmost,
-and no instance of the selected helper is still running. It repeats those checks
-immediately before requesting the helper. It **skips controller baseline activation
-entirely**; only the helper request starts the controller. JSON `baselineReadyMs` is
-explicitly `null`. The tool never quits, kills, or directly starts the controller in
-this mode. All timing starts at the helper's Launch Services request as in warm mode.
+The harness verifies that the controller and selected helper are not running. If
+Chrome is frontmost, it activates an **already-running Finder** using
+`NSRunningApplication.activate(options: [])`. It does not launch Finder, open a
+Finder window, or activate Chrome. If Finder is not running or activation fails,
+the run stops with a status code. If another application is already frontmost, it
+keeps that application as the baseline.
+
+The same non-Chrome application must remain frontmost for `--ready-ms` (150 ms by
+default). Throughout preparation, and again immediately before requesting the
+helper, the harness checks that the controller is still absent. If the controller
+starts independently, the run is refused rather than counted as cold. It **skips
+controller baseline activation entirely**; only the helper request starts the
+controller. JSON `baselineReadyMs` reports the preparation duration, separately
+from and excluded from `latencyMs`. The tool never quits, kills, or directly starts
+the controller in this mode. Timing starts at the helper's Launch Services request.

@@ -123,7 +123,7 @@ private struct Sample: Encodable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(iteration, forKey: .iteration)
         try container.encode(status, forKey: .status)
-        // Explicit null distinguishes the skipped cold baseline from a zero-duration baseline.
+        // Keep a missing baseline distinguishable from a zero-duration baseline.
         try container.encode(baselineReadyMs, forKey: .baselineReadyMs)
         try container.encode(elapsedMs, forKey: .elapsedMs)
         try container.encodeIfPresent(latencyMs, forKey: .latencyMs)
@@ -183,7 +183,7 @@ private func emit<T: Encodable>(_ value: T, exitCode: Int32) -> Never {
 
 @MainActor
 private final class Benchmark: NSObject, NSApplicationDelegate {
-    private enum Phase { case preparing, measuring }
+    private enum Phase { case preparing, preparingCold, measuring }
     private let options: Options
     private let launcherBundleID: String
     private let targetOwner: pid_t
@@ -193,6 +193,8 @@ private final class Benchmark: NSObject, NSApplicationDelegate {
     private var baselineStarted: UInt64 = 0
     private var baselineStableSince: UInt64?
     private var baselineReadyMs: Double?
+    private var coldBaselinePID: pid_t?
+    private var finderActivationAttempted = false
     private var controllerPID: pid_t?
     private var controllerOpened = false
     private var sampleStarted: UInt64 = 0
@@ -228,7 +230,6 @@ private final class Benchmark: NSObject, NSApplicationDelegate {
             .contains(where: { !sameFile($0.bundleURL, options.controller) }) { throw Failure.controllerPathConflict }
         if options.coldController {
             guard NSRunningApplication.runningApplications(withBundleIdentifier: controllerBundleID).isEmpty else { throw Failure.coldControllerRunning }
-            guard NSWorkspace.shared.frontmostApplication?.bundleIdentifier != chromeBundleID else { throw Failure.coldChromeFrontmost }
             guard NSRunningApplication.runningApplications(withBundleIdentifier: identifier).isEmpty else { throw Failure.coldHelperRunning }
         }
         guard let windows = windowMetadata(onScreen: false) else { throw Failure.windowListUnavailable }
@@ -246,14 +247,16 @@ private final class Benchmark: NSObject, NSApplicationDelegate {
         timer = pollingTimer
         RunLoop.main.add(pollingTimer, forMode: .common)
         if options.coldController {
-            // The caller prepares a non-Chrome foreground app and quits only the
-            // controller manually. The harness does not activate any baseline app.
+            // The caller quits only the controller manually. If necessary, activate
+            // an already-running Finder without opening it or touching Chrome.
             guard NSRunningApplication.runningApplications(withBundleIdentifier: controllerBundleID).isEmpty else { finish(status: Failure.coldControllerRunning.rawValue) }
-            guard NSWorkspace.shared.frontmostApplication?.bundleIdentifier != chromeBundleID else { finish(status: Failure.coldChromeFrontmost.rawValue) }
             guard NSRunningApplication.runningApplications(withBundleIdentifier: launcherBundleID).isEmpty else { finish(status: Failure.coldHelperRunning.rawValue) }
             iteration = 1
             baselineReadyMs = nil
-            requestLauncher()
+            baselineStarted = now()
+            baselineStableSince = nil
+            phase = .preparingCold
+            poll()
         } else {
             prepareNextSample()
         }
@@ -290,6 +293,33 @@ private final class Benchmark: NSObject, NSApplicationDelegate {
     private func poll() {
         let timestamp = now()
         switch phase {
+        case .preparingCold:
+            guard NSRunningApplication.runningApplications(withBundleIdentifier: controllerBundleID).isEmpty else { finish(status: Failure.coldControllerRunning.rawValue) }
+            guard NSRunningApplication.runningApplications(withBundleIdentifier: launcherBundleID).isEmpty else { finish(status: Failure.coldHelperRunning.rawValue) }
+            guard milliseconds(timestamp, since: baselineStarted) < options.timeoutMilliseconds else {
+                finish(status: "cold_baseline_not_ready_timeout")
+            }
+            let frontmost = NSWorkspace.shared.frontmostApplication
+            if let frontmost, frontmost.bundleIdentifier != chromeBundleID {
+                if coldBaselinePID != frontmost.processIdentifier || baselineStableSince == nil {
+                    coldBaselinePID = frontmost.processIdentifier
+                    baselineStableSince = timestamp
+                }
+                if milliseconds(timestamp, since: baselineStableSince!) >= options.readinessMilliseconds {
+                    baselineReadyMs = milliseconds(timestamp, since: baselineStarted)
+                    requestLauncher()
+                }
+            } else {
+                coldBaselinePID = nil
+                baselineStableSince = nil
+                if frontmost?.bundleIdentifier == chromeBundleID, !finderActivationAttempted {
+                    finderActivationAttempted = true
+                    guard let finder = NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.finder").first(where: { !$0.isTerminated }) else {
+                        finish(status: "cold_finder_not_running")
+                    }
+                    guard finder.activate(options: []) else { finish(status: "cold_finder_activation_failed") }
+                }
+            }
         case .preparing:
             guard milliseconds(timestamp, since: baselineStarted) < options.timeoutMilliseconds else {
                 finish(status: "baseline_not_ready_timeout")
@@ -333,6 +363,14 @@ private final class Benchmark: NSObject, NSApplicationDelegate {
     }
 
     private func requestLauncher() {
+        if options.coldController {
+            // Recheck immediately at the measurement boundary; abort rather than
+            // silently turning a requested cold measurement into a warm one.
+            guard NSRunningApplication.runningApplications(withBundleIdentifier: controllerBundleID).isEmpty else { finish(status: Failure.coldControllerRunning.rawValue) }
+            guard NSRunningApplication.runningApplications(withBundleIdentifier: launcherBundleID).isEmpty else { finish(status: Failure.coldHelperRunning.rawValue) }
+            guard let frontmost = NSWorkspace.shared.frontmostApplication,
+                  frontmost.bundleIdentifier != chromeBundleID else { finish(status: Failure.coldChromeFrontmost.rawValue) }
+        }
         phase = .measuring
         firstTargetObserved = nil
         launchCallbackMs = nil

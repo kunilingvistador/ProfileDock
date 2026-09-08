@@ -78,7 +78,7 @@ final class ChromeService: @unchecked Sendable {
     @MainActor private func focus(handler: String, arguments: [String]) async throws {
         let started = DispatchTime.now().uptimeNanoseconds
         do {
-            _ = try await execute(handler, arguments: arguments)
+            try await executeWithoutResult(handler, arguments: arguments)
             guard let chrome = NSRunningApplication.runningApplications(withBundleIdentifier: Self.bundleID).first,
                   chrome.activate(options: []) else {
                 throw ChromeError(code: -600, detail: "Chrome is not running.")
@@ -88,6 +88,11 @@ final class ChromeService: @unchecked Sendable {
             recordFocus(handler, started: started, succeeded: false)
             throw error
         }
+    }
+
+    // Discard the non-Sendable Apple event descriptor before resuming MainActor.
+    private func executeWithoutResult(_ handler: String, arguments: [String]) async throws {
+        _ = try await execute(handler, arguments: arguments)
     }
 
     private func execute(_ handler: String, arguments: [String]) async throws -> NSAppleEventDescriptor {

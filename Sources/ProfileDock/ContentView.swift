@@ -72,8 +72,14 @@ struct ContentView: View {
         }
         .alert(L("Something needs attention", "Нужна небольшая проверка"), isPresented: Binding(
             get: { model.errorMessage != nil && route == nil },
-            set: { if !$0 { model.errorMessage = nil } }
+            set: { if !$0 { model.errorMessage = nil; model.recoveryShortcutID = nil } }
         )) {
+            if let shortcut = model.shortcuts.first(where: { $0.id == model.recoveryShortcutID }) {
+                Button(L("Choose window", "Выбрать окно")) {
+                    model.errorMessage = nil; model.recoveryShortcutID = nil
+                    route = .relink(shortcut)
+                }
+            }
             Button(L("OK", "Понятно"), role: .cancel) { model.errorMessage = nil }
         } message: {
             Text(model.errorMessage ?? "")
