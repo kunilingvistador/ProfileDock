@@ -1,6 +1,6 @@
 # Приватность и безопасность ProfileDock
 
-Состояние на **8 сентября 2026 года**. Этот обзор относится к опубликованной **0.1.4 beta, build 9**: [изменения приложения `639fb3d`](https://github.com/kunilingvistador/ProfileDock/commit/639fb3d), [объединённая версия `d6447b1`](https://github.com/kunilingvistador/ProfileDock/commit/d6447b1d89580310d5b5b726bb9cc76110ec5a7d). Исправления для **0.1.5 ещё не опубликованы**; ниже они обозначены отдельно.
+Состояние на **8 сентября 2026 года**. Этот обзор сопоставляет опубликованную **0.1.4 beta, build 9** — [изменения `639fb3d`](https://github.com/kunilingvistador/ProfileDock/commit/639fb3d), [объединённая версия `d6447b1`](https://github.com/kunilingvistador/ProfileDock/commit/d6447b1d89580310d5b5b726bb9cc76110ec5a7d) — и **кандидат 0.1.5, build 11**, [точный код `addbc13`](https://github.com/kunilingvistador/ProfileDock/commit/addbc132f018310a713642cac32c3e58e08e9c9b). **0.1.5 ещё не опубликована**. Проверки кандидата и границы подтверждений приведены в [VALIDATION.md](VALIDATION.md).
 
 ProfileDock не отправляет данные Chrome разработчикам: в проверенном коде нет аккаунта ProfileDock, сервера приложения, аналитики или автоматической отправки отчётов. Переключение окон работает локально. Однако приложение читает некоторые личные метаданные, а получение значка сайта — отдельное, необязательное сетевое действие. «Локально» не означает «приложение технически не может получить доступ к другим данным».
 
@@ -72,7 +72,7 @@ ProfileDock не отправляет данные Chrome разработчик
 
 ProfileDock 0.1.4 beta does not upload Chrome data to its developers and has no account, backend or analytics. It locally loads Chrome profile metadata, optional avatars and window names/titles. Its Chrome automation does not request tab URLs, page contents, history, cookies or passwords. However, the macOS Automation grant is broader than these operations, and the app is not App Sandbox confined.
 
-Settings, icons and exported shortcuts are not encrypted by ProfileDock and may enter your own synced folders or backups. Optional favicon fetching contacts the supplied website; 0.1.4 does not constrain all requests to one HTTPS origin. Pending 0.1.5 hardening and an incognito-title minimization fix are **not yet published**. Revoking Automation does not prevent separate filesystem metadata reads. Diagnostics are local and opt-in. GitHub Pages logs visitor IPs. Open source, hashes and the current ad-hoc signature are not a security guarantee; the release is not notarized.
+Settings, icons and exported shortcuts are not encrypted by ProfileDock and may enter your own synced folders or backups. Optional favicon fetching contacts the supplied website; 0.1.4 does not constrain all requests to one HTTPS origin. Release candidate **0.1.5, build 11** adds network/storage hardening and incognito-title minimization; its source CI and local package checks passed, but it is **not yet published**. Revoking Automation does not prevent separate filesystem metadata reads. Diagnostics are local and opt-in. GitHub Pages logs visitor IPs. Open source, hashes and the current ad-hoc signature are not a security guarantee; the published release and candidate are not notarized.
 
 ## Техническое приложение: проверенные границы
 
@@ -91,9 +91,11 @@ Settings, icons and exported shortcuts are not encrypted by ProfileDock and may 
 | Разрешения и пакет | [scripts/build.py](../scripts/build.py): `NSAppleEventsUsageDescription`; для сборки с Developer ID — entitlement `com.apple.security.automation.apple-events`. App Sandbox не включён; выпуск 0.1.4 использует ad-hoc подпись |
 | Диагностика | [PerformanceTrace.swift](../Sources/ProfileDockCore/PerformanceTrace.swift), `record`, и места его вызова: локальная опция, фиксированные этапы и числовые значения. Ошибки Chrome отображаются локально; их текст не является обезличенным по определению |
 
-### Проверки рабочей ветки 0.1.5
+### Проверки кандидата 0.1.5, build 11
 
-Изменённый AppleScript списка окон прошёл компиляцию без исполнения обработчиков. Для правил favicon и изображений локально выполнены 11 тестовых методов со 118 проверками на фикстурах без сетевых запросов; Swift typecheck прошёл. Это не испытание произвольных внешних сайтов или всех системных декодеров. Проверки файлового хранилища описаны отдельно в [LOCAL-STORAGE-AUDIT.md](LOCAL-STORAGE-AUDIT.md). Итоговый CI и проверка опубликованного пакета 0.1.5 на момент этого обзора ещё не выполнены.
+Изменённый AppleScript списка окон прошёл компиляцию без исполнения обработчиков. Для правил favicon и изображений локально выполнены 11 тестовых методов со 118 проверками на фикстурах без сетевых запросов; Swift typecheck прошёл. Это не испытание произвольных внешних сайтов или всех системных декодеров. [CI 34235067293](https://github.com/kunilingvistador/ProfileDock/actions/runs/34235067293) для точного кода кандидата прошёл все 5 заданий: четыре сочетания macOS 15/26 и arm64/x86_64, а также сборку сайта. На каждом Mac прошли 77 XCTest-тестов, 13 Python-тестов и 8 сценариев совместимости со 134 проверками, без ошибок; также проверены собранные пакеты. Проверки файлового хранилища описаны отдельно в [LOCAL-STORAGE-AUDIT.md](LOCAL-STORAGE-AUDIT.md).
+
+Финальный локальный ZIP 0.1.5 (11) отдельно распакован в новый временный каталог: SHA-256, CRC, обе универсальные программы и deep strict signature прошли проверку. Проверены окно приватности приложения, переход RU → EN к разделу приватности сайта и сохранность четырёх старых ярлыков, настроек и порядка Dock. Хеш архива и точные границы — в [VALIDATION.md](VALIDATION.md). Это проверка локального кандидата, а не скачанного публичного релиза; публикация и последующая проверка скачанного архива ещё предстоят.
 
 ### Зависимости сайта: отдельно от приложения на Mac
 
@@ -105,4 +107,4 @@ Settings, icons and exported shortcuts are not encrypted by ProfileDock and may 
 
 Статическая сборка, TypeScript `--noEmit` и проверка SEO прошли: русская и английская страницы, sitemap и 44 локальные ссылки на ресурсы. Сгенерированный сайт из этой проверки ещё не опубликован. Нулевой ответ одного режима `npm audit` означает только отсутствие известных ему находок в проверенном графе на эту дату, а не отсутствие всех уязвимостей.
 
-Проверка исходников не охватывает все особенности macOS, Chrome, DNS/прокси, облачных копий и процессов того же пользователя. Для pending 0.1.5 этот документ не заменяет итоговые тесты, проверку подписи и опубликованного архива.
+Проверка исходников не охватывает все особенности macOS, Chrome, DNS/прокси, облачных копий и процессов того же пользователя. Проверки кандидата не заменяют проверку будущего опубликованного архива или независимый аудит безопасности.

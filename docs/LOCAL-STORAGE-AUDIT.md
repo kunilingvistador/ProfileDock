@@ -1,6 +1,8 @@
 # Local storage and launcher chain review
 
-Reviewed 2026-09-08: profile discovery, shortcut storage, controller selection,
+Reviewed 2026-09-08 for **release candidate 0.1.5, build 11**, exact source
+[`addbc13`](https://github.com/kunilingvistador/ProfileDock/commit/addbc132f018310a713642cac32c3e58e08e9c9b),
+**not yet published**. This review covers profile discovery, shortcut storage, controller selection,
 legacy import and maintenance, generated launchers, local diagnostics and the
 native build/signing path. This is a source review with isolated filesystem
 fixtures, not a penetration test or a guarantee against another malicious
@@ -29,7 +31,7 @@ Removing an entry from ProfileDock currently removes its configuration entry.
 Previously exported apps, image files and migration backups can remain on disk.
 Treat this as removal from the manager, not secure deletion of all related data.
 
-## Storage hardening implemented
+## Storage hardening implemented in the release candidate
 
 `PrivateStorage` protects the known app-owned data root and immediate owned
 subdirectories with POSIX mode `0700`. JSON/image replacements use mode `0600`,
@@ -56,6 +58,27 @@ leaves, traversal names, read limits, private registry modes, redirected registr
 roots, and preservation of the original backup contents. See
 `Tests/ProfileDockCoreTests/PrivateStorageTests.swift` and the existing launcher
 filesystem harness.
+
+## Candidate validation status
+
+[CI 34235067293](https://github.com/kunilingvistador/ProfileDock/actions/runs/34235067293)
+passed all five jobs for the source above. Each native macOS 15/26 × arm64/x86_64
+job passed **77 XCTest tests, 13 Python tests, and 8 compatibility cases / 134
+assertions**, with zero failures, plus its package checks. A separate fresh
+extraction of the final local build-11 ZIP passed
+checksum, CRC, both universal-binary architecture checks and deep strict
+signature verification. See [VALIDATION.md](VALIDATION.md) for the archive hash
+and the complete validation scope. This was not a download of a published 0.1.5
+release.
+
+Read-only before/after checks of the existing installation found the four
+shortcut paths, root inodes, bundle IDs and ICNS hashes unchanged. The saved
+shortcut JSON hash and Dock GUID order also matched. The actual data root and
+Icons directory were mode `0700`; the controller-location file was mode `0600`.
+These checks do not imply recursively changing existing files, eliminating
+FinderInfo behavior in synced folders, or protection against another process
+running as the same user. The local privacy sheet was exercised; this update
+does not introduce a new focus-performance measurement.
 
 ## Remaining boundaries and follow-up tests
 
