@@ -1,0 +1,178 @@
+#!/usr/bin/env python3
+"""Validate real static HTML and crawlable assets before publishing ProfileDock."""
+
+from __future__ import annotations
+
+import argparse
+from collections import defaultdict
+from html.parser import HTMLParser
+import json
+from pathlib import Path
+import re
+from urllib.parse import unquote, urljoin, urlparse
+import xml.etree.ElementTree as ET
+
+
+SITE = 'https://kunilingvistador.github.io/ProfileDock/'
+PREFIX = '/ProfileDock/'
+PAGES = {'ru': SITE, 'en': SITE + 'en/'}
+REPO = Path(__file__).resolve().parents[1]
+
+
+class Document(HTMLParser):
+    def __init__(self, source: str):
+        super().__init__(convert_charrefs=True)
+        self.language = None
+        self.in_head = False
+        self.in_title = False
+        self.hidden_depth = 0
+        self.title_parts: list[str] = []
+        self.title_count = 0
+        self.h1_count = 0
+        self.text: list[str] = []
+        self.meta: dict[str, list[str]] = defaultdict(list)
+        self.links: list[dict[str, str]] = []
+        self.anchors: list[str] = []
+        self.references: set[str] = set()
+        self.jsonld: list[str] = []
+        self.json_buffer: list[str] | None = None
+        self.feed(source)
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]):
+        data = {key: value or '' for key, value in attrs}
+        if tag == 'html':
+            self.language = data.get('lang')
+        if tag == 'head':
+            self.in_head = True
+        if tag == 'title' and self.in_head:
+            self.in_title = True
+            self.title_count += 1
+        if tag == 'h1':
+            self.h1_count += 1
+        if tag == 'meta' and self.in_head:
+            self.meta[data.get('name', data.get('property', '')).lower()].append(data.get('content', ''))
+        if tag == 'link' and self.in_head:
+            self.links.append(data)
+        if tag == 'a' and data.get('href'):
+            self.anchors.append(data['href'])
+        for attribute in ('src', 'href'):
+            if data.get(attribute):
+                self.references.add(data[attribute])
+        if tag in {'script', 'style', 'template'}:
+            self.hidden_depth += 1
+        if tag == 'script' and data.get('type') == 'application/ld+json':
+            self.json_buffer = []
+
+    def handle_endtag(self, tag: str):
+        if tag == 'head':
+            self.in_head = False
+        if tag == 'title':
+            self.in_title = False
+        if tag == 'script' and self.json_buffer is not None:
+            self.jsonld.append(''.join(self.json_buffer))
+            self.json_buffer = None
+        if tag in {'script', 'style', 'template'}:
+            self.hidden_depth = max(0, self.hidden_depth - 1)
+
+    def handle_data(self, data: str):
+        if self.in_title:
+            self.title_parts.append(data)
+        if self.json_buffer is not None:
+            self.json_buffer.append(data)
+        if not self.in_head and not self.hidden_depth:
+            self.text.append(data)
+
+
+def require(condition: bool, message: str):
+    if not condition:
+        raise ValueError(message)
+
+
+def local_target(root: Path, absolute_url: str) -> Path | None:
+    parsed = urlparse(absolute_url)
+    if parsed.scheme not in {'http', 'https'} or parsed.netloc != urlparse(SITE).netloc:
+        return None
+    require(parsed.path.startswith(PREFIX), f'Local reference escapes project subpath: {absolute_url}')
+    relative = unquote(parsed.path.removeprefix(PREFIX))
+    # Vinext emits prefixed assets before the Pages copy normalizes the tree.
+    candidates = [root / relative, root / 'ProfileDock' / relative]
+    # Before the Pages copy, Vinext exports /en as en.html; /en/ is served by
+    # en/index.html in the copied GitHub Pages tree.
+    if relative.endswith('/') and relative:
+        candidates.append(root / (relative.rstrip('/') + '.html'))
+    for candidate in candidates:
+        candidate = candidate.resolve()
+        require(candidate.is_relative_to(root.resolve()), f'Unsafe local path: {absolute_url}')
+        if candidate.is_dir():
+            candidate = candidate / 'index.html'
+        if candidate.is_file():
+            return candidate
+    raise ValueError(f'Missing local page/asset for {absolute_url}')
+
+
+def single_meta(document: Document, key: str, page: str) -> str:
+    values = document.meta.get(key, [])
+    require(len(values) == 1 and bool(values[0].strip()), f'{page}: expected one nonempty {key}')
+    return values[0]
+
+
+def validate(root: Path):
+    rendered: dict[str, Document] = {}
+    reference_count = 0
+    for language, page in PAGES.items():
+        target = local_target(root, page)
+        require(target is not None, f'No HTML for {page}')
+        document = Document(target.read_text(encoding='utf-8'))
+        rendered[language] = document
+        require(document.language == language, f'{page}: initial HTML lang must be {language}')
+        require(document.title_count == 1 and bool(''.join(document.title_parts).strip()), f'{page}: expected one title')
+        require(document.h1_count == 1, f'{page}: expected one visible document h1')
+        text = re.sub(r'\s+', ' ', ' '.join(document.text)).strip()
+        require(len(text) > 300 and 'Chrome' in text and 'Dock' in text, f'{page}: missing prerendered product content')
+        description = single_meta(document, 'description', page)
+        require('noindex' not in single_meta(document, 'robots', page).lower(), f'{page}: indexable page marked noindex')
+        canonicals = [link.get('href') for link in document.links if link.get('rel') == 'canonical']
+        require(canonicals == [page], f'{page}: expected one self canonical, got {canonicals}')
+        alternates = [link for link in document.links if link.get('rel') == 'alternate' and link.get('hreflang')]
+        expected = {'ru': PAGES['ru'], 'en': PAGES['en'], 'x-default': PAGES['ru']}
+        require(len(alternates) == 3 and {link['hreflang']: link.get('href') for link in alternates} == expected,
+                f'{page}: incomplete or inconsistent reciprocal hreflang')
+        other = PAGES['en' if language == 'ru' else 'ru']
+        require(other in {urljoin(page, href) for href in document.anchors}, f'{page}: no crawlable language-switch link')
+        require(single_meta(document, 'og:url', page) == page, f'{page}: og:url differs from canonical')
+        require(single_meta(document, 'og:title', page) == ''.join(document.title_parts), f'{page}: social title differs')
+        require(single_meta(document, 'og:description', page) == description, f'{page}: social description differs')
+        require(single_meta(document, 'twitter:card', page) == 'summary_large_image', f'{page}: missing social card')
+        for key in ('og:image', 'twitter:image'):
+            image = single_meta(document, key, page)
+            require(image.startswith(SITE), f'{page}: social image URL must be absolute')
+            local_target(root, image)
+        require(len(document.jsonld) == 1, f'{page}: expected one application JSON-LD object')
+        app = json.loads(document.jsonld[0])
+        require(app.get('@type') == 'SoftwareApplication' and app.get('name') == 'ProfileDock', f'{page}: incorrect app data')
+        require(app.get('url') == page and app.get('inLanguage') == language, f'{page}: incorrect localized app data')
+        require(app.get('offers', {}).get('price') == 0 and app.get('isAccessibleForFree') is True, f'{page}: expected honest free offer')
+        require(not {'aggregateRating', 'review'}.intersection(app), f'{page}: ratings require real published evidence first')
+        for reference in document.references:
+            absolute = urljoin(page, reference)
+            if local_target(root, absolute) is not None:
+                reference_count += 1
+        print(f'PASS {language}: static content, language, metadata, alternate link, application data and local assets')
+
+    require(rendered['ru'].text != rendered['en'].text, 'Language routes rendered identical content')
+    sitemap = local_target(root, SITE + 'sitemap.xml')
+    require(sitemap is not None, 'Missing sitemap')
+    tree = ET.fromstring(sitemap.read_text(encoding='utf-8'))
+    locations = [node.text for node in tree.findall('{http://www.sitemaps.org/schemas/sitemap/0.9}url/{http://www.sitemaps.org/schemas/sitemap/0.9}loc')]
+    require(len(locations) == 2 and set(locations) == set(PAGES.values()), 'Sitemap must contain exactly the two canonical pages')
+    print(f'PASS sitemap: two canonical URLs; {reference_count} local HTML references verified')
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--root', type=Path, default=REPO / 'website/dist/client', help='Built export or copied docs directory')
+    arguments = parser.parse_args()
+    try:
+        validate(arguments.root.resolve())
+    except (OSError, ValueError, ET.ParseError) as error:
+        raise SystemExit(f'Website SEO validation failed: {error}')

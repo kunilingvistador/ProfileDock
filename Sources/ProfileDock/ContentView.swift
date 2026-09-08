@@ -4,7 +4,7 @@ import ProfileDockCore
 
 private enum DockStyle {
     static let accent = Color.indigo
-    static let border = Color.primary.opacity(0.07)
+    static let border = Color(nsColor: .separatorColor).opacity(0.55)
     static let muted = Color.secondary
 }
 
@@ -35,25 +35,21 @@ struct ContentView: View {
     }
 
     var body: some View {
-        HStack(spacing: 0) {
-            sidebar
-            Divider()
-            VStack(alignment: .leading, spacing: 0) {
-                header
-                if let notice = model.notice, !notice.isEmpty {
-                    noticeBanner(notice)
-                        .padding(.horizontal, 28)
-                        .padding(.bottom, 16)
-                }
-                if model.shortcuts.isEmpty {
-                    onboarding
-                } else {
-                    library
-                }
+        VStack(alignment: .leading, spacing: 0) {
+            header
+            if let notice = model.notice, !notice.isEmpty {
+                noticeBanner(notice)
+                    .padding(.horizontal, 28)
+                    .padding(.bottom, 16)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .background(Color(nsColor: .windowBackgroundColor))
+            if model.shortcuts.isEmpty {
+                onboarding
+            } else {
+                library
+            }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .background(Color(nsColor: .windowBackgroundColor))
         .tint(DockStyle.accent)
         .frame(minWidth: 800, minHeight: 560)
         .sheet(item: $route) { selectedRoute in
@@ -86,68 +82,6 @@ struct ContentView: View {
         }
     }
 
-    private var sidebar: some View {
-        VStack(alignment: .leading, spacing: 24) {
-            HStack(spacing: 10) {
-                BrandMark(size: 34)
-                Text("ProfileDock")
-                    .font(.system(size: 17, weight: .bold, design: .rounded))
-            }
-            .padding(.top, 7)
-
-            VStack(alignment: .leading, spacing: 9) {
-                Text(L("YOUR SPACE", "ВАШЕ ПРОСТРАНСТВО"))
-                    .font(.system(size: 9, weight: .semibold))
-                    .foregroundStyle(.secondary)
-                    .tracking(0.7)
-                    .padding(.horizontal, 10)
-                HStack(spacing: 9) {
-                    Image(systemName: "square.grid.2x2.fill")
-                        .font(.system(size: 13))
-                    Text(L("Shortcuts", "Ярлыки"))
-                        .font(.system(size: 13, weight: .semibold))
-                    Spacer(minLength: 4)
-                    Text("\(model.shortcuts.count)")
-                        .font(.system(size: 11, weight: .medium, design: .rounded))
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(DockStyle.accent.opacity(0.10), in: Capsule())
-                }
-                .foregroundStyle(DockStyle.accent)
-                .padding(10)
-                .background(DockStyle.accent.opacity(0.09), in: RoundedRectangle(cornerRadius: 8))
-            }
-
-            Spacer()
-
-            VStack(alignment: .leading, spacing: 12) {
-                HStack(spacing: 7) {
-                    Circle()
-                        .fill(model.chromeRunning && model.permissionGranted ? Color.green : Color.secondary.opacity(0.6))
-                        .frame(width: 6, height: 6)
-                    Text(connectionLabel)
-                        .font(.system(size: 11))
-                        .foregroundStyle(.secondary)
-                }
-                Divider()
-                Button { route = .help } label: {
-                    Label(L("How it works", "Как это работает"), systemImage: "questionmark.circle")
-                        .font(.system(size: 12))
-                }
-                .buttonStyle(.plain)
-                .foregroundStyle(.secondary)
-                Text(L("A little less switching around.", "Каждому окну — своё место."))
-                    .font(.system(size: 10))
-                    .foregroundStyle(.tertiary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-        }
-        .padding(18)
-        .frame(width: 183)
-        .frame(maxHeight: .infinity)
-        .background(.ultraThinMaterial)
-    }
-
     private var connectionLabel: String {
         if !model.chromeRunning { return L("Chrome is not running", "Chrome закрыт") }
         if !model.permissionGranted { return L("Connect to Chrome", "Нужно подключить Chrome") }
@@ -155,17 +89,34 @@ struct ContentView: View {
     }
 
     private var header: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            HStack(alignment: .top, spacing: 14) {
-                VStack(alignment: .leading, spacing: 5) {
+        VStack(alignment: .leading, spacing: 24) {
+            HStack(spacing: 12) {
+                BrandMark(size: 38)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("ProfileDock")
+                        .font(.system(size: 20, weight: .bold, design: .rounded))
                     Text(L("Your windows, one click away.", "Ваши окна. Один клик."))
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                    Text(L("A personal Dock shortcut for each Chrome window.", "Отдельный значок в Dock для каждого окна Chrome."))
-                        .font(.system(size: 12))
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
+                        .font(.system(size: 12)).foregroundStyle(.secondary)
                 }
-                Spacer(minLength: 0)
+                Spacer(minLength: 16)
+                HStack(spacing: 6) {
+                    Image(systemName: model.chromeRunning && model.permissionGranted ? "checkmark.circle.fill" : "link")
+                        .foregroundStyle(model.chromeRunning && model.permissionGranted ? Color.green : Color.secondary)
+                    Text(connectionLabel).foregroundStyle(.secondary)
+                }
+                .font(.system(size: 12))
+                .padding(.horizontal, 10).padding(.vertical, 7)
+                .background(Color.secondary.opacity(0.06), in: Capsule())
+                .accessibilityElement(children: .combine)
+
+                Button { route = .help } label: {
+                    Label(L("How it works", "Как это работает"), systemImage: "questionmark.circle")
+                        .font(.system(size: 12))
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 3)
+
                 Menu {
                     Button(L("Import existing shortcuts…", "Импортировать готовые ярлыки…")) { model.importExisting() }
                     Button(L("Create all Dock shortcuts", "Создать все ярлыки для Dock")) { model.exportAll() }
@@ -183,24 +134,38 @@ struct ContentView: View {
                 .menuStyle(.borderlessButton)
                 .fixedSize()
                 .help(L("More options", "Дополнительные действия"))
+                .accessibilityLabel(L("More options", "Дополнительные действия"))
             }
 
             if !model.shortcuts.isEmpty {
-                HStack(spacing: 10) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
+                HStack(spacing: 12) {
+                    Text(L("Your shortcuts", "Ваши ярлыки"))
+                        .font(.system(size: 19, weight: .semibold, design: .rounded))
+                    Text("\(model.shortcuts.count)")
+                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 8).padding(.vertical, 3)
+                        .background(Color.secondary.opacity(0.08), in: Capsule())
+                        .accessibilityLabel(L("\(model.shortcuts.count) shortcuts", "Ярлыков: \(model.shortcuts.count)"))
+                    Spacer(minLength: 8)
+                    HStack(spacing: 8) {
+                        Image(systemName: "magnifyingglass").foregroundStyle(.secondary).accessibilityHidden(true)
                         TextField(L("Find a shortcut", "Найти ярлык"), text: $search)
                             .textFieldStyle(.plain)
+                            .font(.system(size: 13))
+                            .accessibilityLabel(L("Find a shortcut by name", "Найти ярлык по имени"))
                         if !search.isEmpty {
                             Button { search = "" } label: {
-                                Image(systemName: "xmark.circle.fill").foregroundStyle(.tertiary)
+                                Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
                             }
                             .buttonStyle(.plain)
                             .help(L("Clear search", "Очистить поиск"))
+                            .accessibilityLabel(L("Clear search", "Очистить поиск"))
                         }
                     }
                     .padding(.horizontal, 10)
                     .padding(.vertical, 8)
+                    .frame(maxWidth: 310)
                     .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 8))
                     .overlay(RoundedRectangle(cornerRadius: 8).stroke(DockStyle.border))
 
@@ -211,17 +176,21 @@ struct ContentView: View {
                     .disabled(model.isBusy)
                     .keyboardShortcut("r", modifiers: .command)
                     .help(L("Refresh windows", "Обновить список окон"))
+                    .accessibilityLabel(L("Refresh windows", "Обновить список окон"))
 
-                    Button { route = .create } label: {
+                    Button { search = ""; route = .create } label: {
                         Label(L("Add", "Добавить"), systemImage: "plus")
                             .padding(.vertical, 2)
                     }
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(.bordered)
                     .keyboardShortcut("n", modifiers: .command)
+                    .help(L("Create a shortcut for another Chrome window", "Создать ярлык для другого окна Chrome"))
                 }
             }
         }
-        .padding(28)
+        .padding(.horizontal, 28)
+        .padding(.top, 20)
+        .padding(.bottom, 22)
     }
 
     private func noticeBanner(_ notice: String) -> some View {
@@ -237,6 +206,7 @@ struct ContentView: View {
             .buttonStyle(.plain)
             .foregroundStyle(.secondary)
             .help(L("Dismiss", "Скрыть"))
+            .accessibilityLabel(L("Dismiss message", "Скрыть сообщение"))
         }
         .padding(12)
         .background(DockStyle.accent.opacity(0.06), in: RoundedRectangle(cornerRadius: 10))
@@ -255,7 +225,7 @@ struct ContentView: View {
             }
             VStack(spacing: 8) {
                 Text(L("Less searching. More doing.", "Меньше поиска. Больше дела."))
-                    .font(.system(size: 20, weight: .semibold, design: .rounded))
+                    .font(.system(size: 23, weight: .semibold, design: .rounded))
                 Text(L("Choose an open Chrome window, give it a name,\nand keep its shortcut in your Dock.", "Выберите открытое окно Chrome, дайте ему имя\nи сохраните его ярлык в Dock."))
                     .font(.system(size: 13))
                     .foregroundStyle(.secondary)
@@ -292,8 +262,8 @@ struct ContentView: View {
                 .font(.system(size: 12))
             Spacer(minLength: 8)
             Label(L("Your profiles and pictures stay on this Mac.", "Профили и изображения хранятся на этом Mac."), systemImage: "lock")
-                .font(.system(size: 11))
-                .foregroundStyle(.tertiary)
+                .font(.system(size: 12))
+                .foregroundStyle(.secondary)
                 .padding(.bottom, 24)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -321,17 +291,27 @@ struct ContentView: View {
             }
 
             if filteredShortcuts.isEmpty {
-                VStack(spacing: 10) {
-                    Image(systemName: "magnifyingglass").font(.system(size: 25)).foregroundStyle(.tertiary)
+                VStack(spacing: 12) {
+                    Image(systemName: "magnifyingglass")
+                        .font(.system(size: 27, weight: .light))
+                        .foregroundStyle(DockStyle.accent)
+                        .frame(width: 64, height: 64)
+                        .background(DockStyle.accent.opacity(0.08), in: RoundedRectangle(cornerRadius: 18))
+                        .accessibilityHidden(true)
                     Text(L("No matching shortcuts", "Ничего не нашлось"))
-                        .font(.headline)
+                        .font(.system(size: 19, weight: .semibold, design: .rounded))
+                    Text(L("Try another name or clear your search to see all shortcuts.", "Попробуйте другое имя или очистите поиск, чтобы увидеть все ярлыки."))
+                        .font(.system(size: 13)).foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: 360)
                     Button(L("Clear search", "Очистить поиск")) { search = "" }
-                        .buttonStyle(.link)
+                        .buttonStyle(.bordered)
+                        .padding(.top, 4)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 ScrollView {
-                    LazyVStack(spacing: 11) {
+                    LazyVStack(spacing: 10) {
                         ForEach(filteredShortcuts) { shortcut in
                             shortcutCard(shortcut)
                         }
@@ -345,7 +325,7 @@ struct ContentView: View {
             HStack(spacing: 7) {
                 if model.isBusy { ProgressView().controlSize(.mini) }
                 Text(model.isBusy ? L("Updating…", "Обновляем…") : L("Only the window you choose comes forward.", "Наверх поднимается только выбранное окно."))
-                    .font(.system(size: 11))
+                    .font(.system(size: 12))
                     .foregroundStyle(.secondary)
                 Spacer()
                 if !model.isBusy {
@@ -361,27 +341,60 @@ struct ContentView: View {
 
     private func shortcutCard(_ shortcut: Shortcut) -> some View {
         let status = model.status(for: shortcut)
-        return VStack(spacing: 0) {
-            HStack(spacing: 13) {
-                ShortcutAvatar(image: model.icon(for: shortcut), name: shortcut.name, size: 48)
-                VStack(alignment: .leading, spacing: 6) {
+        return HStack(spacing: 16) {
+            ShortcutAvatar(image: model.icon(for: shortcut), name: shortcut.name, size: 56)
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 14) {
                     Text(shortcut.name)
-                        .font(.system(size: 15, weight: .semibold))
+                        .font(.system(size: 17, weight: .semibold))
                         .lineLimit(1)
                         .help(shortcut.name)
+                    Spacer(minLength: 8)
                     StatusBadge(status: status)
                 }
-                Spacer(minLength: 4)
-                if status == .ready {
-                    Button { Task { await model.switchTo(shortcut) } } label: {
-                        Label(L("Switch", "Переключить"), systemImage: "arrow.up.forward")
+                HStack(spacing: 16) {
+                    Button { route = .edit(shortcut) } label: {
+                        Label(L("Customize", "Настроить"), systemImage: "slider.horizontal.3")
+                            .padding(.vertical, 4)
+                            .contentShape(Rectangle())
                     }
-                    .disabled(model.isBusy)
-                    .help(L("Bring this window to the front", "Поднять это окно наверх"))
-                } else if status == .missing || status == .ambiguous {
-                    Button(L("Choose window", "Выбрать окно")) { route = .relink(shortcut) }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(DockStyle.accent)
+                    .accessibilityLabel(L("Customize \(shortcut.name)", "Настроить \(shortcut.name)"))
+                    Button { model.exportShortcut(shortcut) } label: {
+                        Label(L("Create Dock shortcut", "Создать ярлык для Dock"), systemImage: "square.and.arrow.down")
+                            .padding(.vertical, 4)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(DockStyle.accent)
+                    .help(L("Create a launcher and show it in Finder to drag into your Dock", "Создать ярлык и показать в Finder, чтобы перенести его в Dock"))
+                    .accessibilityLabel(L("Create Dock shortcut for \(shortcut.name)", "Создать ярлык для Dock: \(shortcut.name)"))
+                    Spacer(minLength: 8)
+                    if status == .missing || status == .ambiguous {
+                        Button { route = .relink(shortcut) } label: {
+                            Label(L("Choose window", "Выбрать окно"), systemImage: "link")
+                                .frame(width: 124)
+                                .padding(.vertical, 2)
+                        }
+                        .buttonStyle(.borderedProminent)
                         .disabled(model.isBusy)
+                        .accessibilityLabel(L("Choose a window for \(shortcut.name)", "Выбрать окно для \(shortcut.name)"))
+                    } else {
+                        Button { Task { await model.switchTo(shortcut) } } label: {
+                            Label(L("Switch", "Переключить"), systemImage: "arrow.up.forward")
+                                .frame(width: 124)
+                                .padding(.vertical, 2)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .disabled(model.isBusy || status != .ready)
+                        .help(L("Bring this window to the front", "Поднять это окно наверх"))
+                        .accessibilityLabel(L("Switch to \(shortcut.name)", "Переключиться на \(shortcut.name)"))
+                    }
                 }
+                .font(.system(size: 12))
+            }
+            VStack {
                 Menu {
                     Button(L("Edit shortcut…", "Настроить ярлык…")) { route = .edit(shortcut) }
                     Button(L("Choose another window…", "Привязать другое окно…")) { route = .relink(shortcut) }
@@ -400,32 +413,16 @@ struct ContentView: View {
                 .menuStyle(.borderlessButton)
                 .fixedSize()
                 .help(L("Shortcut options", "Действия с ярлыком"))
-            }
-            .padding(16)
-
-            if model.selectedShortcutID == shortcut.id {
-                Divider().padding(.horizontal, 16)
-                HStack(spacing: 15) {
-                    Button { route = .edit(shortcut) } label: {
-                        Label(L("Customize", "Настроить"), systemImage: "slider.horizontal.3")
-                    }
-                    Button { model.exportShortcut(shortcut) } label: {
-                        Label(L("Create Dock shortcut", "Создать ярлык для Dock"), systemImage: "square.and.arrow.down")
-                    }
-                    Spacer()
-                }
-                .font(.system(size: 11))
-                .buttonStyle(.plain)
-                .foregroundStyle(DockStyle.accent)
-                .padding(.horizontal, 17)
-                .padding(.vertical, 12)
+                .accessibilityLabel(L("Options for \(shortcut.name)", "Действия с ярлыком \(shortcut.name)"))
             }
         }
+        .padding(.horizontal, 18)
+        .padding(.vertical, 16)
         .background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 13))
-        .overlay(RoundedRectangle(cornerRadius: 13).stroke(model.selectedShortcutID == shortcut.id ? DockStyle.accent.opacity(0.35) : DockStyle.border, lineWidth: 1))
+        .overlay(RoundedRectangle(cornerRadius: 13).stroke(model.selectedShortcutID == shortcut.id ? DockStyle.accent.opacity(0.45) : DockStyle.border, lineWidth: 1))
         .contentShape(RoundedRectangle(cornerRadius: 13))
         .onTapGesture { model.selectedShortcutID = shortcut.id }
-        .onTapGesture(count: 2) { if status == .ready { Task { await model.switchTo(shortcut) } } }
+        .accessibilityElement(children: .contain)
     }
 }
 
@@ -437,6 +434,7 @@ private struct BrandMark: View {
             .foregroundStyle(.white)
             .frame(width: size, height: size)
             .background(LinearGradient(colors: [Color.indigo, Color.indigo.opacity(0.72)], startPoint: .topLeading, endPoint: .bottomTrailing), in: RoundedRectangle(cornerRadius: size * 0.27))
+            .accessibilityHidden(true)
     }
 }
 
@@ -483,9 +481,14 @@ private struct StatusBadge: View {
     var body: some View {
         HStack(spacing: 5) {
             Circle().fill(color).frame(width: 5, height: 5)
-            Text(label).font(.system(size: 11))
+            Text(label).font(.system(size: 12))
         }
         .foregroundStyle(.secondary)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .background(color.opacity(0.08), in: Capsule())
+        .fixedSize()
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -527,9 +530,19 @@ private struct ShortcutEditor: View {
                     }
                 }
                 Section {
-                    TextField(L("Shortcut name", "Название ярлыка"), text: $name)
-                        .textFieldStyle(.roundedBorder)
-                        .onSubmit { if isValid { save() } }
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(L("Shortcut name", "Название ярлыка"))
+                            .font(.system(size: 12, weight: .medium))
+                        TextField(L("Shortcut name", "Название ярлыка"), text: $name)
+                            .labelsHidden()
+                            .textFieldStyle(.roundedBorder)
+                            .font(.system(size: 13))
+                            .frame(maxWidth: .infinity)
+                            .accessibilityLabel(L("Shortcut name", "Название ярлыка"))
+                            .onSubmit { if isValid { save() } }
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, 4)
                     if shortcut == nil {
                         Picker(L("Name and photo from profile", "Имя и фото из профиля"), selection: $profileID) {
                             Text(L("No profile selected", "Без выбора профиля")).tag(nil as String?)
@@ -750,7 +763,7 @@ private struct HelpSheet: View {
             SheetHeading(title: L("A Dock that knows your windows", "Dock, который знает ваши окна"), subtitle: L("Three steps to calmer switching.", "Три шага к удобному переключению."))
             VStack(alignment: .leading, spacing: 20) {
                 helpStep("1", title: L("Connect Chrome", "Подключите Chrome"), body: L("Allow ProfileDock to control Chrome when macOS asks. Your browsing history is not collected.", "Разрешите ProfileDock управлять Chrome в запросе macOS. История посещений не собирается."))
-                helpStep("2", title: L("Name and link a window", "Назовите и привяжите окно"), body: L("Select the window you want. Add a recognizable photo, profile avatar, or website icon.", "Выберите нужное окно. Добавьте фотографию, аватар профиля или значок сайта."))
+                helpStep("2", title: L("Check and link a window", "Проверьте и привяжите окно"), body: L("Select a window and click “Show window” to check it in Chrome. Return to setup, give the shortcut a name, and link it. You can add a photo or website icon afterward.", "Выберите окно и нажмите «Показать окно», чтобы проверить его в Chrome. Вернитесь к настройке, назовите ярлык и привяжите окно. Затем можно добавить фотографию или значок сайта."))
                 helpStep("3", title: L("Keep its shortcut in the Dock", "Закрепите ярлык в Dock"), body: L("Choose “Create Dock shortcut”, then drag the app from Finder to the Dock. Clicking it brings that window forward.", "Выберите «Создать ярлык для Dock» и перетащите приложение из Finder в Dock. Нажатие поднимет нужное окно."))
                 Divider()
                 Text(L("If a window is closed or renamed, choose a window again in ProfileDock. With multiple windows for one profile, create a separate shortcut for each.", "Если окно закрыто или переименовано, снова выберите его в ProfileDock. Для нескольких окон одного профиля можно создать отдельные ярлыки."))

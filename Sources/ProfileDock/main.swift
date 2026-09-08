@@ -19,6 +19,15 @@ import ProfileDockCore
         window.minSize = NSSize(width: 860, height: 600)
         window.isReleasedWhenClosed = false
         window.contentView = NSHostingView(rootView: ContentView(model: model))
+        // Repeatable screenshot QA affects this sample window only, never system settings.
+        if model.demoMode {
+            if CommandLine.arguments.contains("--demo-dark") {
+                window.appearance = NSAppearance(named: .darkAqua)
+            }
+            if CommandLine.arguments.contains("--demo-compact") {
+                window.setFrame(NSRect(origin: window.frame.origin, size: window.minSize), display: false)
+            }
+        }
         window.center()
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         statusItem.button?.image = NSImage(systemSymbolName: "rectangle.3.group", accessibilityDescription: "ProfileDock")
