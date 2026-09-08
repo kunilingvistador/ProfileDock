@@ -58,7 +58,6 @@ private enum Failure: String, Error {
     case invalidController = "invalid_controller_bundle"
     case invalidLauncher = "invalid_launcher_bundle"
     case controllerPathConflict = "controller_path_conflict"
-    case controllerRegistrationMismatch = "controller_registration_mismatch"
     case windowListUnavailable = "window_list_unavailable"
     case targetNotFound = "target_window_not_found"
     case targetNotChrome = "target_window_is_not_chrome"
@@ -208,26 +207,30 @@ private final class Benchmark: NSObject, NSApplicationDelegate {
 
     init(options: Options) throws {
         self.options = options
-        guard options.controller.pathExtension == "app",
-              let controllerBundle = Bundle(url: options.controller),
-              controllerBundle.bundleIdentifier == controllerBundleID,
-              let controllerExecutable = controllerBundle.executableURL,
-              FileManager.default.isExecutableFile(atPath: controllerExecutable.path) else { throw Failure.invalidController }
+        guard ControllerResolver.isCompatibleController(options.controller) else { throw Failure.invalidController }
         guard options.launcher.pathExtension == "app",
               let launcher = Bundle(url: options.launcher),
               let identifier = launcher.bundleIdentifier,
               let shortcut = launcher.object(forInfoDictionaryKey: "ProfileDockShortcutID") as? String,
               let shortcutID = UUID(uuidString: shortcut),
-              identifier == "io.github.profiledock.launcher.\(shortcutID.uuidString.lowercased())",
+              shortcut.count == 36,
+              (identifier == "io.github.profiledock.launcher.\(shortcutID.uuidString.lowercased())" ||
+               (identifier.hasPrefix("local.") && identifier.contains(".chrome-window-switcher.") &&
+                launcher.object(forInfoDictionaryKey: "ProfileDockLegacyBundleIdentifier") as? String == identifier)),
               let launcherExecutable = launcher.executableURL,
+              launcherExecutable.lastPathComponent == "ProfileDockLauncher",
               FileManager.default.isExecutableFile(atPath: launcherExecutable.path) else { throw Failure.invalidLauncher }
         launcherBundleID = identifier
-        // A helper selects Launch Services' registered controller before its fallback path.
-        // Refuse ambiguous installs rather than measuring the wrong build.
-        if let registered = NSWorkspace.shared.urlForApplication(withBundleIdentifier: controllerBundleID),
-           !sameFile(registered, options.controller) { throw Failure.controllerRegistrationMismatch }
-        if NSRunningApplication.runningApplications(withBundleIdentifier: controllerBundleID)
-            .contains(where: { !sameFile($0.bundleURL, options.controller) }) { throw Failure.controllerPathConflict }
+        // Use the same production resolver as the current helper. A stale Launch
+        // Services registration must not override the user's recorded controller.
+        let running = NSRunningApplication.runningApplications(withBundleIdentifier: controllerBundleID)
+            .filter { !$0.isTerminated }.compactMap(\.bundleURL)
+        let fallback = (launcher.object(forInfoDictionaryKey: "ProfileDockControllerPath") as? String)
+            .map { URL(fileURLWithPath: $0, isDirectory: true) }
+        let resolved = ControllerResolver.resolve(preferred: ControllerLocationRegistry().controllerURL(),
+            running: running, registered: NSWorkspace.shared.urlForApplication(withBundleIdentifier: controllerBundleID),
+            fallback: fallback)
+        guard sameFile(resolved, options.controller) else { throw Failure.controllerPathConflict }
         if options.coldController {
             guard NSRunningApplication.runningApplications(withBundleIdentifier: controllerBundleID).isEmpty else { throw Failure.coldControllerRunning }
             guard NSRunningApplication.runningApplications(withBundleIdentifier: identifier).isEmpty else { throw Failure.coldHelperRunning }
@@ -419,18 +422,21 @@ private final class Benchmark: NSObject, NSApplicationDelegate {
     }
 }
 
-MainActor.assumeIsolated {
-    do {
-        let options = try Options.parse(Array(CommandLine.arguments.dropFirst()))
-        let benchmark = try Benchmark(options: options)
-        let application = NSApplication.shared
-        application.setActivationPolicy(.prohibited)
-        application.delegate = benchmark
-        withExtendedLifetime(benchmark) { application.run() }
-    } catch let failure as Failure {
-        emit(["status": failure.rawValue], exitCode: 2)
-    } catch {
-        // Never print localized error descriptions: they may contain personal paths.
-        emit(["status": "preflight_failed"], exitCode: 2)
+@main
+private struct MeasureLauncherLatency {
+    @MainActor static func main() {
+        do {
+            let options = try Options.parse(Array(CommandLine.arguments.dropFirst()))
+            let benchmark = try Benchmark(options: options)
+            let application = NSApplication.shared
+            application.setActivationPolicy(.prohibited)
+            application.delegate = benchmark
+            withExtendedLifetime(benchmark) { application.run() }
+        } catch let failure as Failure {
+            emit(["status": failure.rawValue], exitCode: 2)
+        } catch {
+            // Never print localized error descriptions: they may contain personal paths.
+            emit(["status": "preflight_failed"], exitCode: 2)
+        }
     }
 }

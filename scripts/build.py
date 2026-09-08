@@ -40,7 +40,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--universal", action="store_true",
                         help="Build arm64 and x86_64, then combine them with lipo")
     parser.add_argument("--identity", help="Installed Developer ID Application signing identity")
-    parser.add_argument("--version", default="0.1.3", help="Numeric app version, default: 0.1.3")
+    parser.add_argument("--version", default="0.1.4", help="Numeric app version, default: 0.1.4")
     parser.add_argument("--build-number", default="1", help="Numeric build number, default: 1")
     args = parser.parse_args()
     if not re.fullmatch(r"\d+\.\d+\.\d+", args.version):

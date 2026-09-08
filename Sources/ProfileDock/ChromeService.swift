@@ -31,10 +31,11 @@ struct ChromePerformanceSample: Sendable {
 
 /// In-process Apple events keep Automation permission attached to this controller.
 /// The compiled script and diagnostic buffer are accessed only on the serial queue.
-/// This queue confinement protects every stored mutable property across callers.
+/// The request gate independently synchronizes publications from the main actor.
 final class ChromeService: @unchecked Sendable {
     static let bundleID = "com.google.Chrome"
     private let queue = DispatchQueue(label: "ProfileDock.ChromeAppleEvents", qos: .userInitiated)
+    private let focusRequests = FocusRequestGate()
     private var compiledScript: NSAppleScript?
     private var samples: [ChromePerformanceSample] = []
     var isRunning: Bool { !NSRunningApplication.runningApplications(withBundleIdentifier: Self.bundleID).isEmpty }
@@ -77,30 +78,44 @@ final class ChromeService: @unchecked Sendable {
 
     @MainActor private func focus(handler: String, arguments: [String]) async throws {
         let started = DispatchTime.now().uptimeNanoseconds
+        let request = focusRequests.request()
+        PerformanceTrace.record("focus.requested", at: started)
         do {
-            try await executeWithoutResult(handler, arguments: arguments)
+            try await executeWithoutResult(handler, arguments: arguments, focusRequest: request)
+            // No suspension between this check and activation: a newer main-actor
+            // request cannot be overtaken by an older activation.
+            guard focusRequests.isCurrent(request) else { throw CancellationError() }
             guard let chrome = NSRunningApplication.runningApplications(withBundleIdentifier: Self.bundleID).first,
                   chrome.activate(options: []) else {
                 throw ChromeError(code: -600, detail: "Chrome is not running.")
             }
             recordFocus(handler, started: started, succeeded: true)
+            PerformanceTrace.record("focus.accepted")
         } catch {
+            if error is CancellationError || !focusRequests.isCurrent(request) {
+                PerformanceTrace.record("focus.superseded")
+                throw CancellationError()
+            }
+            PerformanceTrace.record("focus.failed")
             recordFocus(handler, started: started, succeeded: false)
             throw error
         }
     }
 
     // Discard the non-Sendable Apple event descriptor before resuming MainActor.
-    private func executeWithoutResult(_ handler: String, arguments: [String]) async throws {
-        _ = try await execute(handler, arguments: arguments)
+    private func executeWithoutResult(_ handler: String, arguments: [String], focusRequest: UUID) async throws {
+        _ = try await execute(handler, arguments: arguments, focusRequest: focusRequest)
     }
 
-    private func execute(_ handler: String, arguments: [String]) async throws -> NSAppleEventDescriptor {
+    private func execute(_ handler: String, arguments: [String], focusRequest: UUID? = nil) async throws -> NSAppleEventDescriptor {
         let requested = DispatchTime.now().uptimeNanoseconds
         guard isRunning else { throw ChromeError(code: -600, detail: "Chrome is not running.") }
         return try await withCheckedThrowingContinuation { continuation in
             queue.async {
                 let began = DispatchTime.now().uptimeNanoseconds
+                if let focusRequest, !self.focusRequests.isCurrent(focusRequest) {
+                    continuation.resume(throwing: CancellationError()); return
+                }
                 var error: NSDictionary?
                 var compilationMilliseconds = 0.0
                 if self.compiledScript == nil {
@@ -125,6 +140,11 @@ final class ChromeService: @unchecked Sendable {
                 let parameters = NSAppleEventDescriptor.list()
                 for (index, value) in arguments.enumerated() { parameters.insert(NSAppleEventDescriptor(string: value), at: index + 1) }
                 event.setParam(parameters, forKeyword: 0x2d2d2d2d)
+                // Compilation can take long enough for another click to arrive.
+                // Once execution starts, finish it serially; timeout is not cancellation.
+                if let focusRequest, !self.focusRequests.isCurrent(focusRequest) {
+                    continuation.resume(throwing: CancellationError()); return
+                }
                 let executionBegan = DispatchTime.now().uptimeNanoseconds
                 let result = script.executeAppleEvent(event, error: &error)
                 let finished = DispatchTime.now().uptimeNanoseconds
@@ -148,6 +168,15 @@ final class ChromeService: @unchecked Sendable {
 
     /// Called only on the Apple event queue. The bounded buffer is never written to disk.
     private func append(_ sample: ChromePerformanceSample) {
+        if sample.phase == .appleEvent {
+            PerformanceTrace.record("appleEvent." + sample.operation, values: [
+                "totalMs": sample.totalMilliseconds,
+                "queueMs": sample.queueMilliseconds ?? 0,
+                "compileMs": sample.compilationMilliseconds ?? 0,
+                "executeMs": sample.appleEventMilliseconds ?? 0,
+                "succeeded": sample.succeeded ? 1 : 0,
+            ])
+        }
         samples.append(sample)
         if samples.count > 100 { samples.removeFirst(samples.count - 100) }
     }
@@ -207,14 +236,21 @@ final class ChromeService: @unchecked Sendable {
         if not (application id "com.google.Chrome" is running) then error "Chrome closed" number -600
         with timeout of 12 seconds
             tell application id "com.google.Chrome"
-                set matchingWindows to {}
-                repeat with candidateWindow in (every window whose given name is targetName)
-                    if mode of candidateWindow is not "incognito" then set end of matchingWindows to contents of candidateWindow
-                end repeat
-                if (count of matchingWindows) is 0 then error "Window missing" number -27001
-                if (count of matchingWindows) is not 1 then error "Duplicate name" number -27002
-                set targetID to id of item 1 of matchingWindows
-                if mode of window id targetID is "incognito" then error "Private window" number -27003
+                try
+                    set matchingIDs to get id of (every window whose given name is targetName and mode is not "incognito")
+                on error errorMessage number errorNumber
+                    -- Only the first read may fall back. Never retry timeouts,
+                    -- permission failures, or commands that might have changed a window.
+                    if errorNumber is not -1708 then error errorMessage number errorNumber
+                    set matchingIDs to {}
+                    repeat with candidateWindow in (every window whose given name is targetName)
+                        if mode of candidateWindow is not "incognito" then set end of matchingIDs to id of candidateWindow
+                    end repeat
+                end try
+                if (count of matchingIDs) is 0 then error "Window missing" number -27001
+                if (count of matchingIDs) is not 1 then error "Duplicate name" number -27002
+                set targetID to item 1 of matchingIDs
+                -- Chromium does not permit changing a window's mode after creation.
                 set minimized of window id targetID to false
                 set index of window id targetID to 1
             end tell
