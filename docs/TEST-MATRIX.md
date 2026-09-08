@@ -18,14 +18,14 @@ These are standard public-repository runner labels; GitHub currently provides th
 Every macOS job:
 
 1. Confirms the actual OS major version and native processor architecture, and records macOS, Xcode, Swift, and the selected developer directory in its summary and artifact.
-2. Runs `swift test --scratch-path "$RUNNER_TEMP/ProfileDock-tests"` using the hosted Xcode installation.
+2. Runs `swift test --scratch-path "$RUNNER_TEMP/ProfileDock-tests"` using the hosted Xcode installation and typechecks the standalone latency harness.
 3. Builds the app and helper in release mode with `scripts/build.py`. The macOS 26 arm64 job also cross-compiles the Intel slice and creates a universal package.
 4. Checks the app and helper architectures, code-signature integrity, ZIP CRC, and SHA-256. It extracts the archive with `ditto` and repeats the binary/signature checks.
 5. Uploads separately named, ad-hoc signed development artifacts for 14 days. These are unnotarized test builds, not an automatic public release.
 
 The static website builds once on `ubuntu-24.04`, outside the macOS matrix. Independent matrix jobs continue if one fails. A newer run for the same branch cancels an obsolete run.
 
-**Status:** this document describes configured coverage. It is not evidence that the expanded matrix has passed; record a completed run URL in [VALIDATION.md](VALIDATION.md) after running it. Existing historical validation remains tied to its original candidate and runner.
+**Status:** [CI run 34209812166](https://github.com/kunilingvistador/ProfileDock/actions/runs/34209812166) passed on all four Mac configurations for source `9155f13`. The detailed candidate-specific results and live desktop limits are in [VALIDATION.md](VALIDATION.md).
 
 ## Coverage that requires a desktop session
 

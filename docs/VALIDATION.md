@@ -1,5 +1,47 @@
 # Validation record
 
+## Current candidate: 0.1.1 (4)
+
+Validated **8 September 2026**, source commit `9155f134705cdb4d69d0f04c4143e7edf0e65462`. Live desktop: **macOS 26.5.2, arm64, Chrome 152.0.7977.76**. The exact local universal archive has SHA-256 `041e658d634ed0a98b179ba452de1ac7942b5f30389f4d8efcdc8414f1a21758`.
+
+- Selected one of two identically titled temporary windows, previewed it, returned with Enter, and created/exported a shortcut with its name and selection retained.
+- Preview and relink exclude windows owned by other shortcuts. The picker and save action use the same eligibility list.
+- Closed the linked temporary window, invoked its real helper, and used **Choose window** in the error directly to enter recovery.
+- Previewed another temporary window and relinked the shortcut. The same existing helper then focused the new window; it was not re-exported.
+- Removed both temporary windows and the temporary shortcut. The exported test helper was moved out of the live Launchers folder.
+- All 104 original working tabs survived the full session. Two additional tabs and a changed active tab appeared in a working window during concurrent browser activity; the long session is therefore not claimed as an unchanged baseline.
+- A final short check recorded state immediately before and after one launch of each of four working helpers: **four windows and 106 tabs matched exactly**, including window/tab IDs, selected tabs, names, minimized state, and bounds; z-order is intentionally excluded.
+
+### Launcher timing on this Mac
+
+The standalone harness starts a real helper using `NSWorkspace.openApplication`. It stops the monotonic timer when Chrome is frontmost and the target is the first visible normal window in the window-server order. This is **not a first-painted-frame or physical Dock mouse-click measurement**. Baseline setup and computer-use tool latency are excluded.
+
+| Scenario | Samples | Result |
+| --- | ---: | --- |
+| Warm controller, four working shortcuts | 40 | 40 successful; median **329 ms**, nearest-rank p95 **381 ms**, range **270–393 ms** |
+| Cold controller; Chrome already running | 1 | **765 ms**, success |
+| Restore minimized temporary target | 1 | **543 ms**, success |
+| Existing helper after relink | 1 | **280 ms**, success |
+
+Cold/minimized timings are single observations, not typical or percentile estimates. Earlier development trials varied with machine state; these numbers cannot establish the isolated effect of script caching or promise performance on other Macs. The controller caches compiled AppleScript on its serial queue and retains at most 100 identifier-free diagnostic timing samples in memory.
+
+### Final automated and package checks
+
+[GitHub CI 34209812166](https://github.com/kunilingvistador/ProfileDock/actions/runs/34209812166) passed **5/5 jobs** for the source commit above:
+
+| Native runner | Actual macOS | XCTest | Other checks |
+| --- | --- | --- | --- |
+| Apple Silicon, macOS 15 | 15.7.9 | 37 passed | Harness typecheck, native package integrity |
+| Intel, macOS 15 | 15.7.9 | 37 passed | Harness typecheck, native package integrity |
+| Apple Silicon, macOS 26 | 26.6.2 | 37 passed | Harness typecheck, universal package integrity |
+| Intel, macOS 26 | 26.6.1 | 37 passed | Harness typecheck, native package integrity |
+
+The fifth job built the static website. The previous Apple-event/MainActor compiler warning is absent from the final Mac logs. The local final ZIP separately passed SHA-256, CRC, universal-architecture checks for both binaries, and strict signature verification after extraction into a fresh directory.
+
+**Limits:** native tests on hosted Intel runners do not verify the live Chrome/Dock UI on a physical Intel Mac. Spaces, fullscreen, Stage Manager, multi-display arrangements, revoked permissions, clean-machine Gatekeeper onboarding, and rapid competing helper launches still need focused desktop tests. This local package is ad-hoc signed and **not notarized**. Existing personal legacy Dock applets were not replaced by this iteration; measured helpers are the apps exported by ProfileDock.
+
+## Historical candidate: 0.1.0 (3)
+
 Validation date: **8 September 2026**. Candidate: **0.1.0 (3)**, local beta. Live checks ran on **macOS 26, Apple Silicon (arm64), with Google Chrome** during development of this candidate. Package checks below apply to the final build 3 archive. This record describes observed behavior on that setup; the unverified cases below remain release work.
 
 ## Live window checks
@@ -61,7 +103,7 @@ Use the [architecture checklist](ARCHITECTURE.md#integration-checks-before-relea
 
 On **8 September 2026**, the workflow was expanded to native XCTest jobs on macOS 15 and 26, each on Apple Silicon and Intel. The macOS 26 Apple Silicon job also packages a universal app. Each job verifies its actual environment, packaged architectures, signature integrity, checksum, and archive extraction. The website builds once in a separate Linux job.
 
-The expanded matrix is **configured, not yet recorded here as passed**. The historical run below covers the earlier workflow only. Append a completed run URL and its result before describing the new matrix as validated. This change does not resolve the live Intel UI, older macOS, Spaces, displays, permissions, or notarization checks above. See [TEST-MATRIX.md](TEST-MATRIX.md) for the runnable CI coverage, live scenarios, and timing protocol.
+The expanded matrix subsequently **passed for candidate 0.1.1**; see the current candidate record above. The historical run below covers the earlier workflow only. This change does not resolve the live Intel UI, older macOS, Spaces, displays, permissions, or notarization checks above. See [TEST-MATRIX.md](TEST-MATRIX.md) for the runnable CI coverage, live scenarios, and timing protocol.
 
 ## GitHub CI and final local update
 
