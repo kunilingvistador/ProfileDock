@@ -1,6 +1,6 @@
 # Updating ProfileDock and keeping your shortcuts
 
-The 0.1.3 compatibility candidate lets existing shortcuts use the current ProfileDock controller without being recreated. Validation of this candidate is still in progress; earlier results in [VALIDATION.md](VALIDATION.md) apply only to their recorded versions and source revisions.
+The 0.1.3 compatibility candidate lets existing shortcuts use the current ProfileDock controller without being recreated. Local compatibility checks, live migration checks, and the full CI run passed; release publication is pending. Results and a known signature-verification limitation are recorded below.
 
 ## Replace or move the app
 
@@ -54,8 +54,21 @@ Before converting a legacy applet, ProfileDock saves its original contents and p
 ```text
 Legacy Backups/<random>/Contents/
 Legacy Backups/<random>/original-path.txt
+Legacy Backups/<random>/original-root-attributes.plist
 ```
 
 Each conversion gets a separate backup directory. Open **Open data folder** from the ProfileDock menu to find it. These backups contain the original applet files; they are separate from `shortcuts.json` and the custom images stored in `Icons`.
 
 Maintenance errors appear in a separate nonblocking message with details and an **Update shortcuts** retry action. They do not become a Chrome switching error. The release remains an ad-hoc-signed, unnotarized beta, so macOS approval and Automation permission may still be needed after replacing the app.
+
+## Checked for 0.1.3 (build 6)
+
+On 8 September 2026, four existing applets already pinned in Dock were migrated on a live Mac. The saved configuration remained byte-for-byte identical. Their UUIDs, bundle IDs, app-root inodes, and all icon hashes were preserved; Dock item GUIDs and order were unchanged. Each applet received a complete, byte-matching backup of its original `Contents` directory.
+
+Each of the four original `.app` files was then double-clicked in Finder using UI automation. All four brought the correct existing Chrome window forward. This was a Finder launch check of the original files, not a physical click on each Dock icon.
+
+Repeating **Update shortcuts** through the interface reported **Compatible shortcuts are up to date**. The configuration still contained four records, with no duplicates.
+
+The temporary-filesystem compatibility suite passed **8 cases and 134 assertions**. [CI run 34223725465](https://github.com/kunilingvistador/ProfileDock/actions/runs/34223725465) passed all **five jobs** for source `5b91351`: four native macOS jobs and the website build. Standard XCTest passed **52 tests on each of four runners**: macOS 15 and 26, on arm64 and x86_64. CI package verification and archive checks also passed. These package checks apply to CI-built artifacts, separately from the live migrated applets described below. See [release status and package checksum](RELEASE.md#013-compatibility-candidate).
+
+**Known limitation in iCloud Documents:** after successful installation-time signature verification, the app-root FinderInfo flag `0x2000` reappeared on the migrated applets. Later `codesign --strict` checks failed, although all four apps still launched correctly. The cause remains under investigation. These live results do not establish that the four migrated bundles retain a passing strict signature check indefinitely.

@@ -26,14 +26,29 @@ No signing certificate, personal browser data, account name, custom photo, or us
 
 This candidate keeps the existing UUID focus route and version-1 state format. It adds controller-location tracking, refreshes existing owned helpers when the manager is opened, and offers explicit conversion of compatible older applets. It does not add an automatic app downloader or change Chrome window names. See [shortcut compatibility and backups](SHORTCUT-COMPATIBILITY.md).
 
-Compatibility validation is still in progress. Do not carry forward the results recorded for older versions as proof for this candidate. Before publication, record the tested source revision, package, environments, and results in the [validation record](VALIDATION.md), including:
+Results recorded on **8 September 2026** for **0.1.3, build 6**:
 
-- Existing shortcut UUIDs, bindings, names, images, and version-1 settings survive an app replacement.
-- Helper updates preserve the original app path, root filesystem identity and existing bookmarks; an already pinned Dock icon is checked separately on a live desktop.
-- Explicit legacy conversion preserves the original bundle ID and creates a complete `Legacy Backups/<random>/Contents` backup plus `original-path.txt`. Repeated import or conversion does not duplicate the shortcut.
-- Opening a moved/replaced controller updates its recorded location and existing helpers; subsequent warm and cold Dock requests reach that controller.
-- Maintenance failures stay separate from Chrome focus errors, and ordinary background focus requests do not perform helper maintenance.
-- Name and image edits continue to update migrated helpers at their existing locations.
+| Check | Result |
+| --- | --- |
+| Temporary-filesystem compatibility suite | 8 cases, 134 assertions passed. |
+| Standard XCTest | 52 tests passed on each of four macOS 15/26 arm64/x86_64 runners. |
+| Four live legacy Dock applets | Configuration bytes, UUIDs, bundle IDs, root inodes, and all icon hashes preserved; Dock GUIDs and order unchanged. Each original `Contents` backup matched completely. |
+| Launching the four original app files | Finder double-clicks through UI automation each brought the correct existing Chrome window forward. |
+| Repeating Update shortcuts | The interface reported that compatible shortcuts were up to date; four records remained, with no duplicates. |
+| Full CI for `5b91351` | All five jobs passed: four native macOS jobs, including package verification and archive checks, plus the website build. |
+| Local release ZIP | Extracted into a fresh temporary directory; deep strict signature verification passed, both binaries contained arm64 and x86_64, and version 0.1.3/build 6 contained no user settings. |
+
+**Known limitation:** in iCloud Documents, the app-root FinderInfo flag `0x2000` reappeared after successful installation-time signature verification. Later `codesign --strict` checks failed on those migrated applets, although all four launched correctly. The cause remains under investigation; do not describe these four bundles as permanently passing strict signature verification. See the [compatibility record](SHORTCUT-COMPATIBILITY.md#checked-for-013-build-6) for scope.
+
+[CI run 34223725465](https://github.com/kunilingvistador/ProfileDock/actions/runs/34223725465) completed successfully for source `5b91351`. Its package results apply to the CI-built artifacts, separately from the live migrated applets and their FinderInfo limitation above. Release publication is pending.
+
+The current build-6 ZIP has SHA-256:
+
+```text
+75905a29fe0c9363e10c3e58b413af092ad81568a0865f53bd9875dcbc27b5fd
+```
+
+Keep manual update instructions in the release: download the new app, quit ProfileDock, replace the app, and open the new copy once. Opening it once is also required after moving it. The app does not download future versions automatically.
 
 Run the filesystem compatibility checks on macOS with Command Line Tools:
 
