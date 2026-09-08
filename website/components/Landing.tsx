@@ -106,7 +106,11 @@ const copy = {
       ],
       [
         "Какие разрешения и данные нужны?",
-        "Нужно системное разрешение на управление Google Chrome. Настройки и изображения сохраняются локально; аналитики и аккаунта нет. Когда вы сами выбираете иконку сайта, приложение обращается к этому сайту и к адресам иконок, указанным на его странице.",
+        "Для выбора окна приложение локально читает имена профилей, подписи аккаунтов, фото и заголовки окон. macOS даёт широкое разрешение на управление Chrome; оно не ограничено только переключением. Вы можете отозвать его в разделе «Конфиденциальность и безопасность → Автоматизация».",
+      ],
+      [
+        "Получают ли разработчики данные моего Chrome?",
+        "ProfileDock не отправляет нам данные профилей и окон. В приложении нет аккаунта, сервера для сбора данных или аналитики. Содержимое открытых страниц, пароли, cookies и история не читаются. Отдельная сетевая функция — загрузка значка сайта по вашей команде; вместо неё можно выбрать файл.",
       ],
       [
         "Это отдельный браузер? Работает с Safari или Edge?",
@@ -121,6 +125,17 @@ const copy = {
     closingText: "Маленькое удобство, которое остаётся с вами весь день.",
     feedback: "Предложить улучшение",
     privacy: "Локальные настройки. Без аналитики.",
+    privacyLabel: "Данные и разрешения",
+    privacyTitle: "Ваш браузер.\nВаши данные.",
+    privacyIntro: "ProfileDock не отправляет данные Chrome разработчикам. Доступ нужен самому приложению на вашем Mac, чтобы находить и поднимать окна.",
+    privacyPoints: [
+      ["Что читается на Mac", "Имена профилей, подписи аккаунтов (в том числе email), фото профилей и заголовки окон помогают выбрать нужное окно. Содержимое открытых страниц, пароли, cookies и история посещений не читаются."],
+      ["Что сохраняется", "Имена ярлыков, привязки окон и картинки — в локальной папке данных и созданных ярлыках. У ProfileDock нет облачного аккаунта, аналитики или автоматической отправки этих данных."],
+      ["Когда нужен интернет", "Для переключения — не нужен. При загрузке значка сайта этот сайт получает ваш IP-адрес и запрошенный адрес. Cookies Chrome и данные профилей не передаются. Можно выбрать картинку из файла."],
+      ["Что разрешает macOS", "Automation даёт управление Chrome, а не отдельное разрешение только на переключение. Открытый код позволяет проверить, как оно используется. Доступ можно выключить в настройках macOS; переключение перестанет работать."],
+    ],
+    privacyReport: "Что именно проверено",
+    privacyHost: "Этот сайт размещён на GitHub Pages. GitHub записывает IP-адреса посетителей для безопасности сервиса. Это отдельно от работы приложения.",
     foot: "Сделано для тех, у кого больше одного окна.",
     license: "Лицензия MIT",
   },
@@ -214,7 +229,11 @@ const copy = {
       ],
       [
         "What permissions and data does it need?",
-        "It needs macOS permission to control Google Chrome. Settings and images are stored locally, with no analytics or account. If you choose to fetch a website icon, the app contacts that site and the icon addresses listed on its page.",
+        "To help you choose a window, the app reads local profile names, account labels, pictures and window titles. macOS grants broad control of Chrome, not a permission limited to switching. You can revoke it in Privacy & Security → Automation.",
+      ],
+      [
+        "Do the developers receive my Chrome data?",
+        "ProfileDock does not send us profile or window data. The app has no account, data-collection server or analytics. It does not read open page contents, passwords, cookies or browsing history. An optional network feature fetches a website icon at your request; you can choose a file instead.",
       ],
       [
         "Is this another browser? Does it work with Safari or Edge?",
@@ -229,6 +248,17 @@ const copy = {
     closingText: "A small convenience that stays with you all day.",
     feedback: "Suggest an improvement",
     privacy: "Local settings. No analytics.",
+    privacyLabel: "Data and permissions",
+    privacyTitle: "Your browser.\nYour data.",
+    privacyIntro: "ProfileDock does not send Chrome data to its developers. The app on your Mac needs access to find and bring forward your windows.",
+    privacyPoints: [
+      ["What it reads on your Mac", "Profile names, account labels (including email addresses), profile pictures and window titles help you choose a window. It does not read open page contents, passwords, cookies or browsing history."],
+      ["What it saves", "Shortcut names, window bindings and pictures stay in the local data folder and the shortcuts you create. ProfileDock has no cloud account, analytics or automatic upload of this data."],
+      ["When it uses the internet", "Switching works offline. If you fetch a website icon, that site receives your IP address and the requested address. Chrome cookies and profile data are not sent. You can choose an image file instead."],
+      ["What macOS permits", "Automation grants control of Chrome, rather than a permission limited to switching. The open source shows how it is used. You can revoke access in macOS settings; switching will stop working."],
+    ],
+    privacyReport: "Read what was checked",
+    privacyHost: "This website is hosted on GitHub Pages. GitHub logs visitors’ IP addresses for service security. This is separate from the app’s operation.",
     foot: "Made for people with more than one window.",
     license: "MIT license",
   },
@@ -477,6 +507,28 @@ export default function Landing({ initialLanguage }: { initialLanguage: "ru" | "
             </div>
           </aside>
         </section>
+        <section className="privacy-section wrap" id="privacy" aria-labelledby="privacy-title">
+          <div className="privacy-heading">
+            <span className="feature-icon"><LockKeyhole size={24} aria-hidden="true" /></span>
+            <p className="eyebrow">{t.privacyLabel}</p>
+            <h2 id="privacy-title">{t.privacyTitle}</h2>
+            <p className="section-intro">{t.privacyIntro}</p>
+          </div>
+          <div className="privacy-grid">
+            {t.privacyPoints.map(([title, body]) => (
+              <article key={title}>
+                <h3>{title}</h3>
+                <p>{body}</p>
+              </article>
+            ))}
+          </div>
+          <div className="privacy-footnote">
+            <a className="text-link" href={`${repo}/blob/main/docs/PRIVACY-AND-SECURITY.md`}>
+              {t.privacyReport}<ArrowUpRight size={16} aria-hidden="true" />
+            </a>
+            <p>{t.privacyHost} <a href="https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages#data-collection">GitHub Pages ↗</a></p>
+          </div>
+        </section>
         <section className="faq-section wrap" id="questions" aria-labelledby="faq-title">
           <div className="faq-heading">
             <p className="eyebrow">{t.faqKicker}</p>
@@ -509,10 +561,10 @@ export default function Landing({ initialLanguage }: { initialLanguage: "ru" | "
               <ArrowDown size={19} aria-hidden="true" />
               {t.download}
             </a>
-            <span>
+            <a className="privacy-link" href="#privacy">
               <LockKeyhole size={13} aria-hidden="true" />
               {t.privacy}
-            </span>
+            </a>
           </div>
         </section>
       </main>
@@ -524,6 +576,7 @@ export default function Landing({ initialLanguage }: { initialLanguage: "ru" | "
           <p>{t.foot}</p>
         </div>
         <div className="footer-links">
+          <a href="#privacy">{t.privacyLabel}</a>
           <a href={`${repo}/issues`}>{t.feedback}</a>
           <a href={`${repo}/blob/main/LICENSE`}>{t.license}</a>
           <a href={repo} aria-label={t.source}>

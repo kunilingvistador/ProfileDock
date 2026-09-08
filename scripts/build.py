@@ -40,7 +40,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--universal", action="store_true",
                         help="Build arm64 and x86_64, then combine them with lipo")
     parser.add_argument("--identity", help="Installed Developer ID Application signing identity")
-    parser.add_argument("--version", default="0.1.4", help="Numeric app version, default: 0.1.4")
+    parser.add_argument("--version", default="0.1.5", help="Numeric app version, default: 0.1.5")
     parser.add_argument("--build-number", default="1", help="Numeric build number, default: 1")
     args = parser.parse_args()
     if not re.fullmatch(r"\d+\.\d+\.\d+", args.version):
@@ -144,8 +144,8 @@ def main() -> None:
             "NSPrincipalClass": "NSApplication",
             "NSHighResolutionCapable": True,
             "NSAppleEventsUsageDescription": (
-                "ProfileDock needs permission to find, name, and focus your existing "
-                "Chrome windows when you use a profile shortcut."
+                "ProfileDock reads Chrome window titles to help you choose a window, "
+                "then names and brings it forward. Browser data is not sent to the developers."
             ),
             "CFBundleURLTypes": [{
                 "CFBundleURLName": BUNDLE_ID,
@@ -158,8 +158,8 @@ def main() -> None:
         purpose_strings = {
             "en": metadata["NSAppleEventsUsageDescription"],
             "ru": (
-                "ProfileDock требуется разрешение, чтобы находить и называть уже открытые "
-                "окна Chrome и переключаться на нужное окно при нажатии на ярлык профиля."
+                "ProfileDock читает заголовки окон Chrome для выбора нужного окна, "
+                "затем называет его и поднимает наверх. Данные браузера не отправляются разработчикам."
             ),
         }
         for language, description in purpose_strings.items():

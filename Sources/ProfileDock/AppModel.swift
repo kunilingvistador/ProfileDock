@@ -72,7 +72,8 @@ import ProfileDockCore
         }
         let image: NSImage
         if let name = shortcut.iconFile, name == shortcut.id.uuidString + ".png",
-           let saved = NSImage(contentsOf: store.iconsDirectory.appendingPathComponent(name)) {
+           let data = try? store.privateStorage.readFile(name, subdirectory: "Icons", maximumBytes: 16_000_000),
+           let saved = try? IconService.image(from: data) {
             image = saved
         } else {
             image = IconService.defaultIcon(name: shortcut.name, id: shortcut.id)
@@ -161,7 +162,7 @@ import ProfileDockCore
                 if !demoMode { try? await service.rename(windowID: window.id, to: window.givenName) }
                 throw error
             }
-            if let path = profile?.avatarPath, let image = NSImage(contentsOfFile: path) { try? saveIcon(image, for: new) }
+            if let path = profile?.avatarPath, let image = try? IconService.loadImage(from: URL(fileURLWithPath: path)) { try? saveIcon(image, for: new) }
             selectedShortcutID = new.id
             if !demoMode {
                 permissionGranted = true; chromeRunning = true
@@ -261,30 +262,36 @@ import ProfileDockCore
         guard panel.runModal() == .OK, let url = panel.url else { return }
         errorMessage = nil; notice = nil
         do {
-            guard let size = try url.resourceValues(forKeys: [.fileSizeKey]).fileSize, size <= 16_000_000,
-                  let image = NSImage(contentsOf: url) else { throw IconError.invalidImage }
+            let image = try IconService.loadImage(from: url)
             try saveIcon(image, for: shortcut)
             notice = L("Image saved. Re-add the icon to Dock if macOS keeps showing the old one.", "Картинка сохранена. Если Dock показывает старую, добавьте значок заново.")
         } catch { handle(error) }
     }
 
-    func fetchFavicon(for shortcut: Shortcut, website: String) async {
-        guard !isBusy else { return }
+    func fetchFavicon(for shortcut: Shortcut, website: String) async -> Bool {
+        guard !isBusy, !Task.isCancelled else { return false }
         isBusy = true; errorMessage = nil; notice = nil
         defer { isBusy = false }
         do {
             let data = try await FaviconService().fetch(website: website)
+            try Task.checkCancellation()
             guard let image = NSImage(data: data) else { throw IconError.invalidImage }
+            try Task.checkCancellation()
             try saveIcon(image, for: shortcut)
             notice = L("Site icon saved.", "Значок сайта сохранён.")
-        } catch { handle(error) }
+            return true
+        } catch {
+            if !Task.isCancelled { handle(error) }
+            return false
+        }
     }
 
     func exportShortcut(_ shortcut: Shortcut) {
         errorMessage = nil; notice = nil
         guard !demoMode else { notice = L("Create real shortcuts outside preview mode.", "Создание ярлыков доступно вне предпросмотра."); return }
         do {
-            let url = try LauncherExporter.export(shortcut: shortcut, image: icon(for: shortcut)!, directory: store.launchersDirectory, controllerURL: Bundle.main.bundleURL)
+            let directory = try store.privateStorage.prepareSubdirectory("Launchers")
+            let url = try LauncherExporter.export(shortcut: shortcut, image: icon(for: shortcut)!, directory: directory, controllerURL: Bundle.main.bundleURL)
             NSWorkspace.shared.activateFileViewerSelecting([url])
             notice = L("Drag the selected app from Finder to the left side of Dock.", "Перетащите выделенный ярлык из Finder в левую часть Dock.")
         } catch { handle(error) }
@@ -294,7 +301,8 @@ import ProfileDockCore
         errorMessage = nil; notice = nil
         guard !shortcuts.isEmpty, !demoMode else { return }
         do {
-            let urls = try shortcuts.map { try LauncherExporter.export(shortcut: $0, image: icon(for: $0)!, directory: store.launchersDirectory, controllerURL: Bundle.main.bundleURL) }
+            let directory = try store.privateStorage.prepareSubdirectory("Launchers")
+            let urls = try shortcuts.map { try LauncherExporter.export(shortcut: $0, image: icon(for: $0)!, directory: directory, controllerURL: Bundle.main.bundleURL) }
             NSWorkspace.shared.activateFileViewerSelecting(urls)
             notice = L("Drag the selected apps to Dock. All of them use the same ProfileDock controller.", "Перетащите выделенные ярлыки в Dock. Все они используют одно приложение ProfileDock.")
         } catch { handle(error) }
@@ -376,8 +384,10 @@ import ProfileDockCore
         NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Automation")!)
     }
     func revealDataFolder() {
-        try? FileManager.default.createDirectory(at: store.directory, withIntermediateDirectories: true)
-        NSWorkspace.shared.open(store.directory)
+        do {
+            try store.privateStorage.prepare()
+            NSWorkspace.shared.open(store.directory)
+        } catch { handle(error) }
     }
 
     private func loadProfiles() {
@@ -400,19 +410,18 @@ import ProfileDockCore
     private func saveIcon(_ image: NSImage, for shortcut: Shortcut) throws {
         try ensureWritable()
         guard let index = shortcuts.firstIndex(where: { $0.id == shortcut.id }) else { return }
-        try FileManager.default.createDirectory(at: store.iconsDirectory, withIntermediateDirectories: true)
-        let name = shortcut.id.uuidString + ".png", url = store.iconsDirectory.appendingPathComponent(shortcut.id.uuidString + ".png")
-        let previous = try? Data(contentsOf: url)
+        let name = shortcut.id.uuidString + ".png"
+        let previous = try store.privateStorage.readFile(name, subdirectory: "Icons", maximumBytes: 16_000_000)
         let imageData = try IconService.png(image, size: 512)
-        try imageData.write(to: url, options: .atomic)
+        try store.privateStorage.write(imageData, to: name, subdirectory: "Icons")
         // A new picture keeps the same filename; invalidate by content change,
         // not just by the shortcut's name/iconFile cache key.
         iconCache.removeValue(forKey: shortcut.id)
         var next = shortcuts; next[index].iconFile = name
         do { try commit(next) }
         catch {
-            if let previous { try? previous.write(to: url, options: .atomic) }
-            else { try? FileManager.default.removeItem(at: url) }
+            if let previous { try? store.privateStorage.write(previous, to: name, subdirectory: "Icons") }
+            else { try? store.privateStorage.removeFile(name, subdirectory: "Icons") }
             iconCache.removeValue(forKey: shortcut.id)
             throw error
         }

@@ -198,7 +198,11 @@ final class ChromeService: @unchecked Sendable {
         with timeout of 12 seconds
             tell application id "com.google.Chrome"
                 repeat with w in every window
-                    set end of rows to {(id of w) as text, given name of w, name of w, minimized of w, mode of w}
+                    -- Check privacy before requesting any identifying window metadata.
+                    set windowMode to mode of w
+                    if windowMode is not "incognito" then
+                        set end of rows to {(id of w) as text, given name of w, name of w, minimized of w, windowMode}
+                    end if
                 end repeat
             end tell
         end timeout

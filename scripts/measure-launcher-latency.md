@@ -16,6 +16,7 @@ Compile from the repository root, using a scratch directory outside the source:
 mkdir -p /tmp/profiledock-latency-build
 xcrun swiftc -O -parse-as-library -swift-version 5 \
   -module-cache-path /tmp/profiledock-latency-build/modules \
+  Sources/ProfileDockCore/PrivateStorage.swift \
   Sources/ProfileDockCore/ControllerLocation.swift \
   scripts/measure-launcher-latency.swift \
   -o /tmp/profiledock-latency-build/measure-launcher-latency

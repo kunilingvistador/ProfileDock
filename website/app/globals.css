@@ -70,6 +70,60 @@ h2 {
   width: min(1180px, calc(100% - 80px));
   margin-inline: auto;
 }
+.privacy-section {
+  margin-block: 32px 110px;
+  padding: clamp(24px, 4vw, 54px);
+  background: var(--lavender);
+  border: 1px solid #e4e0f2;
+  border-radius: 28px;
+}
+.privacy-heading {
+  max-width: 740px;
+}
+.privacy-heading .feature-icon {
+  margin-bottom: 22px;
+}
+.privacy-heading .section-intro {
+  margin-top: 20px;
+}
+.privacy-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 30px 42px;
+  margin-block: 34px;
+}
+.privacy-grid h3 {
+  font-size: 16px;
+  margin-bottom: 9px;
+}
+.privacy-grid p {
+  color: var(--muted);
+  font-size: 14px;
+}
+.privacy-footnote {
+  border-top: 1px solid #ddd7ec;
+  padding-top: 22px;
+}
+.privacy-footnote p {
+  max-width: 850px;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 16px;
+}
+.privacy-footnote p a {
+  text-decoration: underline;
+}
+.privacy-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--muted);
+}
+@media (max-width: 700px) {
+  .privacy-grid { grid-template-columns: 1fr; gap: 24px; }
+  .privacy-section { margin-bottom: 70px; border-radius: 20px; }
+}
 /* Navigation and primary actions */
 .site-header {
   height: 100px;
