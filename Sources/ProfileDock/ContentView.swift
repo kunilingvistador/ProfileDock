@@ -501,7 +501,7 @@ private struct ShortcutEditor: View {
     }
 
     private var profile: BrowserProfile? { model.profiles.first { $0.id == profileID } }
-    private var selectedWindow: BrowserWindow? { model.windows.first { $0.id == windowID } }
+    private var selectedWindow: BrowserWindow? { model.linkableWindows().first { $0.id == windowID } }
     private var isValid: Bool {
         !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && (shortcut != nil || selectedWindow != nil) && !model.isBusy
     }
@@ -511,12 +511,21 @@ private struct ShortcutEditor: View {
             SheetHeading(title: shortcut == nil ? L("A new place in your Dock", "Новое место в вашем Dock") : L("Make it yours", "Настройте под себя"), subtitle: shortcut == nil ? L("Link a shortcut to an open Chrome window.", "Свяжите ярлык с открытым окном Chrome.") : L("A clear name and picture make switching easier.", "Понятное имя и картинка помогают быстро найти нужное."))
 
             Form {
+                if shortcut == nil {
+                    Section {
+                        WindowPicker(model: model, selection: $windowID)
+                    } header: {
+                        Text(L("1. Choose and check a window", "1. Выберите и проверьте окно"))
+                    } footer: {
+                        Text(L("Show the window to check its profile before linking it.", "Покажите окно и проверьте его профиль перед привязкой."))
+                    }
+                }
                 Section {
                     TextField(L("Shortcut name", "Название ярлыка"), text: $name)
                         .textFieldStyle(.roundedBorder)
                         .onSubmit { if isValid { save() } }
                     if shortcut == nil {
-                        Picker(L("Chrome profile", "Профиль Chrome"), selection: $profileID) {
+                        Picker(L("Name and photo from profile", "Имя и фото из профиля"), selection: $profileID) {
                             Text(L("No profile selected", "Без выбора профиля")).tag(nil as String?)
                             ForEach(model.profiles) { profile in
                                 Text(profile.account.map { "\(profile.name) — \($0)" } ?? profile.name)
@@ -528,20 +537,10 @@ private struct ShortcutEditor: View {
                         }
                     }
                 } header: {
-                    Text(L("Appearance", "Внешний вид"))
+                    Text(shortcut == nil ? L("2. Name your shortcut", "2. Назовите ярлык") : L("Appearance", "Внешний вид"))
                 } footer: {
                     if shortcut == nil {
-                        Text(L("A profile supplies a name and avatar. Selecting one is optional.", "Профиль подставляет имя и аватар. Его выбор необязателен."))
-                    }
-                }
-
-                if shortcut == nil {
-                    Section {
-                        WindowPicker(model: model, selection: $windowID)
-                    } header: {
-                        Text(L("Window to bring forward", "Какое окно поднимать"))
-                    } footer: {
-                        Text(L("Check the desired window in Chrome, then select it here. Chrome does not tell ProfileDock which profile owns a window.", "Проверьте нужное окно в Chrome и выберите его здесь. Chrome не сообщает ProfileDock, к какому профилю относится окно."))
+                        Text(L("Optional: use a profile's name and photo. This does not change the selected window.", "Необязательно: можно взять имя и фото профиля. Выбранное окно от этого не меняется."))
                     }
                 }
 
@@ -578,7 +577,7 @@ private struct ShortcutEditor: View {
                     .disabled(!isValid)
             }
         }
-        .frame(width: 535, height: shortcut == nil ? 535 : 440)
+        .frame(width: 555, height: shortcut == nil ? 595 : 440)
         .sheet(isPresented: $showingFavicon) {
             if let shortcut { FaviconSheet(model: model, shortcut: shortcut) }
         }
@@ -600,7 +599,8 @@ private struct ShortcutEditor: View {
 private struct WindowPicker: View {
     @ObservedObject var model: AppModel
     @Binding var selection: String?
-    private var windows: [BrowserWindow] { model.windows.filter { !$0.incognito } }
+    var shortcutID: UUID? = nil
+    private var windows: [BrowserWindow] { model.linkableWindows(for: shortcutID) }
     private var hasDuplicateLabels: Bool { Set(windows.map(\.label)).count != windows.count }
     var body: some View {
         VStack(alignment: .leading, spacing: 11) {
@@ -615,22 +615,33 @@ private struct WindowPicker: View {
                         .disabled(model.isBusy)
                 }
             } else if windows.isEmpty {
-                Text(L("Open a regular Chrome window, then refresh this list.", "Откройте обычное окно Chrome и обновите список."))
+                Text(L("No unlinked windows. Open the Chrome window you want to add, then refresh.", "Свободных окон нет. Откройте нужное окно Chrome и обновите список."))
                     .font(.system(size: 12)).foregroundStyle(.secondary)
             } else {
                 Picker(L("Open window", "Открытое окно"), selection: $selection) {
                     Text(L("Choose a window…", "Выберите окно…")).tag(nil as String?)
-                    ForEach(windows) { window in
-                        Text(window.label.isEmpty ? L("Untitled window", "Окно без названия") : window.label)
+                    ForEach(Array(windows.enumerated()), id: \.element.id) { index, window in
+                        Text("\(index + 1). \(windowLabel(window))")
                             .tag(Optional(window.id))
                     }
+                }
+                HStack {
+                    Button {
+                        guard let window = windows.first(where: { $0.id == selection }) else { return }
+                        Task { await model.previewWindow(window) }
+                    } label: {
+                        Label(L("Show window", "Показать окно"), systemImage: "eye")
+                    }
+                    .disabled(model.isBusy || !windows.contains { $0.id == selection })
+                    .help(L("Check the window in Chrome without linking it yet", "Проверить окно в Chrome без изменения привязки"))
+                    if model.isBusy { ProgressView().controlSize(.small) }
                 }
                 if let selected = windows.first(where: { $0.id == selection }), selected.minimized {
                     Label(L("This window is minimized. The shortcut will restore it.", "Это окно свёрнуто. Ярлык развернёт его."), systemImage: "arrow.up.left.and.arrow.down.right")
                         .font(.system(size: 11)).foregroundStyle(.secondary)
                 }
                 if hasDuplicateLabels {
-                    Label(L("Some windows have the same title. Give them different names in Chrome, then refresh to choose the right one.", "Некоторые окна называются одинаково. Дайте им разные имена в Chrome и обновите список, чтобы выбрать нужное."), systemImage: "info.circle")
+                    Label(L("Some titles match. Select a numbered window and use Show window to check it.", "Есть одинаковые названия. Выберите окно по номеру и нажмите «Показать окно», чтобы проверить его."), systemImage: "info.circle")
                         .font(.system(size: 11)).foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
@@ -642,6 +653,14 @@ private struct WindowPicker: View {
             .buttonStyle(.link)
             .disabled(model.isBusy)
         }
+        .onChange(of: windows) { available in
+            if !available.contains(where: { $0.id == selection }) { selection = nil }
+        }
+    }
+
+    private func windowLabel(_ window: BrowserWindow) -> String {
+        if let shortcut = model.shortcuts.first(where: { $0.windowName == window.givenName }) { return shortcut.name }
+        return window.label.isEmpty ? L("Untitled window", "Окно без названия") : window.label
     }
 }
 
@@ -656,9 +675,9 @@ private struct WindowLinkSheet: View {
             SheetHeading(title: L("Choose the right window", "Выберите нужное окно"), subtitle: L("Reconnect “\(shortcut.name)” to an open Chrome window.", "Привяжите «\(shortcut.name)» к открытому окну Chrome."))
             Form {
                 Section {
-                    WindowPicker(model: model, selection: $windowID)
+                    WindowPicker(model: model, selection: $windowID, shortcutID: shortcut.id)
                 } footer: {
-                    Text(L("First check which Chrome window belongs to this profile. The shortcut will remember the window you select.", "Сначала проверьте, какое окно Chrome относится к этому профилю. Ярлык запомнит выбранное вами окно."))
+                    Text(L("Show the window to check it, then link it here. Your existing Dock icon will keep working.", "Покажите окно для проверки, затем привяжите его здесь. Значок в Dock продолжит работать."))
                 }
             }
             .formStyle(.grouped)
@@ -666,7 +685,7 @@ private struct WindowLinkSheet: View {
             SheetFooter(isBusy: model.isBusy, errorMessage: model.errorMessage) {
                 Button(L("Cancel", "Отмена")) { dismiss() }.keyboardShortcut(.cancelAction)
                 Button(L("Link window", "Привязать окно")) {
-                    guard let window = model.windows.first(where: { $0.id == windowID }) else { return }
+                    guard let window = model.linkableWindows(for: shortcut.id).first(where: { $0.id == windowID }) else { return }
                     Task {
                         await model.relink(shortcut, to: window)
                         if model.errorMessage == nil { dismiss() }
@@ -674,10 +693,10 @@ private struct WindowLinkSheet: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .keyboardShortcut(.defaultAction)
-                .disabled(!model.windows.contains(where: { $0.id == windowID && !$0.incognito }) || model.isBusy)
+                .disabled(!model.linkableWindows(for: shortcut.id).contains(where: { $0.id == windowID }) || model.isBusy)
             }
         }
-        .frame(width: 510, height: 345)
+        .frame(width: 535, height: 430)
     }
 }
 

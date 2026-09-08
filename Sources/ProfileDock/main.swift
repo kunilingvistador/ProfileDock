@@ -6,11 +6,13 @@ import ProfileDockCore
     var model: AppModel!
     private var window: NSWindow!
     private var statusItem: NSStatusItem!
+    private var previewPanel: NSPanel?
     private var pendingURLs: [URL] = []
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         model = AppModel()
         model.didChange = { [weak self] in self?.rebuildMenu() }
+        model.didPreviewWindow = { [weak self] in self?.showPreviewReturn() }
         installMainMenu()
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 940, height: 660), styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
         window.title = "ProfileDock"
@@ -49,7 +51,38 @@ import ProfileDockCore
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool { showWindow(); return true }
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }
 
-    @objc func showWindow() { window?.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true) }
+    @objc func showWindow() {
+        previewPanel?.orderOut(nil)
+        window?.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true)
+    }
+    func applicationDidBecomeActive(_ notification: Notification) { previewPanel?.orderOut(nil) }
+
+    private func showPreviewReturn() {
+        guard window?.isVisible == true, window?.attachedSheet != nil else { return }
+        let panel = previewPanel ?? NSPanel(contentRect: NSRect(x: 0, y: 0, width: 330, height: 132),
+            styleMask: [.titled, .closable, .nonactivatingPanel, .utilityWindow], backing: .buffered, defer: false)
+        previewPanel = panel
+        panel.title = L("Check this Chrome window", "Проверьте окно Chrome")
+        panel.isReleasedWhenClosed = false
+        panel.level = .floating
+        panel.hidesOnDeactivate = false
+        panel.collectionBehavior = [.moveToActiveSpace, .fullScreenAuxiliary]
+        panel.contentView = NSHostingView(rootView: VStack(alignment: .leading, spacing: 14) {
+            Text(L("Is this the window you want? The shortcut has not been changed yet.", "Это нужное окно? Связь ярлыка пока не изменена."))
+                .font(.system(size: 12)).fixedSize(horizontal: false, vertical: true)
+            Button(L("Return to setup", "Вернуться к настройке")) { [weak self] in self?.showWindow() }
+                .buttonStyle(.borderedProminent).tint(.indigo)
+                .keyboardShortcut(.defaultAction)
+        }.padding(18).frame(width: 330, height: 132, alignment: .leading))
+        if let screen = NSScreen.screens.first(where: { NSMouseInRect(NSEvent.mouseLocation, $0.frame, false) }) ?? NSScreen.main {
+            let frame = screen.visibleFrame
+            let pointer = NSEvent.mouseLocation
+            panel.setFrameOrigin(NSPoint(
+                x: min(max(frame.minX + 20, pointer.x + 20), frame.maxX - 350),
+                y: min(max(frame.minY + 20, pointer.y - 180), frame.maxY - 180)))
+        }
+        panel.makeKeyAndOrderFront(nil)
+    }
     @objc func quit() { NSApp.terminate(nil) }
     @objc func refresh() { Task { await model.refresh() } }
     @objc func focusMenuItem(_ item: NSMenuItem) {

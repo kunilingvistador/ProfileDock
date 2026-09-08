@@ -16,11 +16,27 @@ struct ChromeError: LocalizedError {
     }
 }
 
+/// Local diagnostic timings contain no window names, IDs, titles, or URLs.
+/// A focus sample ends when macOS accepts activation, not when a frame is displayed.
+struct ChromePerformanceSample: Sendable {
+    enum Phase: String, Sendable { case appleEvent, focus }
+    let operation: String
+    let phase: Phase
+    let totalMilliseconds: Double
+    let succeeded: Bool
+    let queueMilliseconds: Double?
+    let compilationMilliseconds: Double?
+    let appleEventMilliseconds: Double?
+}
+
 /// In-process Apple events keep Automation permission attached to this controller.
-/// Every script is created and executed on the same serial background queue.
-final class ChromeService {
+/// The compiled script and diagnostic buffer are accessed only on the serial queue.
+/// This queue confinement protects every stored mutable property across callers.
+final class ChromeService: @unchecked Sendable {
     static let bundleID = "com.google.Chrome"
     private let queue = DispatchQueue(label: "ProfileDock.ChromeAppleEvents", qos: .userInitiated)
+    private var compiledScript: NSAppleScript?
+    private var samples: [ChromePerformanceSample] = []
     var isRunning: Bool { !NSRunningApplication.runningApplications(withBundleIdentifier: Self.bundleID).isEmpty }
 
     func windows() async throws -> [BrowserWindow] {
@@ -40,32 +56,99 @@ final class ChromeService {
     }
 
     @MainActor func focus(name: String) async throws {
-        _ = try await execute("focusWindow", arguments: [name])
-        guard let chrome = NSRunningApplication.runningApplications(withBundleIdentifier: Self.bundleID).first,
-              chrome.activate(options: []) else {
-            throw ChromeError(code: -600, detail: "Chrome is not running.")
+        try await focus(handler: "focusWindow", arguments: [name])
+    }
+
+    /// Show a selected existing window before the user binds a shortcut to it.
+    /// Preview never renames a window or creates a window/tab.
+    @MainActor func preview(windowID: String) async throws {
+        try await focus(handler: "previewWindow", arguments: [windowID])
+    }
+
+    func performanceSamples(reset: Bool = false) async -> [ChromePerformanceSample] {
+        await withCheckedContinuation { continuation in
+            queue.async {
+                let result = self.samples
+                if reset { self.samples.removeAll(keepingCapacity: true) }
+                continuation.resume(returning: result)
+            }
+        }
+    }
+
+    @MainActor private func focus(handler: String, arguments: [String]) async throws {
+        let started = DispatchTime.now().uptimeNanoseconds
+        do {
+            _ = try await execute(handler, arguments: arguments)
+            guard let chrome = NSRunningApplication.runningApplications(withBundleIdentifier: Self.bundleID).first,
+                  chrome.activate(options: []) else {
+                throw ChromeError(code: -600, detail: "Chrome is not running.")
+            }
+            recordFocus(handler, started: started, succeeded: true)
+        } catch {
+            recordFocus(handler, started: started, succeeded: false)
+            throw error
         }
     }
 
     private func execute(_ handler: String, arguments: [String]) async throws -> NSAppleEventDescriptor {
+        let requested = DispatchTime.now().uptimeNanoseconds
         guard isRunning else { throw ChromeError(code: -600, detail: "Chrome is not running.") }
         return try await withCheckedThrowingContinuation { continuation in
             queue.async {
+                let began = DispatchTime.now().uptimeNanoseconds
                 var error: NSDictionary?
-                guard let script = NSAppleScript(source: Self.source), script.compileAndReturnError(&error) else {
-                    continuation.resume(throwing: Self.failure(error)); return
+                var compilationMilliseconds = 0.0
+                if self.compiledScript == nil {
+                    let compilationBegan = DispatchTime.now().uptimeNanoseconds
+                    guard let script = NSAppleScript(source: Self.source), script.compileAndReturnError(&error) else {
+                        let finished = DispatchTime.now().uptimeNanoseconds
+                        self.append(ChromePerformanceSample(operation: handler, phase: .appleEvent,
+                            totalMilliseconds: Self.milliseconds(from: requested, to: finished), succeeded: false,
+                            queueMilliseconds: Self.milliseconds(from: requested, to: began),
+                            compilationMilliseconds: Self.milliseconds(from: compilationBegan, to: finished),
+                            appleEventMilliseconds: nil))
+                        continuation.resume(throwing: Self.failure(error)); return
+                    }
+                    self.compiledScript = script
+                    compilationMilliseconds = Self.milliseconds(from: compilationBegan)
                 }
+                // Only this queue reads/writes the cached script, including after Chrome restarts.
+                guard let script = self.compiledScript else { preconditionFailure("Compiled script missing") }
                 let event = NSAppleEventDescriptor(eventClass: 0x61736372, eventID: 0x70736272,
                                                    targetDescriptor: nil, returnID: -1, transactionID: 0)
                 event.setParam(NSAppleEventDescriptor(string: handler.lowercased()), forKeyword: 0x736e616d)
                 let parameters = NSAppleEventDescriptor.list()
                 for (index, value) in arguments.enumerated() { parameters.insert(NSAppleEventDescriptor(string: value), at: index + 1) }
                 event.setParam(parameters, forKeyword: 0x2d2d2d2d)
+                let executionBegan = DispatchTime.now().uptimeNanoseconds
                 let result = script.executeAppleEvent(event, error: &error)
+                let finished = DispatchTime.now().uptimeNanoseconds
+                self.append(ChromePerformanceSample(operation: handler, phase: .appleEvent,
+                    totalMilliseconds: Self.milliseconds(from: requested, to: finished), succeeded: error == nil,
+                    queueMilliseconds: Self.milliseconds(from: requested, to: began),
+                    compilationMilliseconds: compilationMilliseconds,
+                    appleEventMilliseconds: Self.milliseconds(from: executionBegan, to: finished)))
                 if let error { continuation.resume(throwing: Self.failure(error)) }
                 else { continuation.resume(returning: result) }
             }
         }
+    }
+
+    private func recordFocus(_ handler: String, started: UInt64, succeeded: Bool) {
+        let sample = ChromePerformanceSample(operation: handler, phase: .focus,
+            totalMilliseconds: Self.milliseconds(from: started), succeeded: succeeded,
+            queueMilliseconds: nil, compilationMilliseconds: nil, appleEventMilliseconds: nil)
+        queue.async { self.append(sample) }
+    }
+
+    /// Called only on the Apple event queue. The bounded buffer is never written to disk.
+    private func append(_ sample: ChromePerformanceSample) {
+        samples.append(sample)
+        if samples.count > 100 { samples.removeFirst(samples.count - 100) }
+    }
+
+    private static func milliseconds(from start: UInt64, to end: UInt64 = DispatchTime.now().uptimeNanoseconds) -> Double {
+        Double(end - start) / 1_000_000
     }
 
     private static func failure(_ error: NSDictionary?) -> ChromeError {
@@ -102,6 +185,18 @@ final class ChromeService {
             end tell
         end timeout
     end bindWindow
+
+    on previewWindow(windowIDValue)
+        if not (application id "com.google.Chrome" is running) then error "Chrome closed" number -600
+        with timeout of 12 seconds
+            tell application id "com.google.Chrome"
+                if not (exists window id windowIDValue) then error "Window missing" number -27001
+                if mode of window id windowIDValue is "incognito" then error "Private window" number -27003
+                set minimized of window id windowIDValue to false
+                set index of window id windowIDValue to 1
+            end tell
+        end timeout
+    end previewWindow
 
     on focusWindow(targetName)
         if not (application id "com.google.Chrome" is running) then error "Chrome closed" number -600

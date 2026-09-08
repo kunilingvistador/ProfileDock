@@ -57,6 +57,12 @@ The package is **ad-hoc signed and unnotarized**. Signature integrity checks do 
 
 Use the [architecture checklist](ARCHITECTURE.md#integration-checks-before-release) for broader regression coverage and the [release guide](RELEASE.md) for the public distribution steps.
 
+## Expanded CI configuration
+
+On **8 September 2026**, the workflow was expanded to native XCTest jobs on macOS 15 and 26, each on Apple Silicon and Intel. The macOS 26 Apple Silicon job also packages a universal app. Each job verifies its actual environment, packaged architectures, signature integrity, checksum, and archive extraction. The website builds once in a separate Linux job.
+
+The expanded matrix is **configured, not yet recorded here as passed**. The historical run below covers the earlier workflow only. Append a completed run URL and its result before describing the new matrix as validated. This change does not resolve the live Intel UI, older macOS, Spaces, displays, permissions, or notarization checks above. See [TEST-MATRIX.md](TEST-MATRIX.md) for the runnable CI coverage, live scenarios, and timing protocol.
+
 ## GitHub CI and final local update
 
 [GitHub Actions run 34162687618](https://github.com/kunilingvistador/ProfileDock/actions/runs/34162687618) passed all 37 XCTest tests and built the packaged app on a separate macOS runner. The final universal build 3 was also launched locally. Updating four existing helper apps preserved all four filesystem identities; Finder retained valid file URLs and opening an updated helper focused its correct window with the original four windows and 102 tabs unchanged.
