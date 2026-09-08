@@ -1,6 +1,22 @@
 # Validation record
 
-## Current beta: 0.1.2 (5)
+## Current performance candidate: 0.1.4 (9)
+
+Validated **8 September 2026**, exact source [`639fb3d`](https://github.com/kunilingvistador/ProfileDock/commit/639fb3d166180139cc2adeeddada1a6b5f5d9a42). **Release publication is pending.** The universal ZIP SHA-256 is `402bc9ecc635218044cf62638b99ec33cd01093488b97bb49586de5e7f83c9b1`. This remains an ad-hoc-signed, unnotarized beta.
+
+The [performance report](PERFORMANCE.md) compares instrumented 0.1.3 (7) and 0.1.4 (9) on one Mac: **21 warm and 3 cold-controller samples per build, zero excluded**. Median **helper-first-instruction → activation accepted** duration changed from **206 to 141 ms** warm and **987 to 399 ms** cold. This is not a physical Dock-click, visible-window, first-frame, or keyboard-readiness measurement. Three invalid external observer reports were not used. Historical window-order measurements below have different boundaries and remain separate.
+
+[CI 34228216382](https://github.com/kunilingvistador/ProfileDock/actions/runs/34228216382) passed all **5 jobs** for this exact source. Each native macOS 15/26 × arm64/x86_64 job passed **55 XCTest tests, 13 Python analyzer tests, and 8 compatibility cases / 134 assertions**, plus packaging checks; the fifth job built the website. Local candidate checks confirmed that the manager opens after a background cold launch and shows four ready shortcuts. In all three measured cold chains it was not constructed before activation acceptance. The performance report distinguishes current live checks, static/unit coverage, and scenarios still awaiting live verification.
+
+The final local build-9 ZIP was extracted into a fresh temporary directory and passed **deep strict signature verification**. Both packaged binaries contained **arm64 and x86_64**, and the archive contained no private icons or user settings. All four existing live shortcut paths, root inodes, bundle IDs, and icon bytes remained unchanged, as did the original `shortcuts.json` hash and Dock GUID order. Opening an existing shortcut's settings and cancelling succeeded. This does not supersede the historical FinderInfo limitation on migrated applets: archive integrity and live applet signatures are separate checks.
+
+One later manager-button switch produced a screenshot of the expected existing Chrome window. The accessibility snapshot from the same call identified a different window; the cause is unknown. This is one visual spot-check, not a validated visible-latency or keyboard-focus result. No personal names, page contents, or screenshots are published. After testing, the tracing flag was removed and the controller restarted; read-only checks confirmed one current controller and no trace file for its new process.
+
+## Compatibility beta: 0.1.3 (6)
+
+The in-place legacy-shortcut migration, preserved file/data identities, complete backups, live launcher checks, and exact-source CI are recorded in [SHORTCUT-COMPATIBILITY.md](SHORTCUT-COMPATIBILITY.md). That record also documents the observed iCloud FinderInfo/signature limitation.
+
+## Historical beta: 0.1.2 (5)
 
 The interface, website, SEO, package and exact-source CI checks for this release are recorded in [DESIGN-VALIDATION.md](DESIGN-VALIDATION.md). The earlier window-activation measurements below retain their original candidate and scope.
 

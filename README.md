@@ -51,7 +51,7 @@ python3 scripts/build.py --scratch-path /tmp/ProfileDock-build
 
 The first command builds both Apple Silicon and Intel binaries. Without `--universal`, the app targets the build machine's architecture. CI produces development artifacts only and does not publish releases.
 
-See the [Mac test matrix](docs/TEST-MATRIX.md) and the [repeatable launcher latency measurement](scripts/measure-launcher-latency.md) for separate automated, performance, and live desktop checks.
+See the [Mac test matrix](docs/TEST-MATRIX.md) and the [performance report](docs/PERFORMANCE.md) for automated checks, measurement boundaries, and remaining live desktop tests. In the **0.1.4 (9) candidate**, median internal helper-to-activation-acceptance time on one Mac fell from **206 to 141 ms** warm and **987 to 399 ms** with a cold controller. This does not measure a physical Dock click, visible frame, or keyboard readiness. Candidate validation passed; release publication is pending.
 
 ## Update without recreating your shortcuts
 
@@ -103,3 +103,5 @@ ProfileDock делает отдельные значки в Dock для уже �
 Это локальная бета. Привязка использует уникальное название окна: после закрытия окна или изменения его названия понадобится связать его заново. Новые пустые окна при переключении не создаются. Для удобного публичного скачивания ещё нужны подпись Developer ID, нотариализация Apple и проверка на разных Mac.
 
 При обновлении замените приложение ProfileDock и откройте новую копию один раз: настройки и картинки сохраняются, существующие совместимые ярлыки обновляются. Для старых ярлыков есть кнопка **«Обновить ярлыки»**; она сохраняет их расположение, имя и изображение, предварительно создавая резервную копию. После переноса приложения также откройте его из нового места. Автоматического скачивания обновлений пока нет. [Подробнее о совместимости](docs/SHORTCUT-COMPATIBILITY.md).
+
+В кандидате 0.1.4 сократили работу при переключении. [Отчёт с измерениями](docs/PERFORMANCE.md) показывает время от начала работы ярлыка до принятия команды активации; появление окна и готовность к вводу этой метрикой не измеряются. Проверки кандидата завершены, публикация версии ожидается.

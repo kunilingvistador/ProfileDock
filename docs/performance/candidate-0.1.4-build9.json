@@ -1,0 +1,737 @@
+{
+  "aggregates": {
+    "all": {
+      "durations": {
+        "appleEventCompile": {
+          "maxMs": 94.557083,
+          "medianMs": 0.0,
+          "minMs": 0,
+          "n": 24,
+          "p95Ms": 86.418042
+        },
+        "appleEventExecution": {
+          "maxMs": 63.428416,
+          "medianMs": 47.842312,
+          "minMs": 24.406167,
+          "n": 24,
+          "p95Ms": 63.252834
+        },
+        "appleEventQueue": {
+          "maxMs": 4.008666,
+          "medianMs": 0.527563,
+          "minMs": 0.215291,
+          "n": 24,
+          "p95Ms": 2.353959
+        },
+        "appleEventTotal": {
+          "maxMs": 153.14125,
+          "medianMs": 49.339521,
+          "minMs": 26.727917,
+          "n": 24,
+          "p95Ms": 139.679416
+        },
+        "controllerStartToFocusRequested": {
+          "maxMs": 136.905208,
+          "medianMs": 124.9855,
+          "minMs": 122.878833,
+          "n": 3,
+          "p95Ms": 136.905208
+        },
+        "firstReceiptToFocusRequested": {
+          "maxMs": 68.642625,
+          "medianMs": 0.786855,
+          "minMs": 0.561709,
+          "n": 24,
+          "p95Ms": 55.298417
+        },
+        "focusToAccepted": {
+          "maxMs": 155.293208,
+          "medianMs": 53.387437,
+          "minMs": 30.801458,
+          "n": 24,
+          "p95Ms": 141.629417
+        },
+        "handoffToFirstControllerReceipt": {
+          "maxMs": 133.683875,
+          "medianMs": 28.962063,
+          "minMs": 7.529333,
+          "n": 24,
+          "p95Ms": 132.873875
+        },
+        "helperResolver": {
+          "maxMs": 97.648959,
+          "medianMs": 63.388688,
+          "minMs": 46.493042,
+          "n": 24,
+          "p95Ms": 87.066833
+        },
+        "helperToAccepted": {
+          "maxMs": 415.199167,
+          "medianMs": 142.867708,
+          "minMs": 113.965875,
+          "n": 24,
+          "p95Ms": 399.427167
+        },
+        "helperToControllerStart": {
+          "maxMs": 134.920459,
+          "medianMs": 121.312709,
+          "minMs": 113.312042,
+          "n": 3,
+          "p95Ms": 134.920459
+        }
+      },
+      "n": 24,
+      "postAcceptanceListWindowsObserved": {
+        "count": 2,
+        "perSampleTotal": {
+          "maxMs": 336.31,
+          "medianMs": 0.0,
+          "minMs": 0,
+          "n": 24,
+          "p95Ms": 326.366791
+        },
+        "samplesWithKnownTotal": 24,
+        "totalMs": 662.676791
+      }
+    },
+    "cold": {
+      "durations": {
+        "appleEventCompile": {
+          "maxMs": 94.557083,
+          "medianMs": 86.418042,
+          "minMs": 75.760917,
+          "n": 3,
+          "p95Ms": 94.557083
+        },
+        "appleEventExecution": {
+          "maxMs": 63.428416,
+          "medianMs": 58.318792,
+          "minMs": 53.005875,
+          "n": 3,
+          "p95Ms": 63.428416
+        },
+        "appleEventQueue": {
+          "maxMs": 0.290042,
+          "medianMs": 0.233167,
+          "minMs": 0.215291,
+          "n": 3,
+          "p95Ms": 0.290042
+        },
+        "appleEventTotal": {
+          "maxMs": 153.14125,
+          "medianMs": 139.679416,
+          "minMs": 139.515208,
+          "n": 3,
+          "p95Ms": 153.14125
+        },
+        "controllerStartToFocusRequested": {
+          "maxMs": 136.905208,
+          "medianMs": 124.9855,
+          "minMs": 122.878833,
+          "n": 3,
+          "p95Ms": 136.905208
+        },
+        "firstReceiptToFocusRequested": {
+          "maxMs": 68.642625,
+          "medianMs": 55.298417,
+          "minMs": 52.869375,
+          "n": 3,
+          "p95Ms": 68.642625
+        },
+        "focusToAccepted": {
+          "maxMs": 155.293208,
+          "medianMs": 141.629417,
+          "minMs": 141.20925,
+          "n": 3,
+          "p95Ms": 155.293208
+        },
+        "handoffToFirstControllerReceipt": {
+          "maxMs": 133.683875,
+          "medianMs": 132.873875,
+          "minMs": 115.185375,
+          "n": 3,
+          "p95Ms": 133.683875
+        },
+        "helperResolver": {
+          "maxMs": 70.923667,
+          "medianMs": 68.136125,
+          "minMs": 56.701417,
+          "n": 3,
+          "p95Ms": 70.923667
+        },
+        "helperToAccepted": {
+          "maxMs": 415.199167,
+          "medianMs": 399.427167,
+          "minMs": 377.820292,
+          "n": 3,
+          "p95Ms": 415.199167
+        },
+        "helperToControllerStart": {
+          "maxMs": 134.920459,
+          "medianMs": 121.312709,
+          "minMs": 113.312042,
+          "n": 3,
+          "p95Ms": 134.920459
+        }
+      },
+      "n": 3,
+      "postAcceptanceListWindowsObserved": {
+        "count": 2,
+        "perSampleTotal": {
+          "maxMs": 336.31,
+          "medianMs": 326.366791,
+          "minMs": 0,
+          "n": 3,
+          "p95Ms": 336.31
+        },
+        "samplesWithKnownTotal": 3,
+        "totalMs": 662.676791
+      }
+    },
+    "warm": {
+      "durations": {
+        "appleEventCompile": {
+          "maxMs": 0,
+          "medianMs": 0,
+          "minMs": 0,
+          "n": 21,
+          "p95Ms": 0
+        },
+        "appleEventExecution": {
+          "maxMs": 63.252834,
+          "medianMs": 46.741583,
+          "minMs": 24.406167,
+          "n": 21,
+          "p95Ms": 62.121334
+        },
+        "appleEventQueue": {
+          "maxMs": 4.008666,
+          "medianMs": 0.601459,
+          "minMs": 0.219459,
+          "n": 21,
+          "p95Ms": 2.353959
+        },
+        "appleEventTotal": {
+          "maxMs": 63.775,
+          "medianMs": 47.277416,
+          "minMs": 26.727917,
+          "n": 21,
+          "p95Ms": 62.584792
+        },
+        "firstReceiptToFocusRequested": {
+          "maxMs": 1.406583,
+          "medianMs": 0.768292,
+          "minMs": 0.561709,
+          "n": 21,
+          "p95Ms": 1.052917
+        },
+        "focusToAccepted": {
+          "maxMs": 73.455375,
+          "medianMs": 50.521083,
+          "minMs": 30.801458,
+          "n": 21,
+          "p95Ms": 66.451625
+        },
+        "handoffToFirstControllerReceipt": {
+          "maxMs": 43.130791,
+          "medianMs": 27.875583,
+          "minMs": 7.529333,
+          "n": 21,
+          "p95Ms": 38.39075
+        },
+        "helperResolver": {
+          "maxMs": 97.648959,
+          "medianMs": 62.725459,
+          "minMs": 46.493042,
+          "n": 21,
+          "p95Ms": 87.066833
+        },
+        "helperToAccepted": {
+          "maxMs": 184.105625,
+          "medianMs": 140.6695,
+          "minMs": 113.965875,
+          "n": 21,
+          "p95Ms": 176.517167
+        }
+      },
+      "n": 21,
+      "postAcceptanceListWindowsObserved": {
+        "count": 0,
+        "perSampleTotal": {
+          "maxMs": 0,
+          "medianMs": 0,
+          "minMs": 0,
+          "n": 21,
+          "p95Ms": 0
+        },
+        "samplesWithKnownTotal": 21,
+        "totalMs": 0
+      }
+    }
+  },
+  "clock": "DispatchTime.uptimeNanoseconds",
+  "counts": {
+    "cold": 3,
+    "excluded": 0,
+    "helperStarts": 24,
+    "included": 24,
+    "warm": 21
+  },
+  "exclusionReasons": {},
+  "input": {
+    "eventCount": 169,
+    "fileCount": 28,
+    "fileReadErrorCount": 0,
+    "ignoredPhaseCount": 0,
+    "invalidEventCount": 0,
+    "lineCount": 169,
+    "malformedLineCount": 0
+  },
+  "label": "candidate-0.1.4-build9",
+  "measuresVisibleWindow": false,
+  "method": "helper_first_code_to_focus_accepted",
+  "missingComponentCounts": {},
+  "percentileMethod": "nearest_rank",
+  "samples": [
+    {
+      "durationsMs": {
+        "appleEventCompile": 0,
+        "appleEventExecution": 41.009167,
+        "appleEventQueue": 2.203833,
+        "appleEventTotal": 43.327583,
+        "firstReceiptToFocusRequested": 0.856291,
+        "focusToAccepted": 47.209625,
+        "handoffToFirstControllerReceipt": 38.39075,
+        "helperResolver": 97.648959,
+        "helperToAccepted": 184.105625
+      },
+      "mode": "warm",
+      "postAcceptanceListWindowsObserved": {
+        "count": 0,
+        "totalMs": 0
+      }
+    },
+    {
+      "durationsMs": {
+        "appleEventCompile": 0,
+        "appleEventExecution": 53.244125,
+        "appleEventQueue": 0.536792,
+        "appleEventTotal": 53.807292,
+        "firstReceiptToFocusRequested": 0.869375,
+        "focusToAccepted": 60.37375,
+        "handoffToFirstControllerReceipt": 37.562417,
+        "helperResolver": 66.854,
+        "helperToAccepted": 165.659542
+      },
+      "mode": "warm",
+      "postAcceptanceListWindowsObserved": {
+        "count": 0,
+        "totalMs": 0
+      }
+    },
+    {
+      "durationsMs": {
+        "appleEventCompile": 0,
+        "appleEventExecution": 35.260375,
+        "appleEventQueue": 2.31225,
+        "appleEventTotal": 37.594708,
+        "firstReceiptToFocusRequested": 0.638417,
+        "focusToAccepted": 40.282041,
+        "handoffToFirstControllerReceipt": 27.875583,
+        "helperResolver": 62.725459,
+        "helperToAccepted": 131.5215
+      },
+      "mode": "warm",
+      "postAcceptanceListWindowsObserved": {
+        "count": 0,
+        "totalMs": 0
+      }
+    },
+    {
+      "durationsMs": {
+        "appleEventCompile": 0,
+        "appleEventExecution": 32.06475,
+        "appleEventQueue": 1.017125,
+        "appleEventTotal": 33.103333,
+        "firstReceiptToFocusRequested": 0.597,
+        "focusToAccepted": 36.299334,
+        "handoffToFirstControllerReceipt": 31.656708,
+        "helperResolver": 54.69175,
+        "helperToAccepted": 123.244792
+      },
+      "mode": "warm",
+      "postAcceptanceListWindowsObserved": {
+        "count": 0,
+        "totalMs": 0
+      }
+    },
+    {
+      "durationsMs": {
+        "appleEventCompile": 0,
+        "appleEventExecution": 31.715083,
+        "appleEventQueue": 1.197791,
+        "appleEventTotal": 33.221583,
+        "firstReceiptToFocusRequested": 0.7865,
+        "focusToAccepted": 36.006708,
+        "handoffToFirstControllerReceipt": 31.781542,
+        "helperResolver": 61.858125,
+        "helperToAccepted": 130.432875
+      },
+      "mode": "warm",
+      "postAcceptanceListWindowsObserved": {
+        "count": 0,
+        "totalMs": 0
+      }
+    },
+    {
+      "durationsMs": {
+        "appleEventCompile": 0,
+        "appleEventExecution": 47.241958,
+        "appleEventQueue": 2.353959,
+        "appleEventTotal": 49.615917,
+        "firstReceiptToFocusRequested": 1.052917,
+        "focusToAccepted": 52.31775,
+        "handoffToFirstControllerReceipt": 31.921458,
+        "helperResolver": 70.557209,
+        "helperToAccepted": 155.849334
+      },
+      "mode": "warm",
+      "postAcceptanceListWindowsObserved": {
+        "count": 0,
+        "totalMs": 0
+      }
+    },
+    {
+      "durationsMs": {
+        "appleEventCompile": 0,
+        "appleEventExecution": 33.496125,
+        "appleEventQueue": 1.237625,
+        "appleEventTotal": 34.746625,
+        "firstReceiptToFocusRequested": 0.842333,
+        "focusToAccepted": 39.020833,
+        "handoffToFirstControllerReceipt": 27.609667,
+        "helperResolver": 46.493042,
+        "helperToAccepted": 113.965875
+      },
+      "mode": "warm",
+      "postAcceptanceListWindowsObserved": {
+        "count": 0,
+        "totalMs": 0
+      }
+    },
+    {
+      "durationsMs": {
+        "appleEventCompile": 0,
+        "appleEventExecution": 31.483375,
+        "appleEventQueue": 1.64225,
+        "appleEventTotal": 33.167667,
+        "firstReceiptToFocusRequested": 0.718917,
+        "focusToAccepted": 38.111667,
+        "handoffToFirstControllerReceipt": 28.805458,
+        "helperResolver": 51.734542,
+        "helperToAccepted": 119.370584
+      },
+      "mode": "warm",
+      "postAcceptanceListWindowsObserved": {
+        "count": 0,
+        "totalMs": 0
+      }
+    },
+    {
+      "durationsMs": {
+        "appleEventCompile": 0,
+        "appleEventExecution": 24.406167,
+        "appleEventQueue": 2.302667,
+        "appleEventTotal": 26.727917,
+        "firstReceiptToFocusRequested": 0.768292,
+        "focusToAccepted": 30.801458,
+        "handoffToFirstControllerReceipt": 35.809458,
+        "helperResolver": 73.290292,
+        "helperToAccepted": 140.6695
+      },
+      "mode": "warm",
+      "postAcceptanceListWindowsObserved": {
+        "count": 0,
+        "totalMs": 0
+      }
+    },
+    {
+      "durationsMs": {
+        "appleEventCompile": 0,
+        "appleEventExecution": 30.868125,
+        "appleEventQueue": 4.008666,
+        "appleEventTotal": 34.897666,
+        "firstReceiptToFocusRequested": 0.994416,
+        "focusToAccepted": 37.900709,
+        "handoffToFirstControllerReceipt": 29.118667,
+        "helperResolver": 52.86275,
+        "helperToAccepted": 120.876542
+      },
+      "mode": "warm",
+      "postAcceptanceListWindowsObserved": {
+        "count": 0,
+        "totalMs": 0
+      }
+    },
+    {
+      "durationsMs": {
+        "appleEventCompile": 0,
+        "appleEventExecution": 35.376375,
+        "appleEventQueue": 0.219459,
+        "appleEventTotal": 35.609584,
+        "firstReceiptToFocusRequested": 0.787209,
+        "focusToAccepted": 38.069625,
+        "handoffToFirstControllerReceipt": 29.819625,
+        "helperResolver": 47.734625,
+        "helperToAccepted": 116.411084
+      },
+      "mode": "warm",
+      "postAcceptanceListWindowsObserved": {
+        "count": 0,
+        "totalMs": 0
+      }
+    },
+    {
+      "durationsMs": {
+        "appleEventCompile": 0,
+        "appleEventExecution": 62.085667,
+        "appleEventQueue": 0.474333,
+        "appleEventTotal": 62.584792,
+        "firstReceiptToFocusRequested": 0.834583,
+        "focusToAccepted": 65.141584,
+        "handoffToFirstControllerReceipt": 23.474167,
+        "helperResolver": 87.066833,
+        "helperToAccepted": 176.517167
+      },
+      "mode": "warm",
+      "postAcceptanceListWindowsObserved": {
+        "count": 0,
+        "totalMs": 0
+      }
+    },
+    {
+      "durationsMs": {
+        "appleEventCompile": 0,
+        "appleEventExecution": 62.121334,
+        "appleEventQueue": 0.398083,
+        "appleEventTotal": 62.534625,
+        "firstReceiptToFocusRequested": 0.60425,
+        "focusToAccepted": 65.005375,
+        "handoffToFirstControllerReceipt": 11.754792,
+        "helperResolver": 70.384666,
+        "helperToAccepted": 147.749083
+      },
+      "mode": "warm",
+      "postAcceptanceListWindowsObserved": {
+        "count": 0,
+        "totalMs": 0
+      }
+    },
+    {
+      "durationsMs": {
+        "appleEventCompile": 0,
+        "appleEventExecution": 55.192875,
+        "appleEventQueue": 0.255375,
+        "appleEventTotal": 55.462875,
+        "firstReceiptToFocusRequested": 0.737417,
+        "focusToAccepted": 62.531541,
+        "handoffToFirstControllerReceipt": 18.528167,
+        "helperResolver": 62.390208,
+        "helperToAccepted": 144.187333
+      },
+      "mode": "warm",
+      "postAcceptanceListWindowsObserved": {
+        "count": 0,
+        "totalMs": 0
+      }
+    },
+    {
+      "durationsMs": {
+        "appleEventCompile": 0,
+        "appleEventExecution": 55.647833,
+        "appleEventQueue": 2.093875,
+        "appleEventTotal": 57.7635,
+        "firstReceiptToFocusRequested": 0.679,
+        "focusToAccepted": 60.146833,
+        "handoffToFirstControllerReceipt": 14.657334,
+        "helperResolver": 66.109583,
+        "helperToAccepted": 141.59275
+      },
+      "mode": "warm",
+      "postAcceptanceListWindowsObserved": {
+        "count": 0,
+        "totalMs": 0
+      }
+    },
+    {
+      "durationsMs": {
+        "appleEventCompile": 0,
+        "appleEventExecution": 63.252834,
+        "appleEventQueue": 0.503666,
+        "appleEventTotal": 63.775,
+        "firstReceiptToFocusRequested": 1.406583,
+        "focusToAccepted": 73.455375,
+        "handoffToFirstControllerReceipt": 7.529333,
+        "helperResolver": 61.751375,
+        "helperToAccepted": 144.142666
+      },
+      "mode": "warm",
+      "postAcceptanceListWindowsObserved": {
+        "count": 0,
+        "totalMs": 0
+      }
+    },
+    {
+      "durationsMs": {
+        "appleEventCompile": 0,
+        "appleEventExecution": 61.590833,
+        "appleEventQueue": 0.363083,
+        "appleEventTotal": 61.969333,
+        "firstReceiptToFocusRequested": 0.561709,
+        "focusToAccepted": 66.451625,
+        "handoffToFirstControllerReceipt": 11.13225,
+        "helperResolver": 59.151333,
+        "helperToAccepted": 137.296917
+      },
+      "mode": "warm",
+      "postAcceptanceListWindowsObserved": {
+        "count": 0,
+        "totalMs": 0
+      }
+    },
+    {
+      "durationsMs": {
+        "appleEventCompile": 0,
+        "appleEventExecution": 59.90675,
+        "appleEventQueue": 0.437333,
+        "appleEventTotal": 60.365667,
+        "firstReceiptToFocusRequested": 0.620875,
+        "focusToAccepted": 65.736708,
+        "handoffToFirstControllerReceipt": 16.206083,
+        "helperResolver": 62.304667,
+        "helperToAccepted": 144.868333
+      },
+      "mode": "warm",
+      "postAcceptanceListWindowsObserved": {
+        "count": 0,
+        "totalMs": 0
+      }
+    },
+    {
+      "durationsMs": {
+        "appleEventCompile": 0,
+        "appleEventExecution": 46.741583,
+        "appleEventQueue": 0.517416,
+        "appleEventTotal": 47.277416,
+        "firstReceiptToFocusRequested": 0.60175,
+        "focusToAccepted": 50.521083,
+        "handoffToFirstControllerReceipt": 9.349209,
+        "helperResolver": 66.115166,
+        "helperToAccepted": 126.587208
+      },
+      "mode": "warm",
+      "postAcceptanceListWindowsObserved": {
+        "count": 0,
+        "totalMs": 0
+      }
+    },
+    {
+      "durationsMs": {
+        "appleEventCompile": 0,
+        "appleEventExecution": 48.442666,
+        "appleEventQueue": 0.601459,
+        "appleEventTotal": 49.063125,
+        "firstReceiptToFocusRequested": 0.828875,
+        "focusToAccepted": 54.457125,
+        "handoffToFirstControllerReceipt": 43.130791,
+        "helperResolver": 68.961959,
+        "helperToAccepted": 167.37875
+      },
+      "mode": "warm",
+      "postAcceptanceListWindowsObserved": {
+        "count": 0,
+        "totalMs": 0
+      }
+    },
+    {
+      "durationsMs": {
+        "appleEventCompile": 0,
+        "appleEventExecution": 46.023583,
+        "appleEventQueue": 0.518334,
+        "appleEventTotal": 46.560042,
+        "firstReceiptToFocusRequested": 0.739542,
+        "focusToAccepted": 48.856417,
+        "handoffToFirstControllerReceipt": 9.713916,
+        "helperResolver": 64.051917,
+        "helperToAccepted": 123.361792
+      },
+      "mode": "warm",
+      "postAcceptanceListWindowsObserved": {
+        "count": 0,
+        "totalMs": 0
+      }
+    },
+    {
+      "durationsMs": {
+        "appleEventCompile": 86.418042,
+        "appleEventExecution": 53.005875,
+        "appleEventQueue": 0.215291,
+        "appleEventTotal": 139.679416,
+        "controllerStartToFocusRequested": 122.878833,
+        "firstReceiptToFocusRequested": 52.869375,
+        "focusToAccepted": 141.629417,
+        "handoffToFirstControllerReceipt": 115.185375,
+        "helperResolver": 68.136125,
+        "helperToAccepted": 377.820292,
+        "helperToControllerStart": 113.312042
+      },
+      "mode": "cold",
+      "postAcceptanceListWindowsObserved": {
+        "count": 1,
+        "totalMs": 326.366791
+      }
+    },
+    {
+      "durationsMs": {
+        "appleEventCompile": 75.760917,
+        "appleEventExecution": 63.428416,
+        "appleEventQueue": 0.290042,
+        "appleEventTotal": 139.515208,
+        "controllerStartToFocusRequested": 136.905208,
+        "firstReceiptToFocusRequested": 68.642625,
+        "focusToAccepted": 141.20925,
+        "handoffToFirstControllerReceipt": 132.873875,
+        "helperResolver": 56.701417,
+        "helperToAccepted": 399.427167,
+        "helperToControllerStart": 121.312709
+      },
+      "mode": "cold",
+      "postAcceptanceListWindowsObserved": {
+        "count": 1,
+        "totalMs": 336.31
+      }
+    },
+    {
+      "durationsMs": {
+        "appleEventCompile": 94.557083,
+        "appleEventExecution": 58.318792,
+        "appleEventQueue": 0.233167,
+        "appleEventTotal": 153.14125,
+        "controllerStartToFocusRequested": 124.9855,
+        "firstReceiptToFocusRequested": 55.298417,
+        "focusToAccepted": 155.293208,
+        "handoffToFirstControllerReceipt": 133.683875,
+        "helperResolver": 70.923667,
+        "helperToAccepted": 415.199167,
+        "helperToControllerStart": 134.920459
+      },
+      "mode": "cold",
+      "postAcceptanceListWindowsObserved": {
+        "count": 0,
+        "totalMs": 0
+      }
+    }
+  ],
+  "schemaVersion": 1,
+  "status": "completed"
+}
