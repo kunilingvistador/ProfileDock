@@ -4,13 +4,14 @@
 
 A small, open-source macOS utility for people who keep several Chrome profiles open. Give each working window a recognizable name and icon, then bring it forward with one click.
 
-[Download the beta](https://github.com/kunilingvistador/ProfileDock/releases/tag/v0.1.0-beta) · [Website](https://kunilingvistador.github.io/ProfileDock/)
+[Download the beta](https://github.com/kunilingvistador/ProfileDock/releases) · [Website](https://kunilingvistador.github.io/ProfileDock/)
 
 **Status: early beta.** The packaging script produces an ad-hoc-signed development build by default. It is not notarized, and macOS may require manual approval before opening the downloaded app. See the [validation record](docs/VALIDATION.md) for completed checks and remaining gaps, and the [release checklist](docs/RELEASE.md) for public distribution.
 
 ## What it does
 
 - Connects a shortcut to an existing Chrome window.
+- Previews the selected window before binding, with a small Return to setup panel.
 - Offers local Chrome profile names to make setup easier.
 - Uses a distinct Dock helper for each shortcut, with its own label and icon.
 - Restores a minimized target and brings that window forward.
@@ -38,7 +39,7 @@ python3 scripts/build.py
 open dist/ProfileDock.app
 ```
 
-For ongoing use, move the built app to a stable location such as Applications before creating shortcuts. Allow ProfileDock to control Google Chrome when macOS asks, then select an existing window for each shortcut. Keep the generated helper apps in place after adding them to the Dock. ProfileDock runs as a menu-bar utility; use its menu to reopen the manager.
+For ongoing use, move the built app to a stable location such as Applications before creating shortcuts. Allow ProfileDock to control Google Chrome when macOS asks, then select an existing window for each shortcut. Use **Show window** to check it and **Return to setup** (or Enter) to continue with the same selection. Windows already linked to another shortcut are excluded. The optional profile picker only supplies a name and picture. Keep the generated helper apps in place after adding them to the Dock. ProfileDock runs as a menu-bar utility; use its menu to reopen the manager.
 
 The build prints the app, ZIP, and SHA-256 checksum locations. Build artifacts go to `dist/`, which is excluded from Git. SwiftPM packaging caches go to a system temporary directory unless `--scratch-path` is supplied.
 
@@ -48,6 +49,8 @@ python3 scripts/build.py --scratch-path /tmp/ProfileDock-build
 ```
 
 The first command builds both Apple Silicon and Intel binaries. Without `--universal`, the app targets the build machine's architecture. CI produces development artifacts only and does not publish releases.
+
+See the [Mac test matrix](docs/TEST-MATRIX.md) and the [repeatable launcher latency measurement](scripts/measure-launcher-latency.md) for separate automated, performance, and live desktop checks.
 
 ## Privacy and permissions
 
@@ -69,6 +72,14 @@ No personal profiles, account names, photographs, or browser data belong in this
 ## Development
 
 The project uses Swift Package Manager, AppKit/SwiftUI, and Apple events. It has no browser extension or bundled Chromium runtime. The controller is `ProfileDock`; the generic Dock helper is `ProfileDockLauncher`.
+
+For interface-only QA, quit any running ProfileDock instance first, then launch a preview with sample shortcuts:
+
+```sh
+open dist/ProfileDock.app --args --demo --demo-dark --demo-compact
+```
+
+`--demo-dark` gives the preview window a dark appearance; `--demo-compact` starts it at the minimum 860 × 600 window size. Both flags require `--demo` and can be used independently. They do not change system preferences or control Chrome. Quit the preview with ⌘Q when finished.
 
 Run `swift test` for core model and parsing checks with a full Xcode installation selected: the XCTest framework is not included in the standalone Command Line Tools environment used for this project's initial build. The GitHub macOS runner has Xcode for these tests. Real window activation must also be checked on macOS: unit tests cannot verify Dock behavior or preservation of other windows. See the [architecture and integration checklist](docs/ARCHITECTURE.md).
 

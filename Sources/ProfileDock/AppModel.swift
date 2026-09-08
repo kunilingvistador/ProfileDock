@@ -11,6 +11,7 @@ import ProfileDockCore
     @Published var errorMessage: String?
     @Published var notice: String?
     @Published var selectedShortcutID: UUID?
+    @Published var recoveryShortcutID: UUID?
     @Published var chromeRunning = false
     @Published var permissionGranted = false
 
@@ -18,6 +19,7 @@ import ProfileDockCore
     let store: ShortcutStore
     let demoMode: Bool
     var didChange: (() -> Void)?
+    var didPreviewWindow: (() -> Void)?
     private var writable = true
     private var focusRequest = UUID()
 
@@ -59,6 +61,33 @@ import ProfileDockCore
     }
 
     func connect() async { await refresh() }
+
+    func linkableWindows(for shortcutID: UUID? = nil) -> [BrowserWindow] {
+        windows.filter { window in
+            !window.incognito && !shortcuts.contains { $0.id != shortcutID && $0.windowName == window.givenName }
+        }
+    }
+
+    /// Preview is deliberately separate from binding: looking at a window never
+    /// changes the shortcut or the window's persistent name.
+    func previewWindow(_ window: BrowserWindow) async {
+        guard !isBusy else { return }
+        errorMessage = nil; isBusy = true
+        defer { isBusy = false }
+        guard !demoMode else {
+            notice = L("Preview mode: browser windows are unchanged.", "Предпросмотр: окна браузера не изменены.")
+            return
+        }
+        do {
+            try await service.preview(windowID: window.id)
+            didPreviewWindow?()
+        } catch {
+            if let failure = error as? ChromeError, failure.code == -27001 {
+                windows.removeAll { $0.id == window.id }
+            }
+            handle(error)
+        }
+    }
 
     func refresh() async {
         guard !isBusy, !demoMode else { return }
@@ -118,7 +147,7 @@ import ProfileDockCore
     }
 
     func switchTo(_ shortcut: Shortcut) async {
-        errorMessage = nil; notice = nil
+        errorMessage = nil; notice = nil; recoveryShortcutID = nil
         if demoMode { notice = L("Preview mode: browser windows are unchanged.", "Предпросмотр: окна браузера не изменены."); return }
         let request = UUID(); focusRequest = request
         defer { didChange?() }
@@ -136,7 +165,13 @@ import ProfileDockCore
                           let fresh = try? await service.windows(), focusRequest == request {
                     windows = fresh
                 }
-                if focusRequest == request { handle(error) }
+                if focusRequest == request {
+                    if let failure = error as? ChromeError, [-27001, -27002].contains(failure.code) {
+                        recoveryShortcutID = shortcut.id
+                        selectedShortcutID = shortcut.id
+                    }
+                    handle(error)
+                }
             }
         }
     }

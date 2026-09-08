@@ -8,14 +8,131 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   macos:
-    runs-on: macos-14
-    timeout-minutes: 20
+    name: macOS ${{ matrix.os }} / ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15
+            os: "15"
+            arch: arm64
+            package: native
+          - runner: macos-15-intel
+            os: "15"
+            arch: x86_64
+            package: native
+          - runner: macos-26
+            os: "26"
+            arch: arm64
+            package: universal
+          - runner: macos-26-intel
+            os: "26"
+            arch: x86_64
+            package: native
+    env:
+      EXPECTED_OS: ${{ matrix.os }}
+      EXPECTED_ARCH: ${{ matrix.arch }}
+      PACKAGE_KIND: ${{ matrix.package }}
     steps:
       - uses: actions/checkout@v4
+      - name: Verify and record the runner environment
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import platform
+          import subprocess
+
+          version = subprocess.check_output(["sw_vers", "-productVersion"], text=True).strip()
+          assert version.split(".")[0] == os.environ["EXPECTED_OS"], version
+          assert platform.machine() == os.environ["EXPECTED_ARCH"], platform.machine()
+          commands = [
+              ["sw_vers"], ["uname", "-m"], ["xcodebuild", "-version"],
+              ["xcrun", "swift", "--version"], ["xcode-select", "-p"],
+          ]
+          report = "\n".join(
+              "$ " + " ".join(command) + "\n" + subprocess.check_output(command, text=True)
+              for command in commands
+          )
+          print(report)
+          (Path(os.environ["RUNNER_TEMP"]) / "ci-environment.txt").write_text(report)
+          with Path(os.environ["GITHUB_STEP_SUMMARY"]).open("a") as summary:
+              summary.write("### Native test environment\n\n```text\n" + report + "\n```\n")
+              summary.write("Core XCTest and package integrity checks only; no live Chrome UI test.\n")
+          PY
       - name: Test core behavior
         run: swift test --scratch-path "$RUNNER_TEMP/ProfileDock-tests"
+      - name: Typecheck the standalone performance harness
+        run: xcrun swiftc -typecheck -swift-version 5 scripts/measure-launcher-latency.swift
+      - name: Build ad-hoc development app
+        run: |
+          if [ "$PACKAGE_KIND" = universal ]; then
+            python3 scripts/build.py --scratch-path "$RUNNER_TEMP/ProfileDock-build" --universal --build-number "${{ github.run_number }}"
+          else
+            python3 scripts/build.py --scratch-path "$RUNNER_TEMP/ProfileDock-build" --build-number "${{ github.run_number }}"
+          fi
+      - name: Verify packaged binaries and archive round trip
+        run: |
+          python3 - <<'PY'
+          import hashlib
+          import os
+          from pathlib import Path
+          import plistlib
+          import subprocess
+          import tempfile
+          import zipfile
+
+          expected = {"arm64", "x86_64"} if os.environ["PACKAGE_KIND"] == "universal" else {os.environ["EXPECTED_ARCH"]}
+          def verify(app):
+              contents = app / "Contents"
+              metadata = plistlib.loads((contents / "Info.plist").read_bytes())
+              assert metadata["CFBundleIdentifier"] == "io.github.profiledock.app"
+              for relative in ("MacOS/ProfileDock", "Resources/ProfileDockLauncher"):
+                  binary = contents / relative
+                  arches = set(subprocess.check_output(["lipo", "-archs", str(binary)], text=True).split())
+                  assert arches == expected, (relative, arches, expected)
+                  subprocess.run(["codesign", "--verify", "--strict", str(binary)], check=True)
+              subprocess.run(["codesign", "--verify", "--deep", "--strict", str(app)], check=True)
+
+          verify(Path("dist/ProfileDock.app"))
+          archives = list(Path("dist").glob("*.zip"))
+          assert len(archives) == 1, archives
+          archive = archives[0]
+          expected_hash, expected_name = Path("dist/SHA256SUMS").read_text().strip().split(maxsplit=1)
+          assert expected_name == archive.name
+          assert hashlib.sha256(archive.read_bytes()).hexdigest() == expected_hash
+          with zipfile.ZipFile(archive) as package:
+              assert package.testzip() is None, "Archive CRC failed"
+          with tempfile.TemporaryDirectory(prefix="profiledock-ci-extract-") as temporary:
+              subprocess.run(["ditto", "-x", "-k", str(archive), temporary], check=True)
+              verify(Path(temporary) / "ProfileDock.app")
+          print("Architecture, signature integrity, checksum, CRC, and extracted app checks passed.")
+          PY
+      - name: Upload development artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ProfileDock-development-unnotarized-${{ matrix.runner }}-${{ matrix.package }}
+          path: |
+            dist/*.zip
+            dist/SHA256SUMS
+            ${{ runner.temp }}/ci-environment.txt
+          if-no-files-found: error
+          retention-days: 14
+
+  website:
+    name: Static website
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
@@ -26,14 +143,5 @@ jobs:
         run: |
           npm ci
           npm run build
-      - name: Build ad-hoc development app
-        run: python3 scripts/build.py --scratch-path "$RUNNER_TEMP/ProfileDock-build"
-      - name: Upload development artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ProfileDock-development-unnotarized
-          path: |
-            dist/*.zip
-            dist/SHA256SUMS
-          if-no-files-found: error
-          retention-days: 14
+      - name: Validate static SEO and the GitHub Pages copy
+        run: python3 scripts/publish-website-files.py --dest "$RUNNER_TEMP/ProfileDock-pages"

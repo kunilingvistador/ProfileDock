@@ -13,7 +13,7 @@ python3 scripts/build.py
 Outputs:
 
 - `dist/ProfileDock.app`
-- `dist/ProfileDock-0.1.0-macos-<architecture>-local.zip`
+- `dist/ProfileDock-0.1.2-macos-<architecture>-local.zip`
 - `dist/SHA256SUMS`
 
 The default targets the current machine, signs ad-hoc, and does not contact the Apple notary service. Use `--universal` to combine arm64 and x86_64 builds. `--scratch-path` controls the SwiftPM cache; the default is outside the repository in the system temporary directory. The script only replaces an existing `dist/ProfileDock.app` if its bundle identifier belongs to this project.
@@ -31,7 +31,7 @@ Apple requires a Developer ID Application identity, valid executable signatures,
 Install the appropriate signing identity using your own Apple developer account. Never commit it or its password. This project does not provision certificates or automatically upload builds.
 
 ```sh
-python3 scripts/build.py --universal --version 0.1.0 --build-number 1 \
+python3 scripts/build.py --universal --version 0.1.2 --build-number 1 \
   --identity 'Developer ID Application: Your Name (TEAMID)'
 ```
 
@@ -42,7 +42,7 @@ With `--identity`, the script signs the helper, enables Hardened Runtime, adds t
 Set up a `notarytool` keychain profile following Apple's documentation, using your own credentials. The example below assumes you named it `ProfileDock-notary`. Review the submission result and its log; continue only if Apple reports acceptance.
 
 ```sh
-xcrun notarytool submit dist/ProfileDock-0.1.0-macos-universal-signed.zip \
+xcrun notarytool submit dist/ProfileDock-0.1.2-macos-universal-signed.zip \
   --keychain-profile ProfileDock-notary --wait
 xcrun stapler staple dist/ProfileDock.app
 xcrun stapler validate dist/ProfileDock.app
@@ -54,9 +54,9 @@ Repackage the app after stapling, so the download includes the ticket. Use a fre
 
 ```sh
 ditto -c -k --keepParent --sequesterRsrc \
-  dist/ProfileDock.app dist/ProfileDock-0.1.0-macos-universal.zip
+  dist/ProfileDock.app dist/ProfileDock-0.1.2-macos-universal.zip
 cd dist
-shasum -a 256 ProfileDock-0.1.0-macos-universal.zip > SHA256SUMS
+shasum -a 256 ProfileDock-0.1.2-macos-universal.zip > SHA256SUMS
 ```
 
 Test the actual final ZIP downloaded through a browser on a clean Mac, including first launch, Automation consent, shortcut creation, and switching. Locally copying an app does not exercise the same Gatekeeper path as an internet download. Do not instruct users to disable Gatekeeper or remove quarantine as the normal installation procedure.

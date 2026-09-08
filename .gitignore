@@ -14,3 +14,5 @@ website/node_modules/
 website/dist/
 website/.vinext/
 website/.next/
+website/next-env.d.ts
+website/*.tsbuildinfo
