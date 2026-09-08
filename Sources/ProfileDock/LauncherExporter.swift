@@ -210,12 +210,11 @@ enum LauncherExporter {
         if legacy {
             // Finish a durable backup before touching the working app. UUIDs
             // avoid overwriting an earlier backup, including after interrupted runs.
-            let backup = backupDirectory.appendingPathComponent(UUID().uuidString, isDirectory: true)
-            try files.createDirectory(at: backup, withIntermediateDirectories: true)
+            let backup = try PrivateStorage(directory: backupDirectory).prepareSubdirectory(UUID().uuidString)
             try files.copyItem(at: installedContents, to: backup.appendingPathComponent("Contents"))
             let attributes = try PropertyListSerialization.data(fromPropertyList: rootAttributes, format: .binary, options: 0)
-            try attributes.write(to: backup.appendingPathComponent("original-root-attributes.plist"), options: .atomic)
-            try Data(app.path.utf8).write(to: backup.appendingPathComponent("original-path.txt"), options: .atomic)
+            try PrivateStorage(directory: backup).write(attributes, to: "original-root-attributes.plist")
+            try PrivateStorage(directory: backup).write(Data(app.path.utf8), to: "original-path.txt")
         }
         // Fail closed if an app was replaced while the staged update was prepared.
         guard safeBundle(app), self.metadata(at: app)?["CFBundleIdentifier"] as? String == identifier,

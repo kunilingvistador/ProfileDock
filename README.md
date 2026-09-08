@@ -65,9 +65,11 @@ See [shortcut compatibility and backups](docs/SHORTCUT-COMPATIBILITY.md) for the
 
 ## Privacy and permissions
 
-ProfileDock reads local profile names and optional avatar metadata, plus Chrome window names/titles for the window picker. It does not need page bodies, cookies, passwords, or browsing history to switch windows. Settings and custom icons stay on your Mac. Fetching an icon from a website, when requested, contacts that website.
+ProfileDock does not send browser data to its developers. The app itself reads local profile names, account labels (which may include email addresses), optional profile pictures, and window names/titles for the picker. It does not read open page contents, Chrome cookies, passwords, or browsing history. Shortcut names, bindings, and pictures are stored locally, not encrypted by ProfileDock; your own backup or sync software may copy those files.
 
-The macOS **Automation → Google Chrome** permission lets the controller read and name windows and focus the selected window. The basic switcher does not require Accessibility, Screen Recording, a browser extension, or an account with ProfileDock.
+The macOS **Automation → Google Chrome** permission is broader than window switching. The controller uses it to find and name windows and bring the selected window forward; the purpose text is not a system restriction on other Chrome commands. You can revoke it in System Settings → Privacy & Security → Automation. The switcher does not require Accessibility, Screen Recording, Full Disk Access, a browser extension, or an account with ProfileDock.
+
+Switching does not use the network. The optional website-icon downloader makes web requests: the destination receives your IP address and requested URL, without Chrome cookies or profile data. Choose a local image file to avoid those requests. The project website and downloads are hosted by GitHub, whose service logging is separate from the app. See [the privacy review, data map, and remaining limits](docs/PRIVACY-AND-SECURITY.md), including the distinction between published 0.1.4 and the next privacy update.
 
 No personal profiles, account names, photographs, or browser data belong in this repository. Please redact those details from screenshots and bug reports.
 

@@ -16,19 +16,12 @@ public struct ControllerLocationRegistry {
         guard ControllerResolver.isCompatibleController(controllerURL) else {
             throw ControllerLocationError.invalidController
         }
-        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-        if (try? file.resourceValues(forKeys: [.isSymbolicLinkKey]).isSymbolicLink) == true {
-            throw ControllerLocationError.symbolicLink
-        }
         let record = Record(version: 1, appPath: controllerURL.standardizedFileURL.path)
-        try JSONEncoder().encode(record).write(to: file, options: .atomic)
+        try PrivateStorage(directory: directory).write(JSONEncoder().encode(record), to: "controller-location.json")
     }
 
     public func controllerURL() -> URL? {
-        guard let values = try? file.resourceValues(forKeys: [.isRegularFileKey, .isSymbolicLinkKey, .fileSizeKey]),
-              values.isRegularFile == true, values.isSymbolicLink != true,
-              let size = values.fileSize, size <= 16_384,
-              let data = try? Data(contentsOf: file),
+        guard let data = try? PrivateStorage(directory: directory).readFile("controller-location.json", maximumBytes: 16_384),
               let record = try? JSONDecoder().decode(Record.self, from: data),
               record.version == 1, record.appPath.hasPrefix("/"), !record.appPath.contains("\0") else { return nil }
         let url = URL(fileURLWithPath: record.appPath, isDirectory: true)

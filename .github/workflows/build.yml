@@ -76,7 +76,7 @@ jobs:
         run: python3 scripts/test-launcher-compatibility.py
       - name: Typecheck the active and passive performance diagnostics
         run: |
-          xcrun swiftc -typecheck -parse-as-library -swift-version 5 Sources/ProfileDockCore/ControllerLocation.swift scripts/measure-launcher-latency.swift
+          xcrun swiftc -typecheck -parse-as-library -swift-version 5 Sources/ProfileDockCore/PrivateStorage.swift Sources/ProfileDockCore/ControllerLocation.swift scripts/measure-launcher-latency.swift
           xcrun swiftc -typecheck -parse-as-library -swift-version 5 scripts/observe-focus-latency.swift
       - name: Build ad-hoc development app
         run: |

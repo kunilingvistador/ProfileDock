@@ -2,20 +2,16 @@ import Foundation
 
 public enum FaviconDiscovery {
     public static func websiteURL(_ input: String) -> URL? {
-        let text = input.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty else { return nil }
-        let candidate = text.contains("://") ? text : "https://" + text
-        guard let url = URL(string: candidate), ["https", "http"].contains(url.scheme?.lowercased() ?? ""),
-              let host = url.host, !host.isEmpty, url.user == nil, url.password == nil else { return nil }
-        return url
+        FaviconURLPolicy.websiteURL(input)
     }
 
     public static func candidates(html: String, baseURL: URL) -> [URL] {
-        guard let tags = try? NSRegularExpression(pattern: #"<link\b[^>]*>"#, options: [.caseInsensitive]),
+        guard let baseURL = FaviconURLPolicy.requestURL(baseURL),
+              let tags = try? NSRegularExpression(pattern: #"<link\b[^>]*>"#, options: [.caseInsensitive]),
               let attrs = try? NSRegularExpression(pattern: #"([\w-]+)\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))"#, options: [.caseInsensitive]) else { return [] }
         let ns = html as NSString
         var choices: [(URL, Int)] = []
-        for tag in tags.matches(in: html, range: NSRange(location: 0, length: ns.length)) {
+        for tag in tags.matches(in: html, range: NSRange(location: 0, length: ns.length)).prefix(256) {
             let text = ns.substring(with: tag.range); let source = text as NSString
             var properties: [String: String] = [:]
             for a in attrs.matches(in: text, range: NSRange(location: 0, length: source.length)) {
@@ -24,8 +20,9 @@ public enum FaviconDiscovery {
             }
             let rels = (properties["rel"] ?? "").lowercased().split(whereSeparator: { $0.isWhitespace })
             guard rels.contains("icon") || rels.contains("apple-touch-icon"), let href = properties["href"],
-                  let url = URL(string: href.replacingOccurrences(of: "&amp;", with: "&"), relativeTo: baseURL)?.absoluteURL,
-                  websiteURL(url.absoluteString) != nil else { continue }
+                  let rawURL = URL(string: href.replacingOccurrences(of: "&amp;", with: "&"), relativeTo: baseURL)?.absoluteURL,
+                  let url = FaviconURLPolicy.requestURL(rawURL),
+                  FaviconURLPolicy.sameOrigin(url, as: baseURL) else { continue }
             let size = Int((properties["sizes"] ?? "").split(separator: "x").first ?? "") ?? 0
             // Prefer a high-resolution site icon; ICO remains a valid fallback.
             choices.append((url, min(size, 1024) + (rels.contains("apple-touch-icon") ? 1 : 0)))

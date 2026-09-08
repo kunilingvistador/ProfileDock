@@ -21,11 +21,12 @@ public struct ShortcutStore {
     public var file: URL { directory.appendingPathComponent("shortcuts.json") }
     public var iconsDirectory: URL { directory.appendingPathComponent("Icons", isDirectory: true) }
     public var launchersDirectory: URL { directory.appendingPathComponent("Launchers", isDirectory: true) }
+    public var privateStorage: PrivateStorage { PrivateStorage(directory: directory) }
     public init(directory: URL) { self.directory = directory }
 
     public func load() throws -> [Shortcut] {
-        guard FileManager.default.fileExists(atPath: file.path) else { return [] }
-        let doc = try JSONDecoder().decode(StateDocument.self, from: Data(contentsOf: file))
+        guard let data = try privateStorage.readFile("shortcuts.json") else { return [] }
+        let doc = try JSONDecoder().decode(StateDocument.self, from: data)
         guard doc.version == 1 else { throw StoreError.unsupportedVersion }
         try validate(doc.shortcuts)
         return doc.shortcuts
@@ -33,9 +34,8 @@ public struct ShortcutStore {
 
     public func save(_ shortcuts: [Shortcut]) throws {
         try validate(shortcuts)
-        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         let encoder = JSONEncoder(); encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        try encoder.encode(StateDocument(shortcuts: shortcuts)).write(to: file, options: .atomic)
+        try privateStorage.write(encoder.encode(StateDocument(shortcuts: shortcuts)), to: "shortcuts.json")
     }
 
     private func validate(_ shortcuts: [Shortcut]) throws {

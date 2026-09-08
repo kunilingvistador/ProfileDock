@@ -311,9 +311,9 @@ final class ModelTests: XCTestCase {
 
     func testFaviconWebsiteInputAcceptsHTTPAndAddsHTTPSForBareDomains() throws {
         XCTAssertEqual(FaviconDiscovery.websiteURL("  example.com/path  ")?.absoluteString, "https://example.com/path")
-        for value in ["http://example.com/path", "https://example.com:8443/path", "HTTPS://example.com/"] {
+        for value in ["https://example.com/path", "https://example.com:443/path", "HTTPS://example.com/"] {
             let url = try XCTUnwrap(FaviconDiscovery.websiteURL(value))
-            XCTAssertTrue(["http", "https"].contains(url.scheme?.lowercased() ?? ""))
+            XCTAssertEqual(url.scheme, "https")
             XCTAssertEqual(url.host, "example.com")
         }
     }
@@ -337,7 +337,6 @@ final class ModelTests: XCTestCase {
         let choices = FaviconDiscovery.candidates(html: html, baseURL: base)
         XCTAssertEqual(choices.map(\.absoluteString), [
             "https://example.com/large.png",
-            "https://cdn.example.com/favicon.png?a=1&b=2",
             "https://example.com/small.png",
         ])
     }

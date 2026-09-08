@@ -13,7 +13,7 @@ python3 scripts/build.py
 Outputs:
 
 - `dist/ProfileDock.app`
-- `dist/ProfileDock-0.1.4-macos-<architecture>-local.zip`
+- `dist/ProfileDock-0.1.5-macos-<architecture>-local.zip`
 - `dist/SHA256SUMS`
 
 The default targets the current machine, signs ad-hoc, and does not contact the Apple notary service. Use `--universal` to combine arm64 and x86_64 builds. `--scratch-path` controls the SwiftPM cache; the default is outside the repository in the system temporary directory. The script only replaces an existing `dist/ProfileDock.app` if its bundle identifier belongs to this project.
@@ -22,7 +22,28 @@ Run `swift test` with a full Xcode installation selected before releasing. XCTes
 
 No signing certificate, personal browser data, account name, custom photo, or user configuration belongs in the source tree or archive. Packaging includes the compiled executables, generated original icon, and app metadata only.
 
-## 0.1.4 performance beta
+## 0.1.5 privacy release candidate
+
+**0.1.5, build 11** is an **unpublished candidate** from exact source
+[`addbc13`](https://github.com/kunilingvistador/ProfileDock/commit/addbc132f018310a713642cac32c3e58e08e9c9b).
+It minimizes incognito metadata in the window picker, restricts optional favicon
+requests and image decoding, protects managed local data paths, and explains
+the actual data/permission boundaries in the app and website. Existing window
+bindings and UUID routes remain in place; this is not a new performance benchmark.
+
+[CI 34235067293](https://github.com/kunilingvistador/ProfileDock/actions/runs/34235067293)
+passed all five jobs. Each of the four native Mac configurations passed 77
+XCTest tests, 13 Python tests and 8 compatibility cases / 134 assertions, plus
+package checks. The final local universal ZIP separately passed fresh-extraction
+checks and has SHA-256
+`0c553844ccc5eb4f9b22e1fe7fdf0d5781663d53426ce900d21303527fab27f4`.
+See [VALIDATION.md](VALIDATION.md) for local UI, existing-shortcut preservation,
+signature/architecture checks and their limits, and [the privacy review](PRIVACY-AND-SECURITY.md)
+for remaining security boundaries and website development-dependency findings.
+Publication and a fresh download of the eventual release assets are pending.
+This candidate is ad-hoc signed and unnotarized; updating remains manual.
+
+## Published 0.1.4 performance beta
 
 **0.1.4, build 9** reduces work between launching an existing Dock helper and accepting its focus request. The manager UI, profile metadata, and menus are prepared when needed; successful background focus no longer triggers a full window-list refresh. Focus uses a combined matching-window read, retains missing/duplicate/private-window checks, and gates obsolete queued requests. Existing UUID routes, version-1 shortcut data, window bindings, and the manual update procedure remain unchanged.
 
@@ -95,7 +116,7 @@ Apple requires a Developer ID Application identity, valid executable signatures,
 Install the appropriate signing identity using your own Apple developer account. Never commit it or its password. This project does not provision certificates or automatically upload builds.
 
 ```sh
-python3 scripts/build.py --universal --version 0.1.4 --build-number 9 \
+python3 scripts/build.py --universal --version 0.1.5 --build-number 11 \
   --identity 'Developer ID Application: Your Name (TEAMID)'
 ```
 
@@ -106,7 +127,7 @@ With `--identity`, the script signs the helper, enables Hardened Runtime, adds t
 Set up a `notarytool` keychain profile following Apple's documentation, using your own credentials. The example below assumes you named it `ProfileDock-notary`. Review the submission result and its log; continue only if Apple reports acceptance.
 
 ```sh
-xcrun notarytool submit dist/ProfileDock-0.1.4-macos-universal-signed.zip \
+xcrun notarytool submit dist/ProfileDock-0.1.5-macos-universal-signed.zip \
   --keychain-profile ProfileDock-notary --wait
 xcrun stapler staple dist/ProfileDock.app
 xcrun stapler validate dist/ProfileDock.app
@@ -118,9 +139,9 @@ Repackage the app after stapling, so the download includes the ticket. Use a fre
 
 ```sh
 ditto -c -k --keepParent --sequesterRsrc \
-  dist/ProfileDock.app dist/ProfileDock-0.1.4-macos-universal.zip
+  dist/ProfileDock.app dist/ProfileDock-0.1.5-macos-universal.zip
 cd dist
-shasum -a 256 ProfileDock-0.1.4-macos-universal.zip > SHA256SUMS
+shasum -a 256 ProfileDock-0.1.5-macos-universal.zip > SHA256SUMS
 ```
 
 Test the actual final ZIP downloaded through a browser on a clean Mac, including first launch, Automation consent, shortcut creation, and switching. Locally copying an app does not exercise the same Gatekeeper path as an internet download. Do not instruct users to disable Gatekeeper or remove quarantine as the normal installation procedure.

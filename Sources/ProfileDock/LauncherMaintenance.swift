@@ -13,9 +13,10 @@ struct LauncherMaintenanceReport {
 /// writes Dock preferences, launches applets or sends Chrome automation commands.
 @MainActor enum LauncherMaintenance {
     static func updateAppearance(of shortcut: Shortcut, image: NSImage, store: ShortcutStore, controllerURL: URL) throws {
-        let managed = (try? FileManager.default.contentsOfDirectory(at: store.launchersDirectory, includingPropertiesForKeys: nil)) ?? []
-        let tracked = (try? Data(contentsOf: store.directory.appendingPathComponent("launcher-locations.json")))
-            .flatMap { try? JSONDecoder().decode([String].self, from: $0) } ?? []
+        let managedDirectory = try store.privateStorage.prepareSubdirectory("Launchers")
+        let managed = try FileManager.default.contentsOfDirectory(at: managedDirectory, includingPropertiesForKeys: nil)
+        let tracked = try store.privateStorage.readFile("launcher-locations.json")
+            .map { try JSONDecoder().decode([String].self, from: $0) } ?? []
         var seen = Set<String>()
         for app in managed + dockApplications() + tracked.map({ URL(fileURLWithPath: $0) }) {
             guard seen.insert(app.standardizedFileURL.path).inserted, LauncherExporter.isManaged(app, shortcutID: shortcut.id) else { continue }
@@ -28,10 +29,18 @@ struct LauncherMaintenanceReport {
                             upgradeLegacy: Bool = false, additionalURLs: [URL] = []) -> LauncherMaintenanceReport {
         var report = LauncherMaintenanceReport()
         let files = FileManager.default
-        let managed = (try? files.contentsOfDirectory(at: store.launchersDirectory,
-            includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])) ?? []
-        let trackedFile = store.directory.appendingPathComponent("launcher-locations.json")
-        let tracked = (try? Data(contentsOf: trackedFile)).flatMap { try? JSONDecoder().decode([String].self, from: $0) } ?? []
+        let managed: [URL]
+        let tracked: [String]
+        do {
+            let directory = try store.privateStorage.prepareSubdirectory("Launchers")
+            managed = try files.contentsOfDirectory(at: directory,
+                includingPropertiesForKeys: nil, options: [.skipsHiddenFiles])
+            tracked = try store.privateStorage.readFile("launcher-locations.json")
+                .map { try JSONDecoder().decode([String].self, from: $0) } ?? []
+        } catch {
+            report.failures.append(error.localizedDescription)
+            return report
+        }
         let locations = managed + dockApplications() + additionalURLs + tracked.map { URL(fileURLWithPath: $0) }
         var seen = Set<String>()
         var retained = Set(tracked)
@@ -77,8 +86,7 @@ struct LauncherMaintenanceReport {
         let paths = retained.sorted()
         if paths != tracked.sorted() {
             do {
-                try files.createDirectory(at: store.directory, withIntermediateDirectories: true)
-                try JSONEncoder().encode(paths).write(to: trackedFile, options: .atomic)
+                try store.privateStorage.write(JSONEncoder().encode(paths), to: "launcher-locations.json")
             } catch { report.failures.append(L("Could not remember shortcut locations: ", "Не удалось сохранить расположение ярлыков: ") + error.localizedDescription) }
         }
         return report

@@ -9,7 +9,7 @@ private enum DockStyle {
 }
 
 private enum EditorRoute: Identifiable {
-    case create, edit(Shortcut), relink(Shortcut), favicon(Shortcut), help
+    case create, edit(Shortcut), relink(Shortcut), favicon(Shortcut), help, privacy
     var id: String {
         switch self {
         case .create: return "create"
@@ -17,6 +17,7 @@ private enum EditorRoute: Identifiable {
         case .relink(let shortcut): return "relink-\(shortcut.id)"
         case .favicon(let shortcut): return "favicon-\(shortcut.id)"
         case .help: return "help"
+        case .privacy: return "privacy"
         }
     }
 }
@@ -69,6 +70,8 @@ struct ContentView: View {
                 FaviconSheet(model: model, shortcut: shortcut)
             case .help:
                 HelpSheet(model: model)
+            case .privacy:
+                PrivacySheet(model: model)
             }
         }
         .alert(L("Something needs attention", "Нужна небольшая проверка"), isPresented: Binding(
@@ -130,6 +133,7 @@ struct ContentView: View {
                     Button(L("Create all Dock shortcuts", "Создать все ярлыки для Dock")) { model.exportAll() }
                         .disabled(model.shortcuts.isEmpty)
                     Divider()
+                    Button(L("Data and permissions", "Данные и разрешения")) { route = .privacy }
                     Button(L("Privacy settings", "Настройки разрешений")) { model.openPrivacySettings() }
                     Button(L("Open data folder", "Открыть папку данных")) { model.revealDataFolder() }
                     Divider()
@@ -306,6 +310,9 @@ struct ContentView: View {
                 }
                 if model.isBusy { ProgressView().controlSize(.small) }
             }
+            Button(L("Why does it need access to Chrome?", "Зачем нужен доступ к Chrome?")) { route = .privacy }
+                .buttonStyle(.link)
+                .font(.system(size: 12))
             if !model.chromeRunning {
                 Text(L("Open Chrome with the profiles you use, then connect it here.", "Откройте Chrome с нужными профилями, затем подключите его здесь."))
                     .font(.system(size: 12))
@@ -781,32 +788,41 @@ private struct FaviconSheet: View {
     let shortcut: Shortcut
     @Environment(\.dismiss) private var dismiss
     @State private var website = ""
+    @State private var downloadTask: Task<Void, Never>?
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             SheetHeading(title: L("A familiar face from the web", "Знакомый значок сайта"), subtitle: L("Use a website’s icon for “\(shortcut.name)”.", "Поставьте значок сайта на «\(shortcut.name)»."))
             VStack(alignment: .leading, spacing: 10) {
                 TextField("https://example.com", text: $website)
                     .textFieldStyle(.roundedBorder)
-                Text(L("ProfileDock visits this address to download its public website icon.", "ProfileDock обратится по этому адресу и скачает общедоступный значок сайта."))
+                Text(L("Use an HTTPS website address. Icons and redirects must stay on that same host; if the icon lives elsewhere, choose an image file.", "Введите HTTPS-адрес сайта. Значок и переадресации должны оставаться на том же домене; если картинка находится на другом сайте, выберите файл."))
+                    .font(.system(size: 12)).foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(L("The website receives your IP address and the requested address. ProfileDock does not send it your Chrome cookies, account details or window titles. You can choose an image file instead.", "Сайт увидит ваш IP-адрес и запрошенный адрес. ProfileDock не передаёт ему cookies Chrome, данные аккаунтов или заголовки окон. Вместо загрузки можно выбрать файл изображения."))
                     .font(.system(size: 12)).foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.horizontal, 24)
             Spacer(minLength: 20)
             SheetFooter(isBusy: model.isBusy, errorMessage: model.errorMessage) {
-                Button(L("Cancel", "Отмена")) { dismiss() }.keyboardShortcut(.cancelAction)
+                Button(L("Cancel", "Отмена")) { downloadTask?.cancel(); dismiss() }.keyboardShortcut(.cancelAction)
                 Button(L("Get icon", "Загрузить значок")) {
-                    Task {
-                        await model.fetchFavicon(for: shortcut, website: website)
-                        if model.errorMessage == nil { dismiss() }
+                    // Reserve the request before yielding to the main actor so
+                    // a second click cannot replace the handle Cancel needs.
+                    guard downloadTask == nil, !model.isBusy else { return }
+                    downloadTask = Task {
+                        defer { downloadTask = nil }
+                        let saved = await model.fetchFavicon(for: shortcut, website: website)
+                        if saved && !Task.isCancelled { dismiss() }
                     }
                 }
                 .buttonStyle(.borderedProminent)
                 .keyboardShortcut(.defaultAction)
-                .disabled(website.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || model.isBusy)
+                .disabled(website.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || model.isBusy || downloadTask != nil)
             }
         }
-        .frame(width: 470, height: 255)
+        .frame(width: 510, height: 345)
+        .onDisappear { downloadTask?.cancel() }
     }
 }
 
@@ -814,6 +830,7 @@ private struct FaviconSheet: View {
 private struct HelpSheet: View {
     @ObservedObject var model: AppModel
     @Environment(\.dismiss) private var dismiss
+    @State private var showingPrivacy = false
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             SheetHeading(title: L("A Dock that knows your windows", "Dock, который знает ваши окна"), subtitle: L("Three steps to calmer switching.", "Три шага к удобному переключению."))
@@ -826,6 +843,7 @@ private struct HelpSheet: View {
                     .font(.system(size: 12)).foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
                 HStack(spacing: 18) {
+                    Button(L("Data and permissions", "Данные и разрешения")) { showingPrivacy = true }
                     Button(L("Privacy settings", "Настройки разрешений")) { model.openPrivacySettings() }
                     Button(L("Open data folder", "Папка данных")) { model.revealDataFolder() }
                 }
@@ -841,6 +859,7 @@ private struct HelpSheet: View {
             }
         }
         .frame(width: 530)
+        .sheet(isPresented: $showingPrivacy) { PrivacySheet(model: model) }
     }
     private func helpStep(_ number: String, title: String, body: String) -> some View {
         HStack(alignment: .top, spacing: 12) {
@@ -850,6 +869,54 @@ private struct HelpSheet: View {
                 .frame(width: 25, height: 25)
                 .background(DockStyle.accent.opacity(0.09), in: Circle())
             VStack(alignment: .leading, spacing: 4) {
+                Text(title).font(.system(size: 13, weight: .semibold))
+                Text(body).font(.system(size: 12)).foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+}
+
+@MainActor
+private struct PrivacySheet: View {
+    @ObservedObject var model: AppModel
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            SheetHeading(title: L("Your data and Chrome access", "Ваши данные и доступ к Chrome"),
+                         subtitle: L("ProfileDock does not send your browser data to its developers.", "ProfileDock не отправляет данные браузера разработчикам."))
+            ScrollView {
+                VStack(alignment: .leading, spacing: 18) {
+                    privacyRow("macwindow", title: L("What the app reads locally", "Что приложение читает на Mac"),
+                        body: L("Profile names, account labels (which may include an email address), profile pictures and normal-window titles help you choose a window. This version skips private-window titles and does not read open page contents, passwords, cookies or browsing history.", "Имена профилей, подписи аккаунтов (в том числе email), фотографии профилей и заголовки обычных окон помогают выбрать окно. Эта версия пропускает заголовки инкогнито и не читает содержимое открытых страниц, пароли, cookies или историю посещений."))
+                    privacyRow("externaldrive", title: L("What stays on your Mac", "Что сохраняется на Mac"),
+                        body: L("Shortcut names, window bindings and pictures are saved in the app’s data folder and in the shortcuts you create. There is no ProfileDock account, analytics or automatic data upload.", "Имена ярлыков, привязки окон и картинки сохраняются в папке данных и созданных ярлыках. В ProfileDock нет аккаунта, аналитики или автоматической отправки данных."))
+                    privacyRow("network", title: L("When the app uses the internet", "Когда нужен интернет"),
+                        body: L("Switching windows works without an internet connection. Fetching a website icon is optional: that website receives your IP address and the requested address, without your Chrome cookies or profile data.", "Переключение окон работает без интернета. Загрузка значка сайта — по вашему выбору: сайт получает IP-адрес и запрошенный адрес, без cookies Chrome и данных профилей."))
+                    privacyRow("lock.shield", title: L("What the permission means", "Что означает разрешение"),
+                        body: L("macOS grants control of Chrome through Automation. There is no separate permission for switching windows only. ProfileDock uses it to find, name and raise windows; the permission is broader than these functions. You can inspect this version’s use in the open source.", "macOS разрешает управление Chrome через Automation. Отдельного разрешения «только переключать окна» нет. ProfileDock использует его для поиска, именования и поднятия окон; разрешение шире этих функций. Работу этой версии можно проверить в открытом коде."))
+                    privacyRow("hand.raised", title: L("You can revoke access", "Доступ можно отозвать"),
+                        body: L("In System Settings → Privacy & Security → Automation, turn off Google Chrome for ProfileDock. Window switching will stop working. Accessibility, Screen Recording and Full Disk Access are not required.", "В Системных настройках → Конфиденциальность и безопасность → Автоматизация выключите Google Chrome для ProfileDock. Переключение перестанет работать. Универсальный доступ, запись экрана и полный доступ к диску не требуются."))
+                }
+                .padding(.horizontal, 24)
+                .padding(.bottom, 22)
+            }
+            SheetFooter(isBusy: false) {
+                Button(L("Permission settings", "Разрешения")) { model.openPrivacySettings() }
+                Button(L("Data folder", "Папка данных")) { model.revealDataFolder() }
+                Button(L("Done", "Понятно")) { dismiss() }
+                    .buttonStyle(.borderedProminent)
+                    .keyboardShortcut(.defaultAction)
+            }
+        }
+        .frame(width: 570, height: 620)
+    }
+
+    private func privacyRow(_ icon: String, title: String, body: String) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: icon).font(.system(size: 17)).foregroundStyle(DockStyle.accent).frame(width: 22)
+            VStack(alignment: .leading, spacing: 5) {
                 Text(title).font(.system(size: 13, weight: .semibold))
                 Text(body).font(.system(size: 12)).foregroundStyle(.secondary)
                     .fixedSize(horizontal: false, vertical: true)
