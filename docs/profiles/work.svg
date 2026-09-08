@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <title>Work — a coral briefcase</title>
+  <defs>
+    <linearGradient id="background" x1="21" y1="6" x2="108" y2="126" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF0D8"/><stop offset="1" stop-color="#FFBD8F"/>
+    </linearGradient>
+    <linearGradient id="case" x1="36" y1="50" x2="92" y2="112" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FA784F"/><stop offset="1" stop-color="#D84C38"/>
+    </linearGradient>
+    <linearGradient id="flap" x1="39" y1="40" x2="82" y2="80" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF9870"/><stop offset="1" stop-color="#F36E46"/>
+    </linearGradient>
+    <linearGradient id="clasp" x1="59" y1="68" x2="70" y2="89" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF5D7"/><stop offset="1" stop-color="#FFD99B"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="29" fill="url(#background)"/>
+  <rect x="1" y="1" width="126" height="126" rx="28" stroke="#FFF" stroke-opacity=".5" stroke-width="2"/>
+  <ellipse cx="65" cy="109" rx="43" ry="8" fill="#A7432E" fill-opacity=".15"/>
+  <path d="M45 44V35C45 27 50 24 57 24H71C79 24 83 28 83 35V44" stroke="#BC4B32" stroke-width="10" stroke-linecap="round"/>
+  <path d="M47 34C47 29 51 27 57 27H71C76 27 80 29 81 33" stroke="#F79462" stroke-width="3" stroke-linecap="round"/>
+  <rect x="17" y="43" width="94" height="65" rx="16" fill="#B84331"/>
+  <rect x="17" y="40" width="94" height="65" rx="16" fill="url(#case)"/>
+  <path d="M17 56C17 46 23 40 33 40H95C105 40 111 46 111 56V64C101 76 84 81 64 81C44 81 27 76 17 64V56Z" fill="#B74530" fill-opacity=".23" transform="translate(0 3)"/>
+  <path d="M17 56C17 46 23 40 33 40H95C105 40 111 46 111 56V63C101 74 84 78 64 78C44 78 27 74 17 63V56Z" fill="url(#flap)"/>
+  <path d="M26 49C28 47 31 46 35 46H91" stroke="#FFBA8D" stroke-width="3" stroke-linecap="round"/>
+  <rect x="54" y="68" width="20" height="24" rx="6" fill="#A8442E" fill-opacity=".24"/>
+  <rect x="55" y="65" width="18" height="24" rx="5" fill="url(#clasp)"/>
+  <path d="M61 77H67" stroke="#B77846" stroke-width="3" stroke-linecap="round"/>
+  <path d="M28 92V95C28 97 30 98 33 98H40" stroke="#FFAF7E" stroke-opacity=".65" stroke-width="3" stroke-linecap="round"/>
+</svg>

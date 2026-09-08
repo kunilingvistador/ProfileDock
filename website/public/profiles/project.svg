@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <title>Project — a cheerful penguin</title>
+  <defs>
+    <linearGradient id="background" x1="23" y1="4" x2="110" y2="124" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#A18AFF"/><stop offset="1" stop-color="#5144D8"/>
+    </linearGradient>
+    <linearGradient id="body" x1="46" y1="25" x2="87" y2="116" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#39364F"/><stop offset="1" stop-color="#24243B"/>
+    </linearGradient>
+    <linearGradient id="belly" x1="51" y1="42" x2="78" y2="115" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFDFA"/><stop offset="1" stop-color="#DFE6FF"/>
+    </linearGradient>
+    <linearGradient id="beak" x1="60" y1="65" x2="70" y2="81" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFC566"/><stop offset="1" stop-color="#F18637"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="29" fill="url(#background)"/>
+  <rect x="1" y="1" width="126" height="126" rx="28" stroke="#FFF" stroke-opacity=".3" stroke-width="2"/>
+  <ellipse cx="64" cy="115" rx="41" ry="7" fill="#302286" fill-opacity=".3"/>
+  <path d="M83 64C95 63 102 55 107 44C110 37 117 43 114 53C112 66 104 79 92 86L83 64Z" fill="#29273F"/>
+  <path d="M40 66C30 65 20 80 17 92C16 99 21 103 26 97L43 82L40 66Z" fill="#25253C"/>
+  <path d="M32 59C32 36 42 23 64 23C86 23 96 36 96 58C96 75 105 93 99 105C92 116 78 120 64 120C49 120 35 116 28 105C21 92 32 75 32 59Z" fill="url(#body)"/>
+  <path d="M47 30C50 27 54 26 59 26" stroke="#68617C" stroke-opacity=".75" stroke-width="3" stroke-linecap="round"/>
+  <path d="M64 48C57 35 39 38 37 54C35 65 42 69 38 81C33 93 33 102 41 108C48 114 57 116 64 116C72 116 83 113 88 107C95 100 95 92 90 80C86 69 93 64 91 54C88 38 72 35 64 48Z" fill="url(#belly)"/>
+  <ellipse cx="49" cy="60" rx="4" ry="5" fill="#2C2940"/>
+  <ellipse cx="80" cy="60" rx="4" ry="5" fill="#2C2940"/>
+  <circle cx="50" cy="58.5" r="1.25" fill="#FFF"/>
+  <circle cx="81" cy="58.5" r="1.25" fill="#FFF"/>
+  <ellipse cx="44" cy="70" rx="5" ry="3" fill="#EEA39F" fill-opacity=".5"/>
+  <ellipse cx="85" cy="70" rx="5" ry="3" fill="#EEA39F" fill-opacity=".5"/>
+  <path d="M53 71C55 66 61 64 65 64C69 64 75 67 77 71C73 77 68 80 65 80C61 80 56 77 53 71Z" fill="url(#beak)"/>
+  <path d="M57 71C62 73 68 73 73 71" stroke="#D87631" stroke-width="1.8" stroke-linecap="round"/>
+  <path d="M43 110C50 107 59 111 61 117C58 123 42 124 36 120C34 116 37 112 43 110Z" fill="#FFA548"/>
+  <path d="M85 110C79 108 70 111 68 117C71 123 87 124 94 120C95 116 91 112 85 110Z" fill="#FFA548"/>
+  <path d="M99 21L101 15L103 21L109 23L103 25L101 31L99 25L93 23L99 21Z" fill="#E6DEFF"/>
+</svg>

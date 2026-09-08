@@ -16,7 +16,7 @@ const descriptions = {
   ru: {
     title: "ProfileDock — ярлыки профилей Chrome в Dock на Mac",
     description:
-      "Бесплатная утилита для macOS: переключайтесь на открытые окна Chrome через свои значки в Dock. Без лишних окон и вкладок. Открытый исходный код.",
+      "Добавьте профили Chrome отдельными ярлыками в Dock на Mac. Свои фотографии и значки, переключение на выбранные открытые окна. Бесплатно, с открытым кодом.",
     imageAlt: "ProfileDock: узнаваемые ярлыки для открытых окон Chrome в Dock на Mac",
     locale: "ru_RU",
     alternateLocale: "en_US",
@@ -24,7 +24,7 @@ const descriptions = {
   en: {
     title: "ProfileDock — Chrome Profile Shortcuts for Mac",
     description:
-      "A free macOS utility that brings existing Chrome windows forward from familiar Dock shortcuts. No extra windows or tabs. Open source.",
+      "Give each Chrome profile its own Mac Dock shortcut with a custom photo or icon. Bring your chosen open window forward in one click. Free and open source.",
     imageAlt: "ProfileDock: familiar Dock shortcuts for existing Chrome windows on Mac",
     locale: "en_US",
     alternateLocale: "ru_RU",

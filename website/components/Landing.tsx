@@ -5,17 +5,14 @@ import {
   ArrowDown,
   ArrowRight,
   ArrowUpRight,
-  BriefcaseBusiness,
   Check,
   ChevronDown,
   Download,
   CodeXml,
   Image as ImageIcon,
-  Layers3,
   LockKeyhole,
   MousePointer2,
   PanelsTopLeft,
-  UserRound,
 } from "lucide-react";
 
 const repo = "https://github.com/kunilingvistador/ProfileDock";
@@ -27,16 +24,19 @@ const copy = {
     source: "Код на GitHub",
     skip: "Перейти к содержанию",
     badge: "CHROME × macOS",
-    line1: "Нужный профиль.",
-    line2: "С первого клика.",
+    line1: "Профили Chrome.",
+    line2: "Отдельно в Dock.",
     intro:
-      "У каждого окна Chrome — свой значок в Dock. Нажмите на знакомую картинку и вернитесь к своим вкладкам.",
+      "Закрепите каждый профиль отдельным ярлыком в Dock. Нажмите на его значок, чтобы вернуться к выбранному открытому окну Chrome.",
     download: "Скачать для Mac",
     see: "Посмотреть, как работает",
     details: "Бесплатно · Открытый код · macOS 13+",
     betaHint: "Бета-версия. При установке нужно подтверждение macOS.",
     demoBadge: "Попробуйте прямо здесь",
-    demo: "Какое окно поднимем?",
+    demoTitle: "Три профиля. Три ярлыка.",
+    demo: "Нажмите на значок в Dock",
+    dockCaption: "Каждый ярлык закрепляется отдельно",
+    switchTo: "Показать окно профиля",
     demoNote: "Это демонстрация — ваш Chrome остаётся как есть.",
     profiles: ["Работа", "Личное", "Проект"],
     tab: "Ваше открытое окно",
@@ -46,7 +46,7 @@ const copy = {
       ["Сразу в нужное окно", "Без поиска в стопке окон. Ярлык поднимает то, которое вы выбрали."],
       [
         "Значки с характером",
-        "Ваша фотография или знакомый логотип. Легче узнать — быстрее выбрать.",
+        "Ваше фото, логотип проекта или значок сайта. У каждого ярлыка — своё имя и изображение.",
       ],
       ["Без лишних настроек", "Работает с обычным Chrome. Без расширения, регистрации и подписки."],
     ],
@@ -130,16 +130,19 @@ const copy = {
     source: "Source on GitHub",
     skip: "Skip to content",
     badge: "CHROME × macOS",
-    line1: "The right profile.",
-    line2: "One familiar click.",
+    line1: "Chrome profiles.",
+    line2: "Each in your Dock.",
     intro:
-      "Give each Chrome window its own icon in the Dock. Click a familiar face and get back to your tabs.",
+      "Give every profile its own Dock shortcut. Click its icon to bring your chosen open Chrome window back to the front.",
     download: "Download for Mac",
     see: "See how it works",
     details: "Free · Open source · macOS 13+",
     betaHint: "Beta software. macOS approval is needed during installation.",
     demoBadge: "Give it a try",
-    demo: "Which window comes forward?",
+    demoTitle: "Three profiles. Three shortcuts.",
+    demo: "Click an icon in the Dock",
+    dockCaption: "Pin each shortcut separately",
+    switchTo: "Show the profile window",
     demoNote: "Just a demonstration. Your Chrome stays unchanged.",
     profiles: ["Work", "Personal", "Project"],
     tab: "Your open window",
@@ -152,7 +155,7 @@ const copy = {
       ],
       [
         "Icons with personality",
-        "Your photo or a familiar logo. Easier to recognize, quicker to choose.",
+        "Your photo, project logo or website icon. Each shortcut has its own name and picture.",
       ],
       [
         "A simple fit",
@@ -230,7 +233,30 @@ const copy = {
     license: "MIT license",
   },
 };
-const ProfileIcons = [BriefcaseBusiness, UserRound, Layers3];
+const profileImages = ["work", "personal", "project"];
+
+function ProfileAvatar({ index }: { index: number }) {
+  return (
+    <img
+      src={`/ProfileDock/profiles/${profileImages[index]}.svg`}
+      width="128"
+      height="128"
+      alt=""
+      draggable={false}
+    />
+  );
+}
+
+function ChromeMark() {
+  return (
+    <svg viewBox="0 0 48 48" aria-hidden="true">
+      <circle cx="24" cy="24" r="22" fill="#f7c64b" />
+      <path d="M24 24H46A22 22 0 0 0 5 13Z" fill="#ed6a5e" />
+      <path d="M24 24 5 13a22 22 0 0 0 19 33l11-19Z" fill="#63ab75" />
+      <circle cx="24" cy="24" r="10" fill="#69a8ee" stroke="#fff" strokeWidth="3" />
+    </svg>
+  );
+}
 const BenefitIcons = [MousePointer2, ImageIcon, LockKeyhole];
 
 export default function Landing({ initialLanguage }: { initialLanguage: "ru" | "en" }) {
@@ -307,9 +333,9 @@ export default function Landing({ initialLanguage }: { initialLanguage: "ru" | "
                 01 — 03
               </span>
             </div>
+            <h2 className="demo-title">{t.demoTitle}</h2>
             <div className="windows" aria-hidden="true">
               {t.profiles.map((name, i) => {
-                const Icon = ProfileIcons[i];
                 return (
                   <div
                     className={`demo-window tone-${i} ${selected === i ? "is-front" : ""}`}
@@ -327,7 +353,7 @@ export default function Landing({ initialLanguage }: { initialLanguage: "ru" | "
                     </div>
                     <div className="window-content">
                       <div className={`profile-avatar tone-${i}`}>
-                        <Icon size={27} strokeWidth={1.7} />
+                        <ProfileAvatar index={i} />
                       </div>
                       <span className="window-kicker">{t.tab}</span>
                       <strong>{name}</strong>
@@ -347,25 +373,30 @@ export default function Landing({ initialLanguage }: { initialLanguage: "ru" | "
             </div>
             <p className="try-label">{t.demo}</p>
             <div className="demo-dock" role="group" aria-label={t.demo}>
+              <div className="dock-chrome" aria-hidden="true">
+                <ChromeMark />
+                <span>Chrome</span>
+              </div>
+              <span className="dock-divider" aria-hidden="true" />
               {t.profiles.map((name, i) => {
-                const Icon = ProfileIcons[i];
                 return (
                   <button
                     type="button"
                     key={i}
-                    className={`dock-icon tone-${i}`}
-                    aria-label={name}
+                    className={`dock-profile tone-${i}`}
+                    aria-label={`${t.switchTo}: ${name}`}
                     aria-pressed={selected === i}
                     onClick={() => setSelected(i)}
                   >
-                    <Icon size={29} strokeWidth={1.7} aria-hidden="true" />
-                    <span className="dock-tooltip" aria-hidden="true">
-                      {name}
+                    <span className="dock-icon">
+                      <ProfileAvatar index={i} />
                     </span>
+                    <span className="dock-name">{name}</span>
                   </button>
                 );
               })}
             </div>
+            <p className="dock-caption">{t.dockCaption}</p>
             <p className="demo-current" role="status" aria-live="polite">
               {t.active} <strong>{t.profiles[selected]}</strong>
             </p>
