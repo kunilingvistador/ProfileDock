@@ -42,6 +42,11 @@ struct ContentView: View {
                     .padding(.horizontal, 28)
                     .padding(.bottom, 16)
             }
+            if model.legacyLauncherCount > 0 || model.launcherMaintenanceNotice != nil || !model.launcherMaintenanceFailures.isEmpty {
+                launcherMaintenanceBanner
+                    .padding(.horizontal, 28)
+                    .padding(.bottom, 16)
+            }
             if model.shortcuts.isEmpty {
                 onboarding
             } else {
@@ -119,6 +124,9 @@ struct ContentView: View {
 
                 Menu {
                     Button(L("Import existing shortcuts…", "Импортировать готовые ярлыки…")) { model.importExisting() }
+                        .disabled(model.demoMode || model.isBusy || model.isMaintainingLaunchers)
+                    Button(L("Update shortcuts", "Обновить ярлыки")) { model.updateLaunchers() }
+                        .disabled(model.demoMode || model.isBusy || model.isMaintainingLaunchers)
                     Button(L("Create all Dock shortcuts", "Создать все ярлыки для Dock")) { model.exportAll() }
                         .disabled(model.shortcuts.isEmpty)
                     Divider()
@@ -207,6 +215,54 @@ struct ContentView: View {
             .foregroundStyle(.secondary)
             .help(L("Dismiss", "Скрыть"))
             .accessibilityLabel(L("Dismiss message", "Скрыть сообщение"))
+        }
+        .padding(12)
+        .background(DockStyle.accent.opacity(0.06), in: RoundedRectangle(cornerRadius: 10))
+    }
+
+    private var launcherMaintenanceBanner: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: "arrow.triangle.2.circlepath")
+                .foregroundStyle(DockStyle.accent)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 7) {
+                if model.legacyLauncherCount > 0 {
+                    Text(L("Older shortcuts: \(model.legacyLauncherCount)", "Старые ярлыки: \(model.legacyLauncherCount)"))
+                        .font(.system(size: 12, weight: .semibold))
+                    Text(L("Update your older shortcuts so they can receive fixes through ProfileDock. Their names, pictures and Dock positions stay the same.", "Обновите старые ярлыки, чтобы они получали исправления через ProfileDock. Имена, картинки и места в Dock сохранятся."))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                if let message = model.launcherMaintenanceNotice {
+                    Text(message).fixedSize(horizontal: false, vertical: true)
+                }
+                if !model.launcherMaintenanceFailures.isEmpty {
+                    DisclosureGroup(L("Update details", "Подробности обновления")) {
+                        ScrollView {
+                            Text(model.launcherMaintenanceFailures.joined(separator: "\n"))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .textSelection(.enabled)
+                        }
+                        .frame(maxHeight: 90)
+                        .padding(.top, 5)
+                    }
+                }
+            }
+            .font(.system(size: 12))
+            .frame(maxWidth: .infinity, alignment: .leading)
+            if model.legacyLauncherCount > 0 || !model.launcherMaintenanceFailures.isEmpty {
+                Button(L("Update shortcuts", "Обновить ярлыки")) { model.updateLaunchers() }
+                    .buttonStyle(.bordered)
+                    .disabled(model.demoMode || model.isBusy || model.isMaintainingLaunchers)
+            }
+            if model.launcherMaintenanceNotice != nil || !model.launcherMaintenanceFailures.isEmpty {
+                Button { model.dismissLauncherMaintenanceNotice() } label: {
+                    Image(systemName: "xmark").font(.system(size: 10, weight: .semibold))
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.secondary)
+                .help(L("Dismiss", "Скрыть"))
+                .accessibilityLabel(L("Dismiss update message", "Скрыть сообщение об обновлении"))
+            }
         }
         .padding(12)
         .background(DockStyle.accent.opacity(0.06), in: RoundedRectangle(cornerRadius: 10))

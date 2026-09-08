@@ -14,6 +14,10 @@ import ProfileDockCore
     @Published var recoveryShortcutID: UUID?
     @Published var chromeRunning = false
     @Published var permissionGranted = false
+    @Published var legacyLauncherCount = 0
+    @Published var isMaintainingLaunchers = false
+    @Published var launcherMaintenanceNotice: String?
+    @Published var launcherMaintenanceFailures: [String] = []
 
     let service = ChromeService()
     let store: ShortcutStore
@@ -259,23 +263,32 @@ import ProfileDockCore
     }
 
     func importExisting() {
+        guard !isBusy, !isMaintainingLaunchers else { return }
+        guard !demoMode else {
+            notice = L("Import real shortcuts outside preview mode.", "Импорт ярлыков доступен вне предпросмотра.")
+            return
+        }
         let panel = NSOpenPanel(); panel.canChooseFiles = false; panel.canChooseDirectories = true
-        panel.message = L("Choose the folder containing your earlier Chrome window shortcuts.", "Выберите папку с созданными ранее ярлыками окон Chrome.")
+        panel.prompt = L("Import and update", "Импортировать и обновить")
+        panel.message = L("Choose the folder with your earlier Chrome shortcuts. Compatible shortcuts will be added to ProfileDock and their existing app files updated to receive fixes. Their names, pictures and Dock positions stay the same.", "Выберите папку со старыми ярлыками Chrome. Совместимые ярлыки будут добавлены в ProfileDock, а их файлы приложений — обновлены для получения исправлений. Имена, картинки и места в Dock сохранятся.")
         guard panel.runModal() == .OK, let directory = panel.url else { return }
         errorMessage = nil; notice = nil
         do {
             try ensureWritable()
             let entries = try FileManager.default.contentsOfDirectory(at: directory, includingPropertiesForKeys: nil)
+            // Duplicate imports still need their original applets upgraded. Also
+            // service successfully imported entries if a later import fails.
+            defer { synchronizeLaunchers(upgradeLegacy: true, additionalURLs: entries, reportSuccess: true) }
             var count = 0
             for url in entries where url.pathExtension == "app" {
-                guard let info = NSDictionary(contentsOf: url.appendingPathComponent("Contents/Info.plist")),
+                guard LauncherExporter.safeBundle(url), let info = NSDictionary(contentsOf: url.appendingPathComponent("Contents/Info.plist")),
                       let identifier = info["CFBundleIdentifier"] as? String,
                       identifier.hasPrefix("local."), identifier.contains(".chrome-window-switcher."),
                       let name = (info["CFBundleDisplayName"] ?? info["CFBundleName"]) as? String else { continue }
                 let scriptURL = url.appendingPathComponent("Contents/Resources/Scripts/main.scpt")
                 var failure: NSDictionary?
                 guard let source = NSAppleScript(contentsOf: scriptURL, error: &failure)?.source,
-                      let target = LegacyShortcutImport.targetName(in: source),
+                      let target = LegacyShortcutImport.supportedTarget(in: source),
                       !shortcuts.contains(where: { $0.windowName == target }) else { continue }
                 let item = Shortcut(name: try validatedName(name), windowName: target)
                 try commit(shortcuts + [item])
@@ -284,10 +297,41 @@ import ProfileDockCore
             }
             selectedShortcutID = shortcuts.first?.id
             notice = count == 0
-                ? L("No new compatible shortcuts found. You can add any existing Chrome window using +.", "Новых совместимых ярлыков не найдено. Любое открытое окно Chrome можно добавить кнопкой +.")
-                : L("Imported \(count) shortcuts. The original shortcuts and Chrome windows are unchanged.", "Импортировано ярлыков: \(count). Исходные ярлыки и окна Chrome сохранены.")
+                ? L("No new shortcuts to import. Existing compatible shortcuts were checked for updates.", "Новых ярлыков для импорта нет. Существующие совместимые ярлыки проверены на обновления.")
+                : L("Imported \(count) shortcuts. Their existing app files were checked for updates; Chrome windows were not changed.", "Импортировано ярлыков: \(count). Их существующие файлы проверены на обновления; окна Chrome не изменены.")
             didChange?()
         } catch { handle(error) }
+    }
+
+    func updateLaunchers() {
+        guard !isBusy else { return }
+        synchronizeLaunchers(upgradeLegacy: true, reportSuccess: true)
+    }
+
+    /// Maintenance has its own feedback channel: a failed app-file update must
+    /// never be treated as a failed focus request or bring the controller forward.
+    func synchronizeLaunchers(upgradeLegacy: Bool = false, additionalURLs: [URL] = [], reportSuccess: Bool = false) {
+        guard !demoMode, !isMaintainingLaunchers, writable else { return }
+        isMaintainingLaunchers = true
+        defer { isMaintainingLaunchers = false; didChange?() }
+        let report = LauncherMaintenance.synchronize(shortcuts: shortcuts, store: store,
+            controllerURL: Bundle.main.bundleURL, upgradeLegacy: upgradeLegacy, additionalURLs: additionalURLs)
+        legacyLauncherCount = report.legacyCount
+        launcherMaintenanceFailures = report.failures
+        if !report.failures.isEmpty {
+            launcherMaintenanceNotice = L("Some shortcuts could not be updated. You can try again from the menu.", "Некоторые ярлыки не удалось обновить. Можно повторить обновление через меню.")
+        } else if reportSuccess {
+            launcherMaintenanceNotice = report.updated > 0 || report.migrated > 0
+                ? L("Shortcuts updated. Their names, pictures and Dock positions are preserved.", "Ярлыки обновлены. Их имена, картинки и места в Dock сохранены.")
+                : L("Compatible shortcuts are up to date.", "Совместимые ярлыки уже обновлены.")
+        } else {
+            launcherMaintenanceNotice = nil
+        }
+    }
+
+    func dismissLauncherMaintenanceNotice() {
+        launcherMaintenanceNotice = nil
+        launcherMaintenanceFailures = []
     }
 
     func openPrivacySettings() {
@@ -330,10 +374,8 @@ import ProfileDockCore
         try updateExistingExport(next[index])
     }
     private func updateExistingExport(_ shortcut: Shortcut) throws {
-        let candidates = (try? FileManager.default.contentsOfDirectory(at: store.launchersDirectory, includingPropertiesForKeys: nil)) ?? []
-        if candidates.contains(where: { (NSDictionary(contentsOf: $0.appendingPathComponent("Contents/Info.plist"))?["ProfileDockShortcutID"] as? String) == shortcut.id.uuidString }) {
-            _ = try LauncherExporter.export(shortcut: shortcut, image: icon(for: shortcut)!, directory: store.launchersDirectory, controllerURL: Bundle.main.bundleURL)
-        }
+        guard !demoMode, let image = icon(for: shortcut) else { return }
+        try LauncherMaintenance.updateAppearance(of: shortcut, image: image, store: store, controllerURL: Bundle.main.bundleURL)
     }
     private func handle(_ error: Error) {
         if let chrome = error as? ChromeError {

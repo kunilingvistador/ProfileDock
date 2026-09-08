@@ -12,7 +12,7 @@ let package = Package(
     targets: [
         .target(name: "ProfileDockCore"),
         .executableTarget(name: "ProfileDock", dependencies: ["ProfileDockCore"]),
-        .executableTarget(name: "ProfileDockLauncher"),
+        .executableTarget(name: "ProfileDockLauncher", dependencies: ["ProfileDockCore"]),
         .testTarget(name: "ProfileDockCoreTests", dependencies: ["ProfileDockCore"]),
     ]
 )
