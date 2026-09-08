@@ -22,7 +22,7 @@ Run `swift test` with a full Xcode installation selected before releasing. XCTes
 
 No signing certificate, personal browser data, account name, custom photo, or user configuration belongs in the source tree or archive. Packaging includes the compiled executables, generated original icon, and app metadata only.
 
-## 0.1.4 performance candidate
+## 0.1.4 performance beta
 
 **0.1.4, build 9** reduces work between launching an existing Dock helper and accepting its focus request. The manager UI, profile metadata, and menus are prepared when needed; successful background focus no longer triggers a full window-list refresh. Focus uses a combined matching-window read, retains missing/duplicate/private-window checks, and gates obsolete queued requests. Existing UUID routes, version-1 shortcut data, window bindings, and the manual update procedure remain unchanged.
 
@@ -40,13 +40,15 @@ Checks recorded on **8 September 2026**:
 | Cold startup UI | No manager construction before acceptance in any of the three timed candidate cold chains. |
 | Diagnostic cleanup | Enablement flag removed and controller restarted. Read-only checks found one current controller and no trace event file for its new process. |
 
-The candidate build-9 ZIP SHA-256 is:
+The published build-9 ZIP SHA-256 is:
 
 ```text
 402bc9ecc635218044cf62638b99ec33cd01093488b97bb49586de5e7f83c9b1
 ```
 
-**Release publication is pending.** This remains an ad-hoc-signed, unnotarized beta. Archive verification does not resolve the historical FinderInfo limitation on migrated applets described below, or replace clean-Mac Gatekeeper and fresh Automation checks. Updating remains manual: quit ProfileDock, replace the app, and open the new copy once. Existing data and compatible helpers remain in place; no automatic version downloader is included.
+Published as [v0.1.4-beta](https://github.com/kunilingvistador/ProfileDock/releases/tag/v0.1.4-beta), targeting merged commit [`d6447b1`](https://github.com/kunilingvistador/ProfileDock/commit/d6447b1d89580310d5b5b726bb9cc76110ec5a7d). After publication, both assets were downloaded from GitHub into a fresh temporary directory: the ZIP hash matched `SHA256SUMS` and the value above; the extracted app reported **0.1.4, build 9**, passed **deep strict signature verification**, and contained **arm64 and x86_64** in both binaries.
+
+This remains an ad-hoc-signed, unnotarized beta. Archive verification does not resolve the historical FinderInfo limitation on migrated applets described below, or replace clean-Mac Gatekeeper and fresh Automation checks. Updating remains manual: quit ProfileDock, replace the app, and open the new copy once. Existing data and compatible helpers remain in place; no automatic version downloader is included.
 
 ## Historical 0.1.3 compatibility beta
 

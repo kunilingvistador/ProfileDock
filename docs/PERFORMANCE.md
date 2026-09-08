@@ -1,8 +1,8 @@
-# Focus performance: 0.1.4 candidate
+# Focus performance: 0.1.4 beta
 
 Measured on **8 September 2026**. On one Apple Silicon Mac, the median time from the **helper's first instrumented instruction to acceptance of the activation request** fell from **206 to 141 ms** with the controller running, and from **987 to 399 ms** with the controller stopped. These are internal response timings, not physical Dock click-to-visible, painted-frame, or keyboard-readiness measurements.
 
-The candidate is **0.1.4 (9)**, source [`639fb3d`](https://github.com/kunilingvistador/ProfileDock/commit/639fb3d166180139cc2adeeddada1a6b5f5d9a42). Validation is complete for the scope below; release publication is pending. The local universal ZIP SHA-256 is `402bc9ecc635218044cf62638b99ec33cd01093488b97bb49586de5e7f83c9b1`. The build remains ad-hoc signed and unnotarized.
+The published beta is [**0.1.4 (9)**](https://github.com/kunilingvistador/ProfileDock/releases/tag/v0.1.4-beta), measured source [`639fb3d`](https://github.com/kunilingvistador/ProfileDock/commit/639fb3d166180139cc2adeeddada1a6b5f5d9a42). The release targets merged commit [`d6447b1`](https://github.com/kunilingvistador/ProfileDock/commit/d6447b1d89580310d5b5b726bb9cc76110ec5a7d). Validation covers the scope below. The universal ZIP SHA-256 is `402bc9ecc635218044cf62638b99ec33cd01093488b97bb49586de5e7f83c9b1`. The build remains ad-hoc signed and unnotarized.
 
 ## Results and evidence
 
@@ -42,6 +42,8 @@ These changes were measured together. Component medians overlap or describe diff
 The [exact-source CI run](https://github.com/kunilingvistador/ProfileDock/actions/runs/34228216382) passed all **5 jobs**. Each of four native configurations—macOS 15 and 26 on arm64 and x86_64—passed **55 XCTest tests**, **13 Python analyzer tests**, and **8 compatibility cases / 134 assertions**, plus package checks. The fifth job built the website. Hosted tests do not exercise a user's live Chrome/Dock desktop.
 
 The final local **0.1.4 (9)** ZIP was extracted into a fresh temporary directory and passed **deep strict code-signature verification**. Both controller and helper contained **arm64 and x86_64** binaries. The archive contained no private icons or user settings. These archive checks are separate from the [FinderInfo limitation of live migrated applets](SHORTCUT-COMPATIBILITY.md#checked-for-013-build-6).
+
+After publication, both release assets were downloaded from GitHub into a fresh temporary directory. The ZIP's SHA-256 matched `SHA256SUMS` and the hash above. The extracted app reported **0.1.4, build 9**, passed **deep strict signature verification**, and contained **arm64 and x86_64** in both binaries. This verifies the published archive's integrity; it does not exercise clean-Mac Gatekeeper or fresh Automation permission prompts.
 
 After the candidate checks, all four existing shortcut app paths, root inodes, bundle IDs, and icon bytes matched their baseline. The original `shortcuts.json` hash and Dock GUID order were unchanged. The manager displayed four ready shortcuts; opening an existing shortcut's settings and cancelling also succeeded. No personal shortcut names or paths are included in this record.
 
