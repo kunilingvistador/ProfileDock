@@ -365,10 +365,10 @@ private final class CompatibilitySuite {
         }
         var rootFinderInfo = Data(repeating: 0, count: 32)
         rootFinderInfo[8] = 0x20 // A legacy bundle flag; not a custom Finder icon.
-        let rootResourceFork = Data("legacy bundle resource fork fixture".utf8)
         let rootCustomAttribute = Data("preserve unrelated root attributes".utf8)
         try writeAttribute("com.apple.FinderInfo", data: rootFinderInfo, at: app)
-        try writeAttribute("com.apple.ResourceFork", data: rootResourceFork, at: app)
+        // macOS rejects a resource fork on a directory (EPERM). The real file
+        // resource fork is exercised on applet.icns above instead.
         try writeAttribute("io.github.profiledock.fixture", data: rootCustomAttribute, at: app)
         let original = try snapshot(contents)
         let originalIdentity = try identity(app)
@@ -418,8 +418,8 @@ private final class CompatibilitySuite {
                                           .appendingPathComponent("original-root-attributes.plist"))
         try require(rootAttributes["com.apple.FinderInfo"] as? Data == rootFinderInfo,
                     "Root FinderInfo was not preserved in the backup manifest")
-        try require(rootAttributes["com.apple.ResourceFork"] as? Data == rootResourceFork,
-                    "Root resource fork was not preserved in the backup manifest")
+        try require(rootAttributes["com.apple.ResourceFork"] == nil,
+                    "The backup invented a resource fork absent from the original app root")
         try verifySignature(app)
         let after = try snapshot(directory)
         try require(try !LauncherExporter.upgrade(at: app, shortcut: item,
