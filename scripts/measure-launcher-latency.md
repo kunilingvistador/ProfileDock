@@ -1,16 +1,22 @@
 # Exported launcher → selected window latency
 
+For new Finder/Dock-driven measurements, prefer the [passive observer](observe-focus-latency.md),
+which never opens or activates an app. This older active diagnostic still opens
+the helper itself and reopens the manager before every warm sample. Opening the
+manager can schedule launcher maintenance, so its baseline is not an idle signal.
+
 This standalone diagnostic requires macOS 13+, an interactive logged-in desktop,
-and the Xcode Command Line Tools. It uses AppKit/CoreGraphics only; XCTest and full
-Xcode are unnecessary. It neither reads browser tabs nor sends Chrome AppleEvents.
+and the Xcode Command Line Tools. It uses AppKit/CoreGraphics and the production
+controller resolver; XCTest and full Xcode are unnecessary. It neither reads browser tabs nor sends Chrome AppleEvents.
 Do not run it while another person or automation is operating the desktop.
 
 Compile from the repository root, using a scratch directory outside the source:
 
 ```sh
 mkdir -p /tmp/profiledock-latency-build
-xcrun swiftc -O -swift-version 5 \
+xcrun swiftc -O -parse-as-library -swift-version 5 \
   -module-cache-path /tmp/profiledock-latency-build/modules \
+  Sources/ProfileDockCore/ControllerLocation.swift \
   scripts/measure-launcher-latency.swift \
   -o /tmp/profiledock-latency-build/measure-launcher-latency
 ```
@@ -31,9 +37,14 @@ IDs are included here or saved by the diagnostic.
   --ready-ms 150 > /tmp/profiledock-latency.json
 ```
 
-Replace all three example values. The executable validates the two app bundles,
-the registered/running controller path, and that the target ID belongs to a normal
-Google Chrome window. The target ID may change when a window is recreated.
+Replace all three example values. The executable accepts modern helpers and
+migrated legacy helpers that retain their original bundle identifier and matching
+`ProfileDockLegacyBundleIdentifier` marker. Unconverted AppleScript applets are rejected.
+It validates the controller selected by the same registry/running/Launch Services/
+standard-location/fallback resolver as the production helper, and that the target
+ID belongs to a normal Google Chrome window. A stale Launch Services record alone
+does not override a valid user-selected registry location. The target ID may change
+when a window is recreated. The preflight only reads the registry; it never updates it.
 
 ## What is measured
 

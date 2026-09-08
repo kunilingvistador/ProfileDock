@@ -2,18 +2,38 @@ import AppKit
 import SwiftUI
 import ProfileDockCore
 
-@MainActor final class AppDelegate: NSObject, NSApplicationDelegate {
+@MainActor final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     var model: AppModel!
     private var window: NSWindow!
     private var statusItem: NSStatusItem!
     private var previewPanel: NSPanel?
     private var pendingURLs: [URL] = []
+    private var menuIsDirty = true
+    private var statusRefreshItem: NSMenuItem?
+    private var statusUpdateItem: NSMenuItem?
+    private var managerRefreshTask: Task<Void, Never>?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        PerformanceTrace.record("controller.didFinishLaunching")
         model = AppModel()
-        model.didChange = { [weak self] in self?.rebuildMenu() }
+        PerformanceTrace.record("controller.modelReady")
+        model.didChange = { [weak self] in self?.menuIsDirty = true }
         model.didPreviewWindow = { [weak self] in self?.showPreviewReturn() }
         installMainMenu()
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
+        statusItem.button?.image = NSImage(systemSymbolName: "rectangle.3.group", accessibilityDescription: "ProfileDock")
+        let menu = NSMenu()
+        menu.autoenablesItems = false
+        menu.delegate = self
+        statusItem.menu = menu
+        PerformanceTrace.record("controller.setupReady")
+        if !CommandLine.arguments.contains("--background"), pendingURLs.isEmpty { showWindow() }
+        let queued = pendingURLs; pendingURLs = []
+        if !queued.isEmpty { application(NSApp, open: queued) }
+    }
+
+    private func ensureManagerWindow() {
+        guard window == nil else { return }
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 940, height: 660), styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
         window.title = "ProfileDock"
         window.minSize = NSSize(width: 860, height: 600)
@@ -29,16 +49,11 @@ import ProfileDockCore
             }
         }
         window.center()
-        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
-        statusItem.button?.image = NSImage(systemSymbolName: "rectangle.3.group", accessibilityDescription: "ProfileDock")
-        rebuildMenu()
-        if !CommandLine.arguments.contains("--background"), pendingURLs.isEmpty { showWindow() }
-        if model.permissionGranted, !model.demoMode { Task { await model.refresh() } }
-        let queued = pendingURLs; pendingURLs = []
-        if !queued.isEmpty { application(NSApp, open: queued) }
+        PerformanceTrace.record("controller.uiReady")
     }
 
     func application(_ application: NSApplication, open urls: [URL]) {
+        PerformanceTrace.record("controller.received")
         guard model != nil else { pendingURLs.append(contentsOf: urls); return }
         for url in urls {
             guard let route = ShortcutRoute.parse(url) else { continue }
@@ -61,7 +76,9 @@ import ProfileDockCore
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }
 
     @objc func showWindow() {
-        if let model, !model.demoMode {
+        guard let model else { return }
+        ensureManagerWindow()
+        if !model.demoMode {
             try? ControllerLocationRegistry(directory: model.store.directory).record(controllerURL: Bundle.main.bundleURL)
             // A background Dock click should spend its time focusing the window,
             // not signing other helpers. Maintenance runs when setup is opened.
@@ -69,8 +86,28 @@ import ProfileDockCore
         }
         previewPanel?.orderOut(nil)
         window?.makeKeyAndOrderFront(nil); NSApp.activate(ignoringOtherApps: true)
+        scheduleManagerRefresh()
     }
-    func applicationDidBecomeActive(_ notification: Notification) { previewPanel?.orderOut(nil) }
+    func applicationDidBecomeActive(_ notification: Notification) {
+        previewPanel?.orderOut(nil)
+        scheduleManagerRefresh()
+    }
+    func applicationDidResignActive(_ notification: Notification) {
+        managerRefreshTask?.cancel()
+        managerRefreshTask = nil
+    }
+
+    private func scheduleManagerRefresh() {
+        managerRefreshTask?.cancel()
+        managerRefreshTask = Task { [weak self] in
+            // Showing and activating the manager may both request this refresh.
+            // Coalesce them and do not poll a manager that is behind Chrome.
+            await Task.yield()
+            guard let self, !Task.isCancelled, NSApp.isActive,
+                  self.window?.isVisible == true, self.window?.attachedSheet == nil else { return }
+            await self.model.refreshForManager()
+        }
+    }
 
     private func showPreviewReturn() {
         guard window?.isVisible == true, window?.attachedSheet != nil else { return }
@@ -126,9 +163,17 @@ import ProfileDockCore
         NSApp.mainMenu = bar
     }
 
-    private func rebuildMenu() {
-        guard statusItem != nil else { return }
-        let menu = NSMenu()
+    func menuNeedsUpdate(_ menu: NSMenu) {
+        if menuIsDirty {
+            rebuildMenu(menu)
+            menuIsDirty = false
+        }
+        statusRefreshItem?.isEnabled = !model.demoMode && !model.isBusy
+        statusUpdateItem?.isEnabled = !model.demoMode && !model.isBusy && !model.isMaintainingLaunchers
+    }
+
+    private func rebuildMenu(_ menu: NSMenu) {
+        menu.removeAllItems()
         let show = NSMenuItem(title: L("Open ProfileDock…", "Открыть ProfileDock…"), action: #selector(showWindow), keyEquivalent: ",")
         show.target = self; menu.addItem(show); menu.addItem(.separator())
         for shortcut in model.shortcuts {
@@ -140,17 +185,18 @@ import ProfileDockCore
         if !model.shortcuts.isEmpty { menu.addItem(.separator()) }
         let refresh = NSMenuItem(title: L("Refresh windows", "Обновить окна"), action: #selector(refresh), keyEquivalent: "r")
         refresh.target = self; menu.addItem(refresh)
+        statusRefreshItem = refresh
         let update = NSMenuItem(title: L("Update shortcuts", "Обновить ярлыки"), action: #selector(updateLaunchers), keyEquivalent: "")
         update.target = self
-        update.isEnabled = !model.demoMode && !model.isBusy && !model.isMaintainingLaunchers
         menu.addItem(update)
+        statusUpdateItem = update
         let quit = NSMenuItem(title: L("Quit ProfileDock", "Завершить ProfileDock"), action: #selector(quit), keyEquivalent: "q")
         quit.target = self; menu.addItem(quit)
-        statusItem.menu = menu
     }
 }
 
 MainActor.assumeIsolated {
+    PerformanceTrace.record("controller.start")
     let application = NSApplication.shared
     let delegate = AppDelegate()
     application.delegate = delegate

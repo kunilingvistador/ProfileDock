@@ -70,10 +70,14 @@ jobs:
           PY
       - name: Test core behavior
         run: swift test --scratch-path "$RUNNER_TEMP/ProfileDock-tests"
+      - name: Test performance report analysis
+        run: python3 scripts/test-summarize-focus-traces.py
       - name: Test launcher update and legacy migration compatibility
         run: python3 scripts/test-launcher-compatibility.py
-      - name: Typecheck the standalone performance harness
-        run: xcrun swiftc -typecheck -swift-version 5 scripts/measure-launcher-latency.swift
+      - name: Typecheck the active and passive performance diagnostics
+        run: |
+          xcrun swiftc -typecheck -parse-as-library -swift-version 5 Sources/ProfileDockCore/ControllerLocation.swift scripts/measure-launcher-latency.swift
+          xcrun swiftc -typecheck -parse-as-library -swift-version 5 scripts/observe-focus-latency.swift
       - name: Build ad-hoc development app
         run: |
           if [ "$PACKAGE_KIND" = universal ]; then

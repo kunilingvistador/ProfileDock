@@ -28,14 +28,7 @@ private final class LauncherDelegate: NSObject, NSApplicationDelegate {
             return
         }
 
-        let registry = ControllerLocationRegistry()
-        let installed = NSWorkspace.shared.urlForApplication(withBundleIdentifier: ControllerResolver.bundleID)
-        let running = NSRunningApplication.runningApplications(withBundleIdentifier: ControllerResolver.bundleID)
-            .filter { !$0.isTerminated }.compactMap(\.bundleURL)
-        let fallback = (Bundle.main.object(forInfoDictionaryKey: "ProfileDockControllerPath") as? String)
-            .map { URL(fileURLWithPath: $0, isDirectory: true) }
-        guard let controller = ControllerResolver.resolve(preferred: registry.controllerURL(), running: running,
-                                                           registered: installed, fallback: fallback) else {
+        guard let controller = resolveController() else {
             fail(localize("ProfileDock could not be found. Move ProfileDock to Applications and open it once, then try this shortcut again.", "Не удалось найти ProfileDock. Переместите его в «Программы» и один раз откройте, затем нажмите ярлык снова."))
             return
         }
@@ -44,6 +37,7 @@ private final class LauncherDelegate: NSObject, NSApplicationDelegate {
         configuration.activates = false
         configuration.addsToRecentItems = false
         configuration.arguments = ["--background"]
+        PerformanceTrace.record("helper.request")
         NSWorkspace.shared.open([url], withApplicationAt: controller, configuration: configuration) { [weak self] _, error in
             DispatchQueue.main.async {
                 if let error {
@@ -53,6 +47,22 @@ private final class LauncherDelegate: NSObject, NSApplicationDelegate {
                 }
             }
         }
+    }
+
+    private func resolveController() -> URL? {
+        // controllerURL() already validates the bundle structure and rejects
+        // symlinks. The common case needs no Launch Services/process lookup.
+        if let preferred = ControllerLocationRegistry().controllerURL() { return preferred }
+
+        let running = NSRunningApplication.runningApplications(withBundleIdentifier: ControllerResolver.bundleID)
+            .filter { !$0.isTerminated }.compactMap(\.bundleURL)
+        if let uniqueRunning = ControllerResolver.resolve(preferred: nil, running: running,
+            registered: nil, fallback: nil, standardLocations: []) { return uniqueRunning }
+
+        let installed = NSWorkspace.shared.urlForApplication(withBundleIdentifier: ControllerResolver.bundleID)
+        let fallback = (Bundle.main.object(forInfoDictionaryKey: "ProfileDockControllerPath") as? String)
+            .map { URL(fileURLWithPath: $0, isDirectory: true) }
+        return ControllerResolver.resolve(preferred: nil, running: [], registered: installed, fallback: fallback)
     }
 
     private func fail(_ message: String) {
@@ -68,6 +78,7 @@ private final class LauncherDelegate: NSObject, NSApplicationDelegate {
 }
 
 MainActor.assumeIsolated {
+    PerformanceTrace.record("helper.start")
     let application = NSApplication.shared
     let launcherDelegate = LauncherDelegate()
     application.delegate = launcherDelegate
