@@ -24,7 +24,7 @@ No signing certificate, personal browser data, account name, custom photo, or us
 
 ## 0.1.3 compatibility candidate
 
-This candidate keeps the existing UUID focus route and version-1 state format. It adds controller-location tracking, refreshes existing owned helpers when the manager is opened, and offers explicit conversion of compatible older applets. It does not add an automatic app downloader or change Chrome window names. See [shortcut compatibility and backups](SHORTCUT-COMPATIBILITY.md).
+The [published 0.1.3 beta](https://github.com/kunilingvistador/ProfileDock/releases/tag/v0.1.3-beta) keeps the existing UUID focus route and version-1 state format. It adds controller-location tracking, refreshes existing owned helpers when the manager is opened, and offers explicit conversion of compatible older applets. It does not add an automatic app downloader or change Chrome window names. See [shortcut compatibility and backups](SHORTCUT-COMPATIBILITY.md).
 
 Results recorded on **8 September 2026** for **0.1.3, build 6**:
 
@@ -40,7 +40,7 @@ Results recorded on **8 September 2026** for **0.1.3, build 6**:
 
 **Known limitation:** in iCloud Documents, the app-root FinderInfo flag `0x2000` reappeared after successful installation-time signature verification. Later `codesign --strict` checks failed on those migrated applets, although all four launched correctly. The cause remains under investigation; do not describe these four bundles as permanently passing strict signature verification. See the [compatibility record](SHORTCUT-COMPATIBILITY.md#checked-for-013-build-6) for scope.
 
-[CI run 34223725465](https://github.com/kunilingvistador/ProfileDock/actions/runs/34223725465) completed successfully for source `5b91351`. Its package results apply to the CI-built artifacts, separately from the live migrated applets and their FinderInfo limitation above. Release publication is pending.
+[CI run 34223725465](https://github.com/kunilingvistador/ProfileDock/actions/runs/34223725465) completed successfully for source `5b91351`. Its package results apply to the CI-built artifacts, separately from the live migrated applets and their FinderInfo limitation above. The release ZIP and checksum were downloaded back from GitHub after publication: the hash matched, and the extracted app passed deep strict signature verification. This download check did not exercise a fresh Mac's Gatekeeper or Automation permission prompts.
 
 The current build-6 ZIP has SHA-256:
 

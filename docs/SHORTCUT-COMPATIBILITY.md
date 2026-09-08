@@ -1,6 +1,6 @@
 # Updating ProfileDock and keeping your shortcuts
 
-The 0.1.3 compatibility candidate lets existing shortcuts use the current ProfileDock controller without being recreated. Local compatibility checks, live migration checks, and the full CI run passed; release publication is pending. Results and a known signature-verification limitation are recorded below.
+The [0.1.3 beta compatibility update](https://github.com/kunilingvistador/ProfileDock/releases/tag/v0.1.3-beta) lets existing shortcuts use the current ProfileDock controller without being recreated. Local compatibility checks, live migration checks, and the full CI run passed. Results and a known signature-verification limitation are recorded below.
 
 ## Replace or move the app
 
