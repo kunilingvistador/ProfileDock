@@ -88,6 +88,7 @@ const copy = {
     faqKicker: "ХОРОШИЕ ВОПРОСЫ",
     faqTitle: "Что стоит знать.",
     faq: [
+      ["Можно переключаться с клавиатуры?", "Да. В версии 0.1.6 можно назначить каждому ярлыку свою комбинацию, например ⌥⌘1. Она возвращает то же открытое окно. ProfileDock должен быть запущен в строке меню; назначение необязательное и сохраняется при обновлении."],
       [
         "Это переключатель профилей Chrome или окон?",
         "ProfileDock привязывает каждый ярлык к конкретному открытому окну Chrome. Поэтому можно держать разные профили — или несколько окон одного профиля — и выбирать нужное через Dock.",
@@ -211,6 +212,7 @@ const copy = {
     faqKicker: "GOOD QUESTIONS",
     faqTitle: "A few things to know.",
     faq: [
+      ["Can I switch using the keyboard?", "Yes. Version 0.1.6 lets you assign a combination such as Option–Command–1 to each shortcut. It returns the same existing window. ProfileDock must be running in the menu bar; assignments are optional and persist across updates."],
       [
         "Does it switch Chrome profiles or windows?",
         "Each shortcut connects to a specific open Chrome window. You can keep different profiles, or several windows of the same profile, and choose the one you want from the Dock.",

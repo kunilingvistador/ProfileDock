@@ -9,13 +9,14 @@ private enum DockStyle {
 }
 
 private enum EditorRoute: Identifiable {
-    case create, edit(Shortcut), relink(Shortcut), favicon(Shortcut), help, privacy
+    case create, edit(Shortcut), relink(Shortcut), favicon(Shortcut), hotkey(Shortcut), help, privacy
     var id: String {
         switch self {
         case .create: return "create"
         case .edit(let shortcut): return "edit-\(shortcut.id)"
         case .relink(let shortcut): return "relink-\(shortcut.id)"
         case .favicon(let shortcut): return "favicon-\(shortcut.id)"
+        case .hotkey(let shortcut): return "hotkey-\(shortcut.id)"
         case .help: return "help"
         case .privacy: return "privacy"
         }
@@ -38,6 +39,10 @@ struct ContentView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             header
+            if let error = model.hotKeyStorageError {
+                Label(error, systemImage: "keyboard.badge.ellipsis")
+                    .font(.callout).foregroundStyle(.orange).padding(.horizontal, 28).padding(.bottom, 12)
+            }
             if let notice = model.notice, !notice.isEmpty {
                 noticeBanner(notice)
                     .padding(.horizontal, 28)
@@ -68,6 +73,8 @@ struct ContentView: View {
                 WindowLinkSheet(model: model, shortcut: shortcut)
             case .favicon(let shortcut):
                 FaviconSheet(model: model, shortcut: shortcut)
+            case .hotkey(let shortcut):
+                HotKeyEditor(model: model, shortcut: shortcut)
             case .help:
                 HelpSheet(model: model)
             case .privacy:
@@ -132,6 +139,11 @@ struct ContentView: View {
                         .disabled(model.demoMode || model.isBusy || model.isMaintainingLaunchers)
                     Button(L("Create all Dock shortcuts", "Создать все ярлыки для Dock")) { model.exportAll() }
                         .disabled(model.shortcuts.isEmpty)
+                    Divider()
+                    Toggle(L("Keyboard shortcuts enabled", "Сочетания клавиш включены"), isOn: Binding(
+                        get: { model.hotKeyDocument.enabled }, set: { model.setHotKeysEnabled($0) }))
+                        .disabled(model.hotKeyStorageError != nil)
+                    Button(L("Retry hotkey registration", "Повторить регистрацию сочетаний")) { model.refreshHotKeys() }
                     Divider()
                     Button(L("Data and permissions", "Данные и разрешения")) { route = .privacy }
                     Button(L("Privacy settings", "Настройки разрешений")) { model.openPrivacySettings() }
@@ -413,6 +425,15 @@ struct ContentView: View {
                         .lineLimit(1)
                         .help(shortcut.name)
                     Spacer(minLength: 8)
+                    Button { route = .hotkey(shortcut) } label: {
+                        Label(model.hotKeyDescription(for: shortcut), systemImage: "keyboard")
+                            .font(.system(size: 11, weight: .medium)).padding(.horizontal, 8).padding(.vertical, 5)
+                            .background(Color.secondary.opacity(0.07), in: RoundedRectangle(cornerRadius: 6))
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(model.hotKeyFailures[shortcut.id] == nil ? Color.secondary : Color.orange)
+                    .help(model.hotKeyFailures[shortcut.id] ?? L("Works while ProfileDock is running", "Работает, пока ProfileDock запущен"))
+                    .accessibilityLabel(L("Hotkey for \(shortcut.name): \(model.hotKeyDescription(for: shortcut))", "Сочетание для \(shortcut.name): \(model.hotKeyDescription(for: shortcut))"))
                     StatusBadge(status: status)
                 }
                 HStack(spacing: 16) {
@@ -460,6 +481,7 @@ struct ContentView: View {
             VStack {
                 Menu {
                     Button(L("Edit shortcut…", "Настроить ярлык…")) { route = .edit(shortcut) }
+                    Button(L("Keyboard shortcut…", "Сочетание клавиш…")) { route = .hotkey(shortcut) }
                     Button(L("Choose another window…", "Привязать другое окно…")) { route = .relink(shortcut) }
                     Divider()
                     Button(L("Choose picture…", "Выбрать изображение…")) { model.chooseImage(for: shortcut) }

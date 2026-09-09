@@ -18,12 +18,19 @@ A small, open-source macOS utility for people who keep several Chrome profiles o
 - Previews the selected window before binding, with a small Return to setup panel.
 - Offers local Chrome profile names to make setup easier.
 - Uses a distinct Dock helper for each shortcut, with its own label and icon.
+- Assigns an optional global keyboard shortcut to each saved window; change or remove it from its card.
 - Restores a minimized target and brings that window forward.
 - Reports missing or ambiguous bindings instead of opening a blank window.
 - Keeps Chrome control in one app, so each shortcut does not need its own Automation permission.
 - Refreshes existing compatible Dock helpers when you open ProfileDock after an app update.
 
 The switching command does not open windows or tabs, change the selected tab, or resize/reposition windows. Native focus behavior still needs broader testing across macOS configurations; see [known limits](#known-limits).
+
+## Keyboard shortcuts
+
+Click **Set hotkey** on a shortcut card, click the recording field, press your combination and save. Use at least two modifiers including Command or Control, for example **Option–Command–1**. Assignments are optional and remain attached to the shortcut when you rename it or reconnect its window. No Dock re-export is needed.
+
+ProfileDock must be running in the menu bar. Closing its settings window is fine; quitting the app disables its hotkeys until the next launch. The app does not enable login startup automatically. **More options → Keyboard shortcuts enabled** pauses all assignments without deleting them. See [hotkey behavior and limitations](docs/HOTKEYS.md).
 
 ## How the connection works
 

@@ -1,6 +1,20 @@
 # Validation record
 
-## Current published beta: 0.1.5 (11)
+## Hotkey beta candidate: 0.1.6 (12)
+
+Validated **9 September 2026**. Optional per-shortcut global hotkeys use the existing window-focus path. Settings are stored separately from legacy shortcut records. See [HOTKEYS.md](HOTKEYS.md) for use, conflict handling, privacy and remaining limits.
+
+The first feature commit passed [CI 34356208396](https://github.com/kunilingvistador/ProfileDock/actions/runs/34356208396): all five jobs, including macOS 15/26 on arm64/x86_64. Each native job passed **84 XCTest tests**, including seven new hotkey tests; the Python analyzer and launcher compatibility suites also passed. This run preceded final editor-validation, menu-conflict and keyboard-layout notification refinements. Release publication requires passing CI for the final source too; its run is linked in the release notes.
+
+The final local universal candidate ZIP has SHA-256 `bd544c37f4f56b7c61aae74e2450ed7a8411b429e54a62611c12b8006a64ae7e`. A fresh extraction passed CRC, **0.1.6 / build 12 / macOS 13 minimum**, **arm64 and x86_64 in both binaries**, and deep strict signature verification. Standard macOS ZIP metadata is present; private user settings and icons are not packaged. The app remains ad-hoc signed and unnotarized.
+
+Live checks on one Apple Silicon Mac covered assigning a combination through the native recorder to a temporary Chrome window and triggering it with a physical keyboard from another app. The tester confirmed the intended window appeared. One diagnostic sample measured **53.5 ms from hotkey callback to focus acceptance**, not keypress-to-visible latency or a performance distribution. The assignment also reloaded in the UI after quitting and reopening the candidate. An app-directed synthetic keypress did not reproduce the physical global-key event and is not used as evidence of global dispatch.
+
+Local TypeScript, production website build and static export checks passed for all eight pages and **194 local references and anchors**. Local Python checks passed 13 analyzer tests and eight compatibility cases / 134 assertions. The local Command Line Tools installation lacks XCTest; the standard XCTest results above come from full-Xcode CI runners.
+
+Hosted tests do not establish physical Intel keyboard/Chrome behavior. Secure Input, sleep/wake with physical input, other keyboard layouts, full-screen/Spaces, multiple displays, clean-Mac permissions and Gatekeeper remain separate live checks. Conflict detection does not discover every shortcut mechanism used by every other app. Hotkeys require ProfileDock to be running; automatic login startup is not included.
+
+## Historical published beta: 0.1.5 (11)
 
 Validated **8 September 2026**, exact application and website source [`addbc13`](https://github.com/kunilingvistador/ProfileDock/commit/addbc132f018310a713642cac32c3e58e08e9c9b). Published as [v0.1.5-beta](https://github.com/kunilingvistador/ProfileDock/releases/tag/v0.1.5-beta), targeting merged commit [`0fc79dd`](https://github.com/kunilingvistador/ProfileDock/commit/0fc79dd40542e9e210eb9aa21be9ac4a1c0e15db). It remains ad-hoc signed and unnotarized.
 
