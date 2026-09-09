@@ -16,7 +16,7 @@ const descriptions = {
   ru: {
     title: "ProfileDock — ярлыки профилей Chrome в Dock на Mac",
     description:
-      "Добавьте профили Chrome отдельными ярлыками в Dock на Mac. Свои фотографии и значки, переключение на выбранные открытые окна. Бесплатно, с открытым кодом.",
+      "Переключайте окна профилей Chrome на Mac через отдельные ярлыки в Dock и горячие клавиши. Свои фотографии и значки. Бесплатно, с открытым кодом.",
     imageAlt: "ProfileDock: узнаваемые ярлыки для открытых окон Chrome в Dock на Mac",
     locale: "ru_RU",
     alternateLocale: "en_US",
@@ -24,7 +24,7 @@ const descriptions = {
   en: {
     title: "ProfileDock — Chrome Profile Shortcuts for Mac",
     description:
-      "Give each Chrome profile its own Mac Dock shortcut with a custom photo or icon. Bring your chosen open window forward in one click. Free and open source.",
+      "Switch Chrome profile windows on Mac with separate Dock shortcuts and global hotkeys. Custom photos and icons for your existing windows. Free and open source.",
     imageAlt: "ProfileDock: familiar Dock shortcuts for existing Chrome windows on Mac",
     locale: "en_US",
     alternateLocale: "ru_RU",
@@ -51,6 +51,7 @@ export function metadataFor(language: SiteLanguage, content?: ContentMetadata): 
     title: copy.title,
     description: copy.description,
     applicationName: "ProfileDock",
+    verification: { google: "myorIcY7TEsKKiQC5rc_fySB15tRPSfyGuDogpgtzfI" },
     alternates: {
       canonical: urls[language],
       languages: { ru: urls.ru, en: urls.en, "x-default": urls.ru },

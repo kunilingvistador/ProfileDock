@@ -125,7 +125,7 @@ const copy = {
     closing: "Меньше искать.\nПроще переключаться.",
     closingText: "Маленькое удобство, которое остаётся с вами весь день.",
     feedback: "Предложить улучшение",
-    privacy: "Локальные настройки. Без аналитики.",
+    privacy: "Приложение работает локально.",
     privacyLabel: "Данные и разрешения",
     privacyTitle: "Ваш браузер.\nВаши данные.",
     privacyIntro: "ProfileDock не отправляет данные Chrome разработчикам. Доступ нужен самому приложению на вашем Mac, чтобы находить и поднимать окна.",
@@ -249,7 +249,7 @@ const copy = {
     closing: "Less window hunting.\nMore familiar switching.",
     closingText: "A small convenience that stays with you all day.",
     feedback: "Suggest an improvement",
-    privacy: "Local settings. No analytics.",
+    privacy: "The Mac app works locally.",
     privacyLabel: "Data and permissions",
     privacyTitle: "Your browser.\nYour data.",
     privacyIntro: "ProfileDock does not send Chrome data to its developers. The app on your Mac needs access to find and bring forward your windows.",
@@ -534,6 +534,12 @@ export default function Landing({ initialLanguage }: { initialLanguage: "ru" | "
             <p>{t.privacyHost} <a href="https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages#data-collection">GitHub Pages ↗</a></p>
           </div>
         </section>
+        <section className="wrap website-analytics-note" id="website-analytics" aria-labelledby="website-analytics-title">
+          <h2 id="website-analytics-title">{initialLanguage === "ru" ? "Аналитика этого сайта" : "Analytics on this website"}</h2>
+          <p>{initialLanguage === "ru" ? "На сайте используется Google Analytics 4 только после вашего согласия. Измеряются посещения страниц и нажатия на ссылки скачивания. Это не подтверждение установки приложения. Google получает страницу, источник перехода, данные браузера и устройства и cookie-идентификатор; IP-адрес используется при обработке запроса. До согласия код Google не загружается." : "This website uses Google Analytics 4 only after you consent. It measures page visits and clicks on download links, not completed app installations. Google receives page and referral details, browser and device information and a cookie identifier; your IP address is used when processing the request. Google’s code does not load before consent."}</p>
+          <p>{initialLanguage === "ru" ? "Мы исключаем параметры и фрагменты адресов страниц и передаём только домен источника перехода. Рекламные сигналы и персонализация отключены. Выбор хранится до 180 дней. Через кнопку «Настройки аналитики» можно отказаться: дальнейшая отправка остановится, cookies этого счётчика будут удалены, страница перезагрузится. Уже отправленные данные этим действием не удаляются. Данные профилей и окон Chrome сюда не поступают: в приложении для Mac аналитики нет." : "We exclude page query strings and fragments and send only the referral origin. Advertising signals and personalization are disabled. Your choice lasts up to 180 days. Use Analytics settings to decline: further sending stops, this tracker’s cookies are cleared and the page reloads. This does not delete data already sent. Chrome profile and window data is not collected here; the Mac app has no analytics."}</p>
+          <a className="text-link" href="https://policies.google.com/privacy">{initialLanguage === "ru" ? "Политика конфиденциальности Google" : "Google Privacy Policy"}</a>
+        </section>
         <section className="guides-teaser wrap" aria-labelledby="guides-title">
           <div className="guides-teaser-heading">
             <div>
@@ -552,6 +558,11 @@ export default function Landing({ initialLanguage }: { initialLanguage: "ru" | "
               <h3>{initialLanguage === "ru" ? "Как вернуться к нужному открытому окну" : "Return to the right existing window"}</h3>
               <p>{initialLanguage === "ru" ? "Почему запуск профиля и переключение окна отличаются. Что делать после закрытия окна или перезапуска Chrome." : "Why launching a profile and switching windows differ. What to do after closing a window or restarting Chrome."}</p>
               <a className="text-link" href={`${home}guides/chrome-shortcut-existing-window/`}>{initialLanguage === "ru" ? "Проверить привязку" : "Check the connection"}<ArrowRight size={17} aria-hidden="true" /></a>
+            </article>
+            <article>
+              <h3>{initialLanguage === "ru" ? "Переключение профилей Chrome с клавиатуры" : "Switch Chrome profiles with a keyboard shortcut"}</h3>
+              <p>{initialLanguage === "ru" ? "Назначьте сочетание нужному окну. Настройка, занятые клавиши и работа после перезапуска." : "Assign a combination to your chosen window. Setup, conflicts and what happens after a restart."}</p>
+              <a className="text-link" href={`${home}guides/switch-chrome-profiles-keyboard-mac/`}>{initialLanguage === "ru" ? "Настроить хоткей" : "Set up a hotkey"}<ArrowRight size={17} aria-hidden="true" /></a>
             </article>
           </div>
         </section>

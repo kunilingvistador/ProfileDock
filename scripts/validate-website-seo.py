@@ -22,6 +22,10 @@ PAGE_GROUPS = {
         'ru': SITE + 'guides/chrome-profile-shortcuts-mac-dock/',
         'en': SITE + 'en/guides/chrome-profile-shortcuts-mac-dock/',
     },
+    'hotkeys': {
+        'ru': SITE + 'guides/switch-chrome-profiles-keyboard-mac/',
+        'en': SITE + 'en/guides/switch-chrome-profiles-keyboard-mac/',
+    },
     'reconnect': {
         'ru': SITE + 'guides/chrome-shortcut-existing-window/',
         'en': SITE + 'en/guides/chrome-shortcut-existing-window/',
@@ -131,6 +135,9 @@ def single_meta(document: Document, key: str, page: str) -> str:
 
 
 def validate(root: Path):
+    analytics = local_target(root, SITE + 'analytics.js')
+    require(analytics is not None, 'Missing first-party analytics consent runtime')
+    require("const id = 'G-VTDFFJ1TWQ';" in analytics.read_text(encoding='utf-8'), 'Missing actual ProfileDock measurement ID')
     rendered: dict[str, Document] = {}
     reference_count = 0
     for key, page in PAGES.items():
@@ -139,6 +146,9 @@ def validate(root: Path):
         target = local_target(root, page)
         require(target is not None, f'No HTML for {page}')
         document = Document(target.read_text(encoding='utf-8'))
+        require(single_meta(document, 'google-site-verification', page) == 'myorIcY7TEsKKiQC5rc_fySB15tRPSfyGuDogpgtzfI', f'{page}: missing Search Console verification token')
+        require(PREFIX + 'analytics.js' in document.references, f'{page}: missing consent runtime')
+        require(not any(urlparse(ref).netloc.endswith(('googletagmanager.com', 'google-analytics.com')) for ref in document.references), f'{page}: Google resources must load only after consent')
         rendered[key] = document
         require(document.language == language, f'{page}: initial HTML lang must be {language}')
         require(document.title_count == 1 and bool(''.join(document.title_parts).strip()), f'{page}: expected one title')
@@ -195,6 +205,24 @@ def validate(root: Path):
             if local_target(root, absolute) is not None:
                 reference_count += 1
         print(f'PASS {key}: static content, metadata, paired language link, structured data and local assets')
+
+    titles = [''.join(document.title_parts).strip() for document in rendered.values()]
+    descriptions = [document.meta['description'][0].strip() for document in rendered.values()]
+    require(len(set(titles)) == len(titles), 'Canonical pages must have distinct titles')
+    require(len(set(descriptions)) == len(descriptions), 'Canonical pages must have distinct descriptions')
+    # Discover pages from actual HTML links, not merely their sitemap membership.
+    by_url = {PAGES[key]: document for key, document in rendered.items()}
+    visited, pending = set(), [SITE]
+    while pending:
+        url = pending.pop()
+        if url in visited:
+            continue
+        visited.add(url)
+        for href in by_url[url].anchors:
+            absolute = urljoin(url, href).split('#')[0].split('?')[0]
+            if absolute in by_url and absolute not in visited:
+                pending.append(absolute)
+    require(visited == set(PAGES.values()), f'Orphan canonical pages: {set(PAGES.values()) - visited}')
 
     for group in PAGE_GROUPS:
         require(rendered[f'{group}:ru'].text != rendered[f'{group}:en'].text, f'{group}: language routes rendered identical content')
