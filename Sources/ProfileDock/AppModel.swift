@@ -20,6 +20,17 @@ import ProfileDockCore
     @Published var launcherMaintenanceNotice: String?
     @Published var launcherMaintenanceFailures: [String] = []
 
+    @Published var hotKeyDocument = HotKeyDocument()
+    @Published var hotKeyFailures: [UUID: String] = [:]
+    @Published var hotKeyStorageError: String?
+    @Published var hotKeyRevision = 0
+    var didInvokeHotKey: ((UUID) -> Void)?
+    private var hotKeyCoordinator: HotKeyCoordinator?
+    private var hotKeyBackend: CarbonHotKeyBackend?
+    private var hotKeyReadOnly = false
+    private var recordingHotKey = false
+    private var hotKeysSleeping = false
+
     let service = ChromeService()
     let store: ShortcutStore
     let demoMode: Bool
@@ -35,7 +46,7 @@ import ProfileDockCore
     private var iconCache: [UUID: CachedIcon] = [:]
 
     init() {
-        demoMode = CommandLine.arguments.contains("--demo")
+        demoMode = CommandLine.arguments.contains("--demo") || Bundle.main.bundleIdentifier == "io.github.profiledock.preview"
         let base = demoMode
             ? FileManager.default.temporaryDirectory.appendingPathComponent("ProfileDock-Preview-\(ProcessInfo.processInfo.processIdentifier)")
             : FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("ProfileDock")
@@ -54,6 +65,83 @@ import ProfileDockCore
             permissionGranted = UserDefaults.standard.bool(forKey: "ChromePermissionGranted")
         }
         selectedShortcutID = shortcuts.first?.id
+    }
+
+    func startHotKeys() {
+        guard !demoMode else { return }
+        let backend = CarbonHotKeyBackend()
+        hotKeyBackend = backend
+        let disk = HotKeyStore(directory: store.directory)
+        do { hotKeyDocument = try disk.load() }
+        catch {
+            hotKeyReadOnly = true
+            hotKeyStorageError = L("Saved hotkeys could not be loaded. Dock shortcuts still work; the original file has been preserved.", "Не удалось прочитать сохранённые сочетания. Ярлыки Dock продолжают работать; исходный файл сохранён.")
+        }
+        do {
+            let coordinator = try HotKeyCoordinator(document: hotKeyDocument, knownIDs: Set(shortcuts.map(\.id)),
+                backend: backend, persist: { try disk.save($0) })
+            hotKeyCoordinator = coordinator
+            coordinator.onInvoke = { [weak self] id in
+                PerformanceTrace.record("hotkey.received")
+                self?.didInvokeHotKey?(id)
+            }
+            backend.onEvent = { [weak coordinator] token, down in coordinator?.receive(token: token, isDown: down) }
+            coordinator.reconcile()
+            updateHotKeyState()
+        } catch { hotKeyReadOnly = true; hotKeyStorageError = hotKeyErrorText(error) }
+    }
+    func stopHotKeys() { hotKeyCoordinator?.stop(); hotKeyBackend?.shutdown() }
+    func suspendHotKeys() { recordingHotKey = true; hotKeyCoordinator?.suspend() }
+    func resumeHotKeys() {
+        recordingHotKey = false
+        if !hotKeysSleeping { hotKeyCoordinator?.resume(); updateHotKeyState() }
+    }
+    func hotKeysWillSleep() { hotKeysSleeping = true; hotKeyCoordinator?.suspend() }
+    func hotKeysDidWake() {
+        hotKeysSleeping = false
+        if !recordingHotKey { hotKeyCoordinator?.resume(); updateHotKeyState() }
+    }
+    func refreshHotKeys() {
+        hotKeyCoordinator?.knownIDs = Set(shortcuts.map(\.id))
+        hotKeyCoordinator?.reconcile(); updateHotKeyState()
+    }
+    private func updateHotKeyState() {
+        if let coordinator = hotKeyCoordinator {
+            hotKeyDocument = coordinator.document
+            hotKeyFailures = coordinator.failures.mapValues { hotKeyErrorText($0) }
+        }
+        hotKeyRevision += 1; didChange?()
+    }
+    func hotKeyDescription(for shortcut: Shortcut) -> String {
+        guard let key = hotKeyDocument.hotKey(for: shortcut.id) else { return L("Set hotkey", "Назначить сочетание") }
+        let suffix = !hotKeyDocument.enabled ? L(" · Off", " · Выкл.") : hotKeyFailures[shortcut.id] != nil ? " ⚠" : ""
+        return key.display + suffix
+    }
+    func saveHotKey(_ key: HotKey?, for id: UUID) -> String? {
+        guard !hotKeyReadOnly else { return hotKeyStorageError }
+        guard shortcuts.contains(where: { $0.id == id }) else { return L("Shortcut no longer exists.", "Ярлык больше не существует.") }
+        if let key {
+            guard key.isValid else { return hotKeyErrorText(HotKeyError.invalidData) }
+            if let other = hotKeyDocument.assignments.first(where: { $0.shortcutID != id && $0.hotKey == key }) {
+                let name = shortcuts.first(where: { $0.id == other.shortcutID })?.name ?? L("a saved shortcut", "сохранённого ярлыка")
+                return L("Already assigned to \(name). Choose another combination.", "Уже назначено для «\(name)». Выберите другое сочетание.")
+            }
+            if CarbonHotKeyBackend.isReserved(key) { return hotKeyErrorText(HotKeyError.reserved) }
+        }
+        let next = hotKeyDocument.assigning(key, to: id)
+        do {
+            if demoMode { hotKeyDocument = next; didChange?() }
+            else { try hotKeyCoordinator?.apply(next); updateHotKeyState() }
+            return nil
+        } catch { return hotKeyErrorText(error) }
+    }
+    func setHotKeysEnabled(_ enabled: Bool) {
+        guard !hotKeyReadOnly else { return }
+        var next = hotKeyDocument; next.enabled = enabled
+        do {
+            if demoMode { hotKeyDocument = next; didChange?() }
+            else { try hotKeyCoordinator?.apply(next); updateHotKeyState() }
+        } catch { errorMessage = hotKeyErrorText(error) }
     }
 
     func status(for shortcut: Shortcut) -> ShortcutStatus {
@@ -250,6 +338,10 @@ import ProfileDockCore
         errorMessage = nil
         do {
             try commit(shortcuts.filter { $0.id != shortcut.id })
+            if !hotKeyReadOnly {
+                do { try hotKeyCoordinator?.apply(hotKeyDocument.assigning(nil, to: shortcut.id)); updateHotKeyState() }
+                catch { hotKeyStorageError = hotKeyErrorText(error) }
+            }
             if selectedShortcutID == shortcut.id { selectedShortcutID = shortcuts.first?.id }
             notice = L("Removed from ProfileDock. You can drag its old icon out of Dock. The Chrome window is still open.", "Ярлык удалён из ProfileDock. Его старый значок можно убрать из Dock. Окно Chrome осталось открытым.")
         } catch { handle(error) }
@@ -405,7 +497,7 @@ import ProfileDockCore
         try ensureWritable(); try store.save(items)
         let retainedIDs = Set(items.map(\.id))
         iconCache = iconCache.filter { retainedIDs.contains($0.key) }
-        shortcuts = items; didChange?()
+        shortcuts = items; refreshHotKeys(); didChange?()
     }
     private func saveIcon(_ image: NSImage, for shortcut: Shortcut) throws {
         try ensureWritable()

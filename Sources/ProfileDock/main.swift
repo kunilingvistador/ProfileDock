@@ -20,6 +20,15 @@ import ProfileDockCore
         model.didChange = { [weak self] in self?.menuIsDirty = true }
         model.didPreviewWindow = { [weak self] in self?.showPreviewReturn() }
         installMainMenu()
+        model.didInvokeHotKey = { [weak self] id in
+            guard let self, let shortcut = self.model.shortcuts.first(where: { $0.id == id }) else { return }
+            Task { await self.model.switchTo(shortcut); if self.model.errorMessage != nil { self.showWindow() } }
+        }
+        model.startHotKeys()
+        NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(recoverHotKeys), name: NSWorkspace.didWakeNotification, object: nil)
+        NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(pauseHotKeys), name: NSWorkspace.willSleepNotification, object: nil)
+        DistributedNotificationCenter.default().addObserver(self, selector: #selector(layoutChanged),
+            name: Notification.Name("com.apple.Carbon.TISNotifySelectedKeyboardInputSourceChanged"), object: nil)
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         statusItem.button?.image = NSImage(systemSymbolName: "rectangle.3.group", accessibilityDescription: "ProfileDock")
         let menu = NSMenu()
@@ -135,6 +144,10 @@ import ProfileDockCore
         }
         panel.makeKeyAndOrderFront(nil)
     }
+    @objc func recoverHotKeys() { model?.hotKeysDidWake() }
+    @objc func pauseHotKeys() { model?.hotKeysWillSleep() }
+    @objc func layoutChanged() { model?.hotKeyRevision += 1; menuIsDirty = true }
+    func applicationWillTerminate(_ notification: Notification) { model?.stopHotKeys() }
     @objc func quit() { NSApp.terminate(nil) }
     @objc func refresh() { Task { await model.refresh() } }
     @objc func updateLaunchers() { model.updateLaunchers() }
@@ -177,7 +190,8 @@ import ProfileDockCore
         let show = NSMenuItem(title: L("Open ProfileDock…", "Открыть ProfileDock…"), action: #selector(showWindow), keyEquivalent: ",")
         show.target = self; menu.addItem(show); menu.addItem(.separator())
         for shortcut in model.shortcuts {
-            let item = NSMenuItem(title: shortcut.name, action: #selector(focusMenuItem(_:)), keyEquivalent: "")
+            let hotKeyLabel = model.hotKeyDocument.hotKey(for: shortcut.id) == nil ? "" : "  \(model.hotKeyDescription(for: shortcut))"
+            let item = NSMenuItem(title: shortcut.name + hotKeyLabel, action: #selector(focusMenuItem(_:)), keyEquivalent: "")
             item.representedObject = shortcut.id; item.target = self
             let image = model.icon(for: shortcut)?.copy() as? NSImage; image?.size = NSSize(width: 20, height: 20)
             item.image = image; menu.addItem(item)
