@@ -27,7 +27,7 @@ import ProfileDockCore
             Text(L("Return to this shortcut’s existing Chrome window from another app.", "Возвращайтесь к привязанному окну Chrome из другого приложения."))
                 .font(.callout).foregroundStyle(.secondary)
             HotKeyRecorder(key: candidate, onChange: { key in
-                candidate = key; message = nil; hasChanges = true
+                candidate = key; message = model.validateHotKey(key, for: shortcut.id); hasChanges = true
             }, onError: { message = $0 })
                 .frame(height: 52)
             Text(L("Click the field, then press a key with at least two modifiers, including ⌘ or ⌃. Example: ⌥⌘1. Esc cancels recording.", "Нажмите на поле и введите клавишу с минимум двумя модификаторами, включая ⌘ или ⌃. Например: ⌥⌘1. Esc отменяет запись."))
@@ -55,7 +55,7 @@ import ProfileDockCore
                     else { dismiss() }
                 }
                 .buttonStyle(.borderedProminent).keyboardShortcut(.defaultAction)
-                .disabled(!hasChanges || model.hotKeyStorageError != nil)
+                .disabled(!hasChanges || message != nil || model.hotKeyStorageError != nil)
             }
         }
         .padding(26).frame(width: 535).fixedSize(horizontal: false, vertical: true)

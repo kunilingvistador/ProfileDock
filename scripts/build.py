@@ -37,10 +37,11 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--scratch-path", type=Path,
                         help="SwiftPM cache outside the repository (default: system temp directory)")
+    parser.add_argument("--output-dir", type=Path, help="Package destination; defaults to dist in the repository")
     parser.add_argument("--universal", action="store_true",
                         help="Build arm64 and x86_64, then combine them with lipo")
     parser.add_argument("--identity", help="Installed Developer ID Application signing identity")
-    parser.add_argument("--version", default="0.1.5", help="Numeric app version, default: 0.1.5")
+    parser.add_argument("--version", default="0.1.6", help="Numeric app version, default: 0.1.6")
     parser.add_argument("--build-number", default="1", help="Numeric build number, default: 1")
     args = parser.parse_args()
     if not re.fullmatch(r"\d+\.\d+\.\d+", args.version):
@@ -103,7 +104,7 @@ def main() -> None:
         raise RuntimeError(f"Unsupported build architecture: {architecture}")
     architectures = ["arm64", "x86_64"] if args.universal else [architecture]
     binaries = build_products(scratch, architectures)
-    dist = REPO / "dist"
+    dist = (args.output_dir or REPO / "dist").resolve()
     dist.mkdir(exist_ok=True)
     final_app = dist / "ProfileDock.app"
     validate_old_app(final_app)

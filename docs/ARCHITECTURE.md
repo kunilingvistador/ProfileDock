@@ -5,6 +5,7 @@ ProfileDock uses one native controller and lightweight Dock helpers. Its central
 ```mermaid
 flowchart LR
   D[Named Dock helper] -->|binding UUID| C[ProfileDock controller]
+  K[Registered global hotkey] -->|binding UUID| C
   P[Chrome Local State] -->|read profile labels| C
   C -->|serialized Apple events| W[Existing named Chrome window]
   C --> S[Local settings and icons]
@@ -53,3 +54,9 @@ Compare tab counts/IDs, selected tabs, geometry, minimized states, and the relat
 ## Distribution boundaries
 
 The packaging script creates a native app and ZIP with Command Line Tools. Ad-hoc signing is useful for local development. A public consumer release needs a stable Developer ID identity, Hardened Runtime, and notarization. Keep profile-specific configuration and icons outside the signed controller. See [RELEASE.md](RELEASE.md).
+
+## Global hotkeys (0.1.6)
+
+`HotKeyCoordinator` validates a separate `hotkeys.json` document, reconciles known binding UUIDs with a registration adapter, and preserves working registrations if a new registration or disk commit fails. Unknown UUIDs never invoke an action. `CarbonHotKeyBackend` registers selected combinations exclusively through RegisterEventHotKey and delivers pressed/released identifiers on the main actor. It does not monitor the global stream of typed text. The recorder is an AppKit button receiving keys only while focused in the editor; registrations are temporarily released while that editor is open.
+
+Hotkey invocation calls the same `AppModel.switchTo` / `ChromeService.focus` path as the Dock route. No helper launch, URL delivery, profile refresh, or successful manager presentation is involved. Repeat presses are suppressed until release. Sleep and recording suspension are tracked separately; wake must not enable shortcuts while recording. Assignment storage is separate from the version-1 shortcut file so an older controller does not discard it when saving names or bindings.

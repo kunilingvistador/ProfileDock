@@ -1,4 +1,5 @@
 import AppKit
+import Carbon
 import SwiftUI
 import ProfileDockCore
 
@@ -28,7 +29,7 @@ import ProfileDockCore
         NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(recoverHotKeys), name: NSWorkspace.didWakeNotification, object: nil)
         NSWorkspace.shared.notificationCenter.addObserver(self, selector: #selector(pauseHotKeys), name: NSWorkspace.willSleepNotification, object: nil)
         DistributedNotificationCenter.default().addObserver(self, selector: #selector(layoutChanged),
-            name: Notification.Name("com.apple.Carbon.TISNotifySelectedKeyboardInputSourceChanged"), object: nil)
+            name: Notification.Name(kTISNotifySelectedKeyboardInputSourceChanged as String), object: nil)
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         statusItem.button?.image = NSImage(systemSymbolName: "rectangle.3.group", accessibilityDescription: "ProfileDock")
         let menu = NSMenu()

@@ -94,7 +94,9 @@ extension HotKey {
             guard let menu else { return false }
             return menu.items.contains { item in
                 if menuContains(item.submenu) { return true }
-                return !item.keyEquivalent.isEmpty && HotKey.modifiers(item.keyEquivalentModifierMask) == key.modifiers &&
+                var modifiers = HotKey.modifiers(item.keyEquivalentModifierMask)
+                if item.keyEquivalent != item.keyEquivalent.lowercased() { modifiers |= HotKey.shift }
+                return !item.keyEquivalent.isEmpty && modifiers == key.modifiers &&
                     [key.keyLabel.lowercased(), HotKey.keyLabels[key.keyCode]?.lowercased()].contains(item.keyEquivalent.lowercased())
             }
         }

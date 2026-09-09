@@ -117,7 +117,7 @@ import ProfileDockCore
         let suffix = !hotKeyDocument.enabled ? L(" · Off", " · Выкл.") : hotKeyFailures[shortcut.id] != nil ? " ⚠" : ""
         return key.display + suffix
     }
-    func saveHotKey(_ key: HotKey?, for id: UUID) -> String? {
+    func validateHotKey(_ key: HotKey?, for id: UUID) -> String? {
         guard !hotKeyReadOnly else { return hotKeyStorageError }
         guard shortcuts.contains(where: { $0.id == id }) else { return L("Shortcut no longer exists.", "Ярлык больше не существует.") }
         if let key {
@@ -128,6 +128,10 @@ import ProfileDockCore
             }
             if CarbonHotKeyBackend.isReserved(key) { return hotKeyErrorText(HotKeyError.reserved) }
         }
+        return nil
+    }
+    func saveHotKey(_ key: HotKey?, for id: UUID) -> String? {
+        if let error = validateHotKey(key, for: id) { return error }
         let next = hotKeyDocument.assigning(key, to: id)
         do {
             if demoMode { hotKeyDocument = next; didChange?() }
