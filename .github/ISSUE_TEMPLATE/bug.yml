@@ -1,0 +1,49 @@
+name: Report a problem / Сообщить об ошибке
+description: Help reproduce a setup, shortcut, or window-switching problem.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for trying ProfileDock. This report will be public. Please remove account addresses, private page contents, personal paths and window titles from text and screenshots. Russian and English are both welcome.
+        Спасибо за проверку ProfileDock. Отчёт будет публичным: уберите адреса аккаунтов, личные страницы, пути и заголовки окон. Можно писать по-русски.
+  - type: input
+    id: versions
+    attributes:
+      label: Versions / Версии
+      description: macOS, Google Chrome, and ProfileDock versions. Do not paste your Chrome profile path.
+      placeholder: "macOS 26, Chrome 152, ProfileDock 0.1.5"
+    validations:
+      required: true
+  - type: dropdown
+    id: architecture
+    attributes:
+      label: Mac processor / Процессор
+      options:
+        - Apple Silicon
+        - Intel
+        - Not sure / Не знаю
+  - type: dropdown
+    id: stage
+    attributes:
+      label: Where did it happen? / На каком шаге?
+      options:
+        - Download or first launch / Загрузка или первый запуск
+        - Chrome permission / Разрешение Chrome
+        - Choosing a window / Выбор окна
+        - Dock shortcut / Ярлык в Dock
+        - Switching to an existing window / Переключение окна
+        - Updating the app / Обновление
+        - Something else / Другое
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: What happened? / Что произошло?
+      description: List the steps, what you expected, and what actually happened. Mention fullscreen, Spaces, or multiple displays only if relevant.
+    validations:
+      required: true
+  - type: textarea
+    id: error
+    attributes:
+      label: Error message / Текст ошибки
+      description: Optional. Redact private information. No full browser logs or personal screenshots are needed.

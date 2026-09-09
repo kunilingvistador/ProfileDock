@@ -15,7 +15,19 @@ import xml.etree.ElementTree as ET
 
 SITE = 'https://kunilingvistador.github.io/ProfileDock/'
 PREFIX = '/ProfileDock/'
-PAGES = {'ru': SITE, 'en': SITE + 'en/'}
+PAGE_GROUPS = {
+    'home': {'ru': SITE, 'en': SITE + 'en/'},
+    'guides': {'ru': SITE + 'guides/', 'en': SITE + 'en/guides/'},
+    'setup': {
+        'ru': SITE + 'guides/chrome-profile-shortcuts-mac-dock/',
+        'en': SITE + 'en/guides/chrome-profile-shortcuts-mac-dock/',
+    },
+    'reconnect': {
+        'ru': SITE + 'guides/chrome-shortcut-existing-window/',
+        'en': SITE + 'en/guides/chrome-shortcut-existing-window/',
+    },
+}
+PAGES = {f'{group}:{language}': url for group, pages in PAGE_GROUPS.items() for language, url in pages.items()}
 REPO = Path(__file__).resolve().parents[1]
 
 
@@ -33,6 +45,7 @@ class Document(HTMLParser):
         self.meta: dict[str, list[str]] = defaultdict(list)
         self.links: list[dict[str, str]] = []
         self.anchors: list[str] = []
+        self.ids: set[str] = set()
         self.references: set[str] = set()
         self.jsonld: list[str] = []
         self.json_buffer: list[str] | None = None
@@ -42,6 +55,8 @@ class Document(HTMLParser):
         data = {key: value or '' for key, value in attrs}
         if tag == 'html':
             self.language = data.get('lang')
+        if data.get('id'):
+            self.ids.add(data['id'])
         if tag == 'head':
             self.in_head = True
         if tag == 'title' and self.in_head:
@@ -96,8 +111,7 @@ def local_target(root: Path, absolute_url: str) -> Path | None:
     relative = unquote(parsed.path.removeprefix(PREFIX))
     # Vinext emits prefixed assets before the Pages copy normalizes the tree.
     candidates = [root / relative, root / 'ProfileDock' / relative]
-    # Before the Pages copy, Vinext exports /en as en.html; /en/ is served by
-    # en/index.html in the copied GitHub Pages tree.
+    # Normalize flat Vinext route exports to directory URLs in the Pages copy.
     if relative.endswith('/') and relative:
         candidates.append(root / (relative.rstrip('/') + '.html'))
     for candidate in candidates:
@@ -119,11 +133,13 @@ def single_meta(document: Document, key: str, page: str) -> str:
 def validate(root: Path):
     rendered: dict[str, Document] = {}
     reference_count = 0
-    for language, page in PAGES.items():
+    for key, page in PAGES.items():
+        group, language = key.split(':')
+        pair = PAGE_GROUPS[group]
         target = local_target(root, page)
         require(target is not None, f'No HTML for {page}')
         document = Document(target.read_text(encoding='utf-8'))
-        rendered[language] = document
+        rendered[key] = document
         require(document.language == language, f'{page}: initial HTML lang must be {language}')
         require(document.title_count == 1 and bool(''.join(document.title_parts).strip()), f'{page}: expected one title')
         require(document.h1_count == 1, f'{page}: expected one visible document h1')
@@ -134,38 +150,69 @@ def validate(root: Path):
         canonicals = [link.get('href') for link in document.links if link.get('rel') == 'canonical']
         require(canonicals == [page], f'{page}: expected one self canonical, got {canonicals}')
         alternates = [link for link in document.links if link.get('rel') == 'alternate' and link.get('hreflang')]
-        expected = {'ru': PAGES['ru'], 'en': PAGES['en'], 'x-default': PAGES['ru']}
+        expected = {'ru': pair['ru'], 'en': pair['en'], 'x-default': pair['ru']}
         require(len(alternates) == 3 and {link['hreflang']: link.get('href') for link in alternates} == expected,
                 f'{page}: incomplete or inconsistent reciprocal hreflang')
-        other = PAGES['en' if language == 'ru' else 'ru']
+        other = pair['en' if language == 'ru' else 'ru']
         require(other in {urljoin(page, href) for href in document.anchors}, f'{page}: no crawlable language-switch link')
         require(single_meta(document, 'og:url', page) == page, f'{page}: og:url differs from canonical')
         require(single_meta(document, 'og:title', page) == ''.join(document.title_parts), f'{page}: social title differs')
         require(single_meta(document, 'og:description', page) == description, f'{page}: social description differs')
         require(single_meta(document, 'twitter:card', page) == 'summary_large_image', f'{page}: missing social card')
-        for key in ('og:image', 'twitter:image'):
-            image = single_meta(document, key, page)
+        for image_key in ('og:image', 'twitter:image'):
+            image = single_meta(document, image_key, page)
             require(image.startswith(SITE), f'{page}: social image URL must be absolute')
             local_target(root, image)
-        require(len(document.jsonld) == 1, f'{page}: expected one application JSON-LD object')
-        app = json.loads(document.jsonld[0])
-        require(app.get('@type') == 'SoftwareApplication' and app.get('name') == 'ProfileDock', f'{page}: incorrect app data')
-        require(app.get('url') == page and app.get('inLanguage') == language, f'{page}: incorrect localized app data')
-        require(app.get('offers', {}).get('price') == 0 and app.get('isAccessibleForFree') is True, f'{page}: expected honest free offer')
-        require(not {'aggregateRating', 'review'}.intersection(app), f'{page}: ratings require real published evidence first')
+        require(len(document.jsonld) == 1, f'{page}: expected one JSON-LD script')
+        schema = json.loads(document.jsonld[0])
+        require(schema.get('@context') == 'https://schema.org', f'{page}: incorrect schema context')
+        if group == 'home':
+            require(schema.get('@type') == 'SoftwareApplication' and schema.get('name') == 'ProfileDock', f'{page}: incorrect app data')
+            require(schema.get('url') == page and schema.get('inLanguage') == language, f'{page}: incorrect localized app data')
+            require(schema.get('offers', {}).get('price') == 0 and schema.get('isAccessibleForFree') is True, f'{page}: expected honest free offer')
+            require(not {'aggregateRating', 'review'}.intersection(schema), f'{page}: ratings require real published evidence first')
+        else:
+            graph = schema.get('@graph', [])
+            expected_type = 'CollectionPage' if group == 'guides' else 'Article'
+            entries = [item for item in graph if item.get('@type') == expected_type]
+            require(len(entries) == 1, f'{page}: expected one {expected_type}')
+            entry = entries[0]
+            require(entry.get('url') == page and entry.get('inLanguage') == language, f'{page}: incorrect localized guide data')
+            if group != 'guides':
+                require(entry.get('headline') and entry.get('datePublished'), f'{page}: missing article metadata')
+                require(len(text) > 1800, f'{page}: article body missing from static HTML')
+            breadcrumbs = [item for item in graph if item.get('@type') == 'BreadcrumbList']
+            require(len(breadcrumbs) == 1, f'{page}: expected one breadcrumb list')
+            crumbs = breadcrumbs[0].get('itemListElement', [])
+            require(len(crumbs) >= 2, f'{page}: incomplete breadcrumbs')
+            for index, crumb in enumerate(crumbs, 1):
+                require(crumb.get('position') == index and crumb.get('name'), f'{page}: invalid breadcrumb position/name')
+                require(str(crumb.get('item', '')).startswith(SITE), f'{page}: breadcrumb needs an absolute project URL')
+                require(local_target(root, crumb['item']) is not None, f'{page}: missing breadcrumb destination')
+            require(crumbs[-1].get('item') == page, f'{page}: breadcrumb does not end at this page')
         for reference in document.references:
             absolute = urljoin(page, reference)
             if local_target(root, absolute) is not None:
                 reference_count += 1
-        print(f'PASS {language}: static content, language, metadata, alternate link, application data and local assets')
+        print(f'PASS {key}: static content, metadata, paired language link, structured data and local assets')
 
-    require(rendered['ru'].text != rendered['en'].text, 'Language routes rendered identical content')
+    for group in PAGE_GROUPS:
+        require(rendered[f'{group}:ru'].text != rendered[f'{group}:en'].text, f'{group}: language routes rendered identical content')
+    for key, document in rendered.items():
+        page = PAGES[key]
+        for href in document.anchors:
+            absolute = urljoin(page, href)
+            target = local_target(root, absolute)
+            fragment = unquote(urlparse(absolute).fragment)
+            if target and fragment:
+                destination = Document(target.read_text(encoding='utf-8'))
+                require(fragment in destination.ids, f'{page}: broken fragment link {absolute}')
     sitemap = local_target(root, SITE + 'sitemap.xml')
     require(sitemap is not None, 'Missing sitemap')
     tree = ET.fromstring(sitemap.read_text(encoding='utf-8'))
     locations = [node.text for node in tree.findall('{http://www.sitemaps.org/schemas/sitemap/0.9}url/{http://www.sitemaps.org/schemas/sitemap/0.9}loc')]
-    require(len(locations) == 2 and set(locations) == set(PAGES.values()), 'Sitemap must contain exactly the two canonical pages')
-    print(f'PASS sitemap: two canonical URLs; {reference_count} local HTML references verified')
+    require(len(locations) == len(PAGES) and set(locations) == set(PAGES.values()), 'Sitemap must contain exactly the canonical pages')
+    print(f'PASS sitemap: {len(PAGES)} canonical URLs; {reference_count} local HTML references and internal fragments verified')
 
 
 if __name__ == '__main__':

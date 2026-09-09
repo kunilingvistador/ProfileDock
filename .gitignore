@@ -16,3 +16,5 @@ website/.vinext/
 website/.next/
 website/next-env.d.ts
 website/*.tsbuildinfo
+__pycache__/
+*.py[cod]

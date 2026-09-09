@@ -4,10 +4,12 @@
 This copies local files only. It does not push, deploy, or submit URLs to a search engine.
 """
 import argparse
+import importlib.util
 from pathlib import Path
 import shutil
 import subprocess
 import sys
+from urllib.parse import urlparse
 
 
 repo = Path(__file__).resolve().parents[1]
@@ -24,6 +26,16 @@ if not (source / 'index.html').is_file():
 
 # Fail before touching the old Pages files if a locale or its assets did not export.
 subprocess.run([sys.executable, str(validator), '--root', str(source)], check=True)
+spec = importlib.util.spec_from_file_location('website_seo', validator)
+seo = importlib.util.module_from_spec(spec)
+sys.dont_write_bytecode = True
+spec.loader.exec_module(seo)
+# Resolve every HTML source before replacing the previous site. Vinext can emit
+# nested routes as path.html; GitHub Pages needs path/index.html for our URLs.
+pages = {
+    urlparse(url).path.removeprefix(seo.PREFIX): seo.local_target(source, url)
+    for url in seo.PAGES.values()
+}
 public_names = {entry.name for entry in (repo / 'website/public').iterdir()}
 if any(name.endswith('.md') for name in public_names):
     raise SystemExit('Public assets must not replace the Markdown project documentation in docs/.')
@@ -31,7 +43,7 @@ missing_public = sorted(name for name in public_names if not (source / name).exi
 if missing_public:
     raise SystemExit(f'Rebuild the website: these public assets are missing from the export: {missing_public}')
 owned = {
-    '_next', 'en', 'en.rsc', 'index.html', 'index.rsc', '404.html',
+    '_next', 'en', 'guides', 'en.html', 'guides.html', 'en.rsc', 'index.html', 'index.rsc', '404.html',
     'vinext-client-entry-manifest.json', *public_names,
 }
 dest.mkdir(parents=True, exist_ok=True)
@@ -46,14 +58,18 @@ for name in sorted(owned):
         shutil.rmtree(target)
     elif target.exists():
         target.unlink()
-    if name == 'en' and not original.exists() and (source / 'en.html').is_file():
-        target.mkdir()
-        shutil.copy2(source / 'en.html', target / 'index.html')
-    elif original.is_dir():
+    if name in {'en', 'guides', 'en.html', 'guides.html', 'index.html'}:
+        continue
+    if original.is_dir():
         shutil.copytree(original, target)
     elif original.is_file():
         shutil.copy2(original, target)
 
+for relative, original in pages.items():
+    target = dest / relative / 'index.html'
+    target.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(original, target)
+
 (dest / '.nojekyll').write_text('', encoding='utf-8')
 subprocess.run([sys.executable, str(validator), '--root', str(dest)], check=True)
-print(f'Prepared and verified both language pages and assets in {dest}. No deployment performed.')
+print(f'Prepared and verified {len(pages)} pages and their assets in {dest}. No deployment performed.')
