@@ -4,11 +4,11 @@ Technical review updated: **9 September 2026**. Scope: ProfileDock's GitHub Page
 
 ## Guides and discovery update
 
-The site now contains **ten canonical pages**: two home pages, two guide indexes, and three complete guides in Russian and English. The guides cover initial Dock-shortcut setup; the difference between a profile and a window, diagnostics and reconnecting; and direct keyboard shortcuts. The guides are linked from the landing page, navigation, guide indexes and each other.
+The site now contains **fourteen canonical pages**: two home pages, two guide indexes, and five complete guides in Russian and English. The guides cover initial Dock-shortcut setup; the difference between a profile and a window, diagnostics and reconnecting; direct keyboard shortcuts; work/personal organization; and Chrome Automation permission. The guides are linked from the landing page, navigation, guide indexes and each other.
 
 Each translation pair has its own reciprocal hreflang and self-canonical URLs. Articles have factual Article and BreadcrumbList structured data, indexes use CollectionPage and BreadcrumbList, and the home pages retain SoftwareApplication. Dates reflect the publication content update; there are no fabricated authors, ratings or traffic claims. All guide bodies and links are included in the static HTML.
 
-The copy script now normalizes nested Vinext flat HTML exports to directory/index.html URLs. Validation checks all ten pages, metadata, paired language links, sitemap membership, resources and internal fragment links. The previous Markdown project documentation is preserved during the generated-file copy.
+The copy script now normalizes nested Vinext flat HTML exports to directory/index.html URLs. Validation checks all fourteen pages, metadata, paired language links, sitemap membership, resources and internal fragment links. The previous Markdown project documentation is preserved during the generated-file copy.
 
 The repository's homepage and nine relevant topics were added on 9 September. The README links to the guides and existing interactive demonstration and shows a screenshot using sample profiles. Voluntary public GitHub feedback forms ask for actionable steps and versions while requesting that private information be omitted. Those initial discovery changes introduced no website analytics or app telemetry. The separate website measurement added subsequently is documented below; the native app remains without telemetry.
 
