@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { ArrowRight, ArrowUpRight, BookOpen, Check, Download, LifeBuoy } from "lucide-react";
+import { ArrowRight, ArrowUpRight, BookOpen, Check, Download, Keyboard, LifeBuoy } from "lucide-react";
 import { guideCopy, guideMetadata, guidePath, guides, guideSlugs, type Guide, type GuideSlug } from "@/lib/guides";
 import { guideDataFor, languageURLs, releaseURL, repositoryURL, serializeJSONLD, type SiteLanguage } from "@/lib/seo";
 
@@ -52,7 +52,7 @@ function GuideShell({ language, slug, children }: { language: SiteLanguage; slug
 
 function GuideCard({ language, guide }: { language: SiteLanguage; guide: Guide }) {
   const isSetup = guide.slug === "chrome-profile-shortcuts-mac-dock";
-  const Icon = isSetup ? BookOpen : LifeBuoy;
+  const Icon = isSetup ? BookOpen : guide.slug === "switch-chrome-profiles-keyboard-mac" ? Keyboard : LifeBuoy;
   return <article className="guide-card">
     <div className={`guide-card-icon ${isSetup ? "" : "guide-card-icon-peach"}`}><Icon size={24} aria-hidden="true" /></div>
     <p className="guide-category">{guide.category}</p>
@@ -78,7 +78,7 @@ export function GuideHub({ language }: { language: SiteLanguage }) {
 export function GuideArticle({ language, slug }: { language: SiteLanguage; slug: GuideSlug }) {
   const guide = guides[language][slug];
   const t = guideCopy[language];
-  const related = guides[language][guideSlugs.find(other => other !== slug)!];
+  const related = guideSlugs.filter(other => other !== slug).map(other => guides[language][other]);
   return <GuideShell language={language} slug={slug}>
     <article className="guide-article">
       <header className="guide-article-heading">
@@ -114,8 +114,7 @@ export function GuideArticle({ language, slug }: { language: SiteLanguage; slug:
           <div className="guide-feedback"><a href={`${repositoryURL}/issues/new/choose`}>{t.feedback}<ArrowUpRight size={14} aria-hidden="true" /></a><p>{t.feedbackHint}</p></div>
           <aside className="guide-related" aria-labelledby="guide-related-title">
             <p className="guide-category" id="guide-related-title">{t.related}</p>
-            <h2><a href={guidePath(language, related.slug)}>{related.shortTitle}<ArrowRight size={20} aria-hidden="true" /></a></h2>
-            <p>{related.summary}</p>
+            {related.map(item => <div key={item.slug}><h2><a href={guidePath(language, item.slug)}>{item.shortTitle}<ArrowRight size={20} aria-hidden="true" /></a></h2><p>{item.summary}</p></div>)}
             <a className="text-link" href={guidePath(language)}>{t.allGuides}<ArrowRight size={15} aria-hidden="true" /></a>
           </aside>
         </div>

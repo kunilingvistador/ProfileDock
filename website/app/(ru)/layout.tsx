@@ -4,5 +4,5 @@ import '../globals.css';
 export const metadata = metadataFor('ru');
 
 export default function RussianLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="ru"><body>{children}</body></html>;
+  return <html lang="ru"><body>{children}<script src="/ProfileDock/analytics.js" defer /></body></html>;
 }
