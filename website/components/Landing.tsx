@@ -310,6 +310,9 @@ export default function Landing({ initialLanguage }: { initialLanguage: "ru" | "
           <a className="nav-section" href="#questions">
             {t.nav[1]}
           </a>
+          <a className="nav-section" href={`${home}guides/`}>
+            {initialLanguage === "ru" ? "Инструкции" : "Guides"}
+          </a>
           <a className="source-link" href={repo} aria-label={t.source}>
             <CodeXml size={19} aria-hidden="true" />
             <span>GitHub</span>
@@ -529,6 +532,27 @@ export default function Landing({ initialLanguage }: { initialLanguage: "ru" | "
             <p>{t.privacyHost} <a href="https://docs.github.com/en/pages/getting-started-with-github-pages/what-is-github-pages#data-collection">GitHub Pages ↗</a></p>
           </div>
         </section>
+        <section className="guides-teaser wrap" aria-labelledby="guides-title">
+          <div className="guides-teaser-heading">
+            <div>
+              <p className="eyebrow">{initialLanguage === "ru" ? "ПОЛЕЗНО ПОД РУКОЙ" : "A LITTLE GUIDANCE"}</p>
+              <h2 id="guides-title">{initialLanguage === "ru" ? "Настроить один раз.\nРазобраться без спешки." : "Set it up.\nMake it familiar."}</h2>
+            </div>
+            <a className="text-link" href={`${home}guides/`}>{initialLanguage === "ru" ? "Все инструкции" : "All guides"}<ArrowUpRight size={17} aria-hidden="true" /></a>
+          </div>
+          <div className="guides-teaser-grid">
+            <article>
+              <h3>{initialLanguage === "ru" ? "Профили Chrome отдельными ярлыками в Dock" : "Chrome profile shortcuts in your Mac Dock"}</h3>
+              <p>{initialLanguage === "ru" ? "Выберите окно, проверьте привязку и добавьте свой значок. Пошаговая инструкция для первого запуска." : "Choose a window, check the connection and pick an icon. A step-by-step guide for your first shortcut."}</p>
+              <a className="text-link" href={`${home}guides/chrome-profile-shortcuts-mac-dock/`}>{initialLanguage === "ru" ? "Настроить ярлык" : "Set up a shortcut"}<ArrowRight size={17} aria-hidden="true" /></a>
+            </article>
+            <article>
+              <h3>{initialLanguage === "ru" ? "Как вернуться к нужному открытому окну" : "Return to the right existing window"}</h3>
+              <p>{initialLanguage === "ru" ? "Почему запуск профиля и переключение окна отличаются. Что делать после закрытия окна или перезапуска Chrome." : "Why launching a profile and switching windows differ. What to do after closing a window or restarting Chrome."}</p>
+              <a className="text-link" href={`${home}guides/chrome-shortcut-existing-window/`}>{initialLanguage === "ru" ? "Проверить привязку" : "Check the connection"}<ArrowRight size={17} aria-hidden="true" /></a>
+            </article>
+          </div>
+        </section>
         <section className="faq-section wrap" id="questions" aria-labelledby="faq-title">
           <div className="faq-heading">
             <p className="eyebrow">{t.faqKicker}</p>
@@ -576,6 +600,7 @@ export default function Landing({ initialLanguage }: { initialLanguage: "ru" | "
           <p>{t.foot}</p>
         </div>
         <div className="footer-links">
+          <a href={`${home}guides/`}>{initialLanguage === "ru" ? "Инструкции" : "Guides"}</a>
           <a href="#privacy">{t.privacyLabel}</a>
           <a href={`${repo}/issues`}>{t.feedback}</a>
           <a href={`${repo}/blob/main/LICENSE`}>{t.license}</a>

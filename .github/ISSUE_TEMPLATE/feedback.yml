@@ -1,0 +1,26 @@
+name: Share feedback / Поделиться впечатлениями
+description: Tell us what worked and what made setup or daily use difficult.
+title: "[Feedback]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Feedback is voluntary and public. Please do not include personal account names, addresses, or private screenshots. Russian and English are welcome.
+        Обратная связь добровольная и публичная. Не добавляйте личные аккаунты, адреса или приватные скриншоты. Можно писать по-русски.
+  - type: dropdown
+    id: outcome
+    attributes:
+      label: Did you set up a working shortcut? / Удалось настроить ярлык?
+      options:
+        - Yes, and I use it / Да, пользуюсь
+        - Yes, but something is inconvenient / Да, но есть неудобства
+        - Not yet / Пока нет
+    validations:
+      required: true
+  - type: textarea
+    id: experience
+    attributes:
+      label: What should be easier? / Что стоит упростить?
+      description: Describe the task you wanted to solve, what helped, and what got in your way.
+    validations:
+      required: true

@@ -31,8 +31,20 @@ const descriptions = {
   },
 } satisfies Record<SiteLanguage, Record<string, string>>;
 
-export function metadataFor(language: SiteLanguage): Metadata {
-  const copy = descriptions[language];
+export type ContentMetadata = {
+  title: string;
+  description: string;
+  /** Relative to each language's home URL, with a trailing slash. */
+  path: string;
+  article?: boolean;
+};
+
+export function metadataFor(language: SiteLanguage, content?: ContentMetadata): Metadata {
+  const copy = { ...descriptions[language], ...content };
+  const urls = {
+    ru: new URL(content?.path ?? "", languageURLs.ru).href,
+    en: new URL(content?.path ?? "", languageURLs.en).href,
+  };
   const image = `${siteURL}social-preview.png`;
   return {
     metadataBase: new URL(siteURL),
@@ -40,20 +52,21 @@ export function metadataFor(language: SiteLanguage): Metadata {
     description: copy.description,
     applicationName: "ProfileDock",
     alternates: {
-      canonical: languageURLs[language],
-      languages: { ru: languageURLs.ru, en: languageURLs.en, "x-default": languageURLs.ru },
+      canonical: urls[language],
+      languages: { ru: urls.ru, en: urls.en, "x-default": urls.ru },
     },
     robots: { index: true, follow: true, "max-image-preview": "large" },
     icons: { icon: { url: `${siteURL}icon.svg`, type: "image/svg+xml" } },
     openGraph: {
-      type: "website",
+      type: content?.article ? "article" : "website",
       siteName: "ProfileDock",
-      url: languageURLs[language],
+      url: urls[language],
       title: copy.title,
       description: copy.description,
       locale: copy.locale,
       alternateLocale: [copy.alternateLocale],
       images: [{ url: image, alt: copy.imageAlt, width: 1200, height: 630 }],
+      ...(content?.article ? { publishedTime: "2026-09-09", modifiedTime: "2026-09-09" } : {}),
     },
     twitter: {
       card: "summary_large_image",
@@ -61,6 +74,39 @@ export function metadataFor(language: SiteLanguage): Metadata {
       description: copy.description,
       images: [{ url: image, alt: copy.imageAlt }],
     },
+  };
+}
+
+export function guideDataFor(language: SiteLanguage, content: ContentMetadata) {
+  const url = new URL(content.path, languageURLs[language]).href;
+  const hub = new URL("guides/", languageURLs[language]).href;
+  const items = [
+    { "@type": "ListItem", position: 1, name: "ProfileDock", item: languageURLs[language] },
+    { "@type": "ListItem", position: 2, name: language === "ru" ? "Инструкции" : "Guides", item: hub },
+    ...(content.article ? [{ "@type": "ListItem", position: 3, name: content.title, item: url }] : []),
+  ];
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      { "@type": "BreadcrumbList", "@id": `${url}#breadcrumbs`, itemListElement: items },
+      {
+        "@type": content.article ? "Article" : "CollectionPage",
+        "@id": `${url}#${content.article ? "article" : "page"}`,
+        url,
+        name: content.title,
+        description: content.description,
+        inLanguage: language,
+        isAccessibleForFree: true,
+        ...(content.article ? {
+          headline: content.title,
+          datePublished: "2026-09-09",
+          dateModified: "2026-09-09",
+          mainEntityOfPage: { "@type": "WebPage", "@id": url },
+          image: `${siteURL}app-preview.jpg`,
+          publisher: { "@type": "Organization", name: "ProfileDock", url: siteURL },
+        } : { breadcrumb: { "@id": `${url}#breadcrumbs` } }),
+      },
+    ],
   };
 }
 

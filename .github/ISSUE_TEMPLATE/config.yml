@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Setup and troubleshooting guides / Инструкции
+    url: https://kunilingvistador.github.io/ProfileDock/guides/
+    about: Connect a shortcut or restore its link to an existing window.
+  - name: Data and permissions / Данные и разрешения
+    url: https://kunilingvistador.github.io/ProfileDock/#privacy
+    about: What the app reads locally and how Chrome permission is used.

@@ -6,6 +6,10 @@ A small, open-source macOS utility for people who keep several Chrome profiles o
 
 [Download the beta](https://github.com/kunilingvistador/ProfileDock/releases) · [Website](https://kunilingvistador.github.io/ProfileDock/)
 
+[Setup guide](https://kunilingvistador.github.io/ProfileDock/en/guides/chrome-profile-shortcuts-mac-dock/) · [Reconnect an existing window](https://kunilingvistador.github.io/ProfileDock/en/guides/chrome-shortcut-existing-window/) · [Interactive Dock demonstration](https://kunilingvistador.github.io/ProfileDock/en/#hero-title)
+
+![ProfileDock manager showing fictional Studio, Personal and Research shortcuts](docs/app-preview.jpg)
+
 **Status: early beta.** The packaging script produces an ad-hoc-signed development build by default. It is not notarized, and macOS may require manual approval before opening the downloaded app. See the [validation record](docs/VALIDATION.md) for completed checks and remaining gaps, and the [release checklist](docs/RELEASE.md) for public distribution.
 
 ## What it does
@@ -69,7 +73,7 @@ ProfileDock does not send browser data to its developers. The app itself reads l
 
 The macOS **Automation → Google Chrome** permission is broader than window switching. The controller uses it to find and name windows and bring the selected window forward; the purpose text is not a system restriction on other Chrome commands. You can revoke it in System Settings → Privacy & Security → Automation. The switcher does not require Accessibility, Screen Recording, Full Disk Access, a browser extension, or an account with ProfileDock.
 
-Switching does not use the network. The optional website-icon downloader makes web requests: the destination receives your IP address and requested URL, without Chrome cookies or profile data. Choose a local image file to avoid those requests. The project website and downloads are hosted by GitHub, whose service logging is separate from the app. See [the privacy review, data map, and remaining limits](docs/PRIVACY-AND-SECURITY.md), including the distinction between published 0.1.4 and the next privacy update.
+Switching does not use the network. The optional website-icon downloader makes web requests: the destination receives your IP address and requested URL, without Chrome cookies or profile data. Choose a local image file to avoid those requests. The project website and downloads are hosted by GitHub, whose service logging is separate from the app. The published **0.1.5 beta** adds stricter icon downloads, private storage permissions and an in-app Data and permissions screen. See [the privacy review, data map, and remaining limits](docs/PRIVACY-AND-SECURITY.md).
 
 No personal profiles, account names, photographs, or browser data belong in this repository. Please redact those details from screenshots and bug reports.
 
