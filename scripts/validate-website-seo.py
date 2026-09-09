@@ -26,6 +26,14 @@ PAGE_GROUPS = {
         'ru': SITE + 'guides/switch-chrome-profiles-keyboard-mac/',
         'en': SITE + 'en/guides/switch-chrome-profiles-keyboard-mac/',
     },
+    'organization': {
+        'ru': SITE + 'guides/separate-work-personal-chrome-profiles-mac/',
+        'en': SITE + 'en/guides/separate-work-personal-chrome-profiles-mac/',
+    },
+    'permissions': {
+        'ru': SITE + 'guides/chrome-automation-permission-mac/',
+        'en': SITE + 'en/guides/chrome-automation-permission-mac/',
+    },
     'reconnect': {
         'ru': SITE + 'guides/chrome-shortcut-existing-window/',
         'en': SITE + 'en/guides/chrome-shortcut-existing-window/',

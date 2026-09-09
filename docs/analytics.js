@@ -5,7 +5,7 @@
   const host = 'kunilingvistador.github.io';
   const prefix = '/ProfileDock/';
   const key = 'profiledock.analytics-consent.v1';
-  const paths = ['', 'en/', 'guides/', 'en/guides/', ...['chrome-profile-shortcuts-mac-dock', 'chrome-shortcut-existing-window', 'switch-chrome-profiles-keyboard-mac'].flatMap(slug => [`guides/${slug}/`, `en/guides/${slug}/`])];
+  const paths = ['', 'en/', 'guides/', 'en/guides/', ...['chrome-profile-shortcuts-mac-dock', 'chrome-shortcut-existing-window', 'switch-chrome-profiles-keyboard-mac', 'separate-work-personal-chrome-profiles-mac', 'chrome-automation-permission-mac'].flatMap(slug => [`guides/${slug}/`, `en/guides/${slug}/`])];
   const path = location.pathname;
   if (!/^G-[A-Z0-9]+$/.test(id) || !paths.includes(path.slice(prefix.length)) || !path.startsWith(prefix)) return;
   let loaded = false;

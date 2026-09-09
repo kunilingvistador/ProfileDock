@@ -567,6 +567,7 @@ export default function Landing({ initialLanguage }: { initialLanguage: "ru" | "
               <a className="text-link" href={`${home}guides/switch-chrome-profiles-keyboard-mac/`}>{initialLanguage === "ru" ? "Настроить хоткей" : "Set up a hotkey"}<ArrowRight size={17} aria-hidden="true" /></a>
             </article>
           </div>
+          <p className="guide-comparison-note">{initialLanguage === "ru" ? "Начинаете с нуля? " : "Starting from scratch? "}<a className="text-link" href={`${home}guides/separate-work-personal-chrome-profiles-mac/`}>{initialLanguage === "ru" ? "Разделите работу и личное" : "Separate work and personal browsing"}</a>{initialLanguage === "ru" ? ". Есть вопрос о доступе? " : ". Unsure about access? "}<a className="text-link" href={`${home}guides/chrome-automation-permission-mac/`}>{initialLanguage === "ru" ? "Разберитесь с разрешением Chrome" : "Understand Chrome permissions"}</a>.</p>
         </section>
         <section className="faq-section wrap" id="questions" aria-labelledby="faq-title">
           <div className="faq-heading">

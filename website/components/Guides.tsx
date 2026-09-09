@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { ArrowRight, ArrowUpRight, BookOpen, Check, Download, Keyboard, LifeBuoy } from "lucide-react";
+import { ArrowRight, ArrowUpRight, BookOpen, Check, Download, Keyboard, LifeBuoy, ShieldCheck, BriefcaseBusiness, UserRound } from "lucide-react";
 import { guideCopy, guideMetadata, guidePath, guides, guideSlugs, type Guide, type GuideSlug } from "@/lib/guides";
 import { guideDataFor, languageURLs, releaseURL, repositoryURL, serializeJSONLD, type SiteLanguage } from "@/lib/seo";
 
@@ -53,7 +53,7 @@ function GuideShell({ language, slug, children }: { language: SiteLanguage; slug
 
 function GuideCard({ language, guide }: { language: SiteLanguage; guide: Guide }) {
   const isSetup = guide.slug === "chrome-profile-shortcuts-mac-dock";
-  const Icon = isSetup ? BookOpen : guide.slug === "switch-chrome-profiles-keyboard-mac" ? Keyboard : LifeBuoy;
+  const Icon = isSetup ? BookOpen : guide.slug === "switch-chrome-profiles-keyboard-mac" ? Keyboard : guide.slug === "chrome-automation-permission-mac" ? ShieldCheck : guide.slug === "separate-work-personal-chrome-profiles-mac" ? BriefcaseBusiness : LifeBuoy;
   return <article className="guide-card">
     <div className={`guide-card-icon ${isSetup ? "" : "guide-card-icon-peach"}`}><Icon size={24} aria-hidden="true" /></div>
     <p className="guide-category">{guide.category}</p>
@@ -65,6 +65,16 @@ function GuideCard({ language, guide }: { language: SiteLanguage; guide: Guide }
 
 export function GuideHub({ language }: { language: SiteLanguage }) {
   const t = guideCopy[language];
+  const ru = language === "ru";
+  const methods = ru ? [
+    ["Меню Chrome", "Переключаетесь время от времени", "Встроено в Chrome; дополнительное приложение не требуется", "separate-work-personal-chrome-profiles-mac"],
+    ["Значки в Dock", "Узнаёте нужное окно по картинке", "ProfileDock поднимает одно привязанное окно; закрытое нужно переподключить", "chrome-profile-shortcuts-mac-dock"],
+    ["Сочетания клавиш", "Часто переходите из других приложений", "Для выбранного окна; ProfileDock должен оставаться запущенным", "switch-chrome-profiles-keyboard-mac"],
+  ] : [
+    ["Chrome’s menu", "You switch occasionally", "Built into Chrome; no additional app needed", "separate-work-personal-chrome-profiles-mac"],
+    ["Dock icons", "You recognize your window by its picture", "ProfileDock raises one connected window; reconnect after closing it", "chrome-profile-shortcuts-mac-dock"],
+    ["Keyboard shortcuts", "You often switch from other apps", "For your chosen window; ProfileDock must remain running", "switch-chrome-profiles-keyboard-mac"],
+  ];
   return <GuideShell language={language}>
     <section className="guide-hub-intro">
       <p className="eyebrow">CHROME × macOS · {t.hub.toUpperCase()}</p>
@@ -72,6 +82,15 @@ export function GuideHub({ language }: { language: SiteLanguage }) {
       <p>{t.intro}</p>
     </section>
     <div className="guide-card-grid">{guideSlugs.map(slug => <GuideCard key={slug} language={language} guide={guides[language][slug]} />)}</div>
+    <section className="guide-comparison" aria-labelledby="comparison-title">
+      <p className="eyebrow">{ru ? "НАЧНИТЕ С ПРИВЫЧКИ" : "START WITH YOUR HABITS"}</p>
+      <h2 id="comparison-title">{ru ? "Какой способ подойдёт вам?" : "Which way of switching fits you?"}</h2>
+      <div className="guide-methods">{methods.map(([name, situation, detail, path]) => <article key={path}>
+        <h3><a href={guidePath(language, path as GuideSlug)}>{name}<ArrowUpRight size={16} aria-hidden="true" /></a></h3>
+        <p className="guide-method-situation">{situation}</p><p>{detail}</p>
+      </article>)}</div>
+      <p className="guide-comparison-note">{ru ? "Нет необходимости сразу настраивать всё. Начните с одного рабочего и одного личного окна." : "You do not need to set up everything at once. Start with one work window and one personal window."}</p>
+    </section>
     <div className="guide-hub-note"><Check size={18} aria-hidden="true" /><p>{t.version}. <a href={`${languageURLs[language]}#privacy`}>{t.privacy}<ArrowUpRight size={13} aria-hidden="true" /></a></p></div>
   </GuideShell>;
 }
@@ -79,7 +98,14 @@ export function GuideHub({ language }: { language: SiteLanguage }) {
 export function GuideArticle({ language, slug }: { language: SiteLanguage; slug: GuideSlug }) {
   const guide = guides[language][slug];
   const t = guideCopy[language];
-  const related = guideSlugs.filter(other => other !== slug).map(other => guides[language][other]);
+  const next: Record<GuideSlug, GuideSlug[]> = {
+    "chrome-profile-shortcuts-mac-dock": ["switch-chrome-profiles-keyboard-mac", "chrome-automation-permission-mac"],
+    "chrome-shortcut-existing-window": ["chrome-profile-shortcuts-mac-dock", "chrome-automation-permission-mac"],
+    "switch-chrome-profiles-keyboard-mac": ["chrome-shortcut-existing-window", "separate-work-personal-chrome-profiles-mac"],
+    "separate-work-personal-chrome-profiles-mac": ["chrome-profile-shortcuts-mac-dock", "switch-chrome-profiles-keyboard-mac"],
+    "chrome-automation-permission-mac": ["chrome-profile-shortcuts-mac-dock", "chrome-shortcut-existing-window"],
+  };
+  const related = next[slug].map(other => guides[language][other]);
   return <GuideShell language={language} slug={slug}>
     <article className="guide-article">
       <header className="guide-article-heading">
@@ -103,6 +129,13 @@ export function GuideArticle({ language, slug }: { language: SiteLanguage; slug:
               {section.steps && <ol className="guide-steps">{section.steps.map(step => <li key={step.title}><h3>{step.title}</h3><p>{step.body}</p></li>)}</ol>}
               {section.points && <div className="guide-symptoms">{section.points.map(point => <div key={point.title}><h3>{point.title}</h3><p>{point.body}</p></div>)}</div>}
             </section>
+            {slug === "separate-work-personal-chrome-profiles-mac" && index === 0 && <figure className="guide-figure guide-context-figure">
+              <div className="guide-contexts">
+                <div><BriefcaseBusiness size={30} aria-hidden="true" /><strong>{language === "ru" ? "Работа" : "Work"}</strong><span>{language === "ru" ? "Почта · календарь · документы" : "Mail · calendar · documents"}</span></div>
+                <div><UserRound size={30} aria-hidden="true" /><strong>{language === "ru" ? "Личное" : "Personal"}</strong><span>{language === "ru" ? "Покупки · поездки · хобби" : "Shopping · travel · hobbies"}</span></div>
+              </div>
+              <figcaption>{language === "ru" ? "Пример организации: два отдельных профиля Chrome. Для постоянно открытого окна каждого профиля можно создать свой ярлык." : "Example setup: two separate Chrome profiles. Each profile’s everyday window can have its own shortcut."}</figcaption>
+            </figure>}
             {slug === "chrome-profile-shortcuts-mac-dock" && index === 2 && <figure className="guide-figure">
               <img src="/ProfileDock/app-preview.jpg" alt={t.figureAlt} width="940" height="692" loading="lazy" />
               <figcaption>{t.figureCaption}</figcaption>

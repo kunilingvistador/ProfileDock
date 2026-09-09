@@ -43,13 +43,13 @@ python3 ../scripts/publish-website-files.py --dest /tmp/profiledock-pages-check
 
 The validator reads the generated HTML rather than assuming the metadata API rendered correctly. It checks initial language and product content, one title/H1/description, self canonical, reciprocal hreflang, an actual language-switch anchor, social metadata and assets, factual JSON-LD, sitemap scope, local page/asset references and internal fragments. The copy script normalizes Vinext's assets and all ten routes, includes public files, preserves Markdown project documentation, and validates the copied tree again. CI performs the same check in its temporary directory. These checks do not prove Google has indexed a page or replace testing the live deployment.
 
-All ten content routes explicitly require static rendering. With the pinned Vinext beta, enabling `trailingSlash` caused the `/en` prerender request to return a redirect and be skipped. The build therefore keeps Vinext's `en.html` output, and the Pages copy places that rendered document at `en/index.html` for the canonical `/en/` URL. This is a packaging adjustment; the document's content and metadata are rendered normally, without a client-only language substitution.
+All fourteen content routes explicitly require static rendering. With the pinned Vinext beta, enabling `trailingSlash` caused the `/en` prerender request to return a redirect and be skipped. The build therefore keeps Vinext's `en.html` output, and the Pages copy places that rendered document at `en/index.html` for the canonical `/en/` URL. This is a packaging adjustment; the document's content and metadata are rendered normally, without a client-only language substitution.
 
 ## Content direction and later measurement
 
 Useful search-intent hypotheses include “Chrome profile switcher Mac”, “Chrome profile Dock shortcuts”, “switch existing Chrome window without new tab”, “ярлыки профилей Chrome Mac”, and “переключение профилей Chrome в Dock”. These are unmeasured wording hypotheses. The page should answer what a click does, how setup works, whether existing tabs remain open, how a closed target is reconnected, and which platform is supported. Avoid publishing thin pages for every variation of these phrases.
 
-After the actual deployment, verify all ten URLs and the sitemap return the intended content, test the structured data, and use an owner-verified Search Console URL-prefix property to inspect indexing and submit the sitemap if desired. No Search Console submission is performed by the build script or this implementation. Track impressions, real queries, clicks, and click-through rate separately by language and device before deciding on further content. No baseline search dataset is available yet.
+After the actual deployment, verify all fourteen URLs and the sitemap return the intended content, test the structured data, and use an owner-verified Search Console URL-prefix property to inspect indexing and submit the sitemap if desired. No Search Console submission is performed by the build script or this implementation. Track impressions, real queries, clicks, and click-through rate separately by language and device before deciding on further content. No baseline search dataset is available yet.
 
 ## September 9 follow-up: keyboard intent and measurement
 
@@ -77,3 +77,30 @@ Local validation passed: TypeScript, production build, ten-page static SEO valid
 ### Banner removal
 
 The owner explicitly requested removal of the popup and default-on analytics. The popup and floating settings button were removed. An inline browser opt-out remains in the website analytics section; older refusals remain effective. Site copy now describes default-on measurement. This is a product configuration change, not a claim of universal legal compliance. Native app code and Search Console verification are unchanged.
+
+
+## Content foundation: five guides, two languages
+
+The site now has 14 canonical pages: two home pages, two guide indexes and five articles in Russian and English. The two new guides address distinct jobs: organizing work/personal browsing and understanding Chrome Automation permission. Existing setup, hotkey and reconnect guides remain their canonical destinations. Each article offers two contextual next steps, and the guide index compares three switching methods. Home pages link to all five topics. A diagram illustrates separate contexts; the setup guide retains its real app screenshot.
+
+### Search hypotheses and decisions
+
+These are topic hypotheses, not measured search volumes or promised traffic. Paths below have matching `/en/` versions.
+
+| Reader's question | Canonical page under `/ProfileDock/guides/` | What useful success looks like |
+| --- | --- | --- |
+| How do I separate work and personal Chrome on Mac? | `separate-work-personal-chrome-profiles-mac/` | Reader distinguishes a profile from an account/window and can set up two contexts |
+| What does allowing control of Chrome mean? | `chrome-automation-permission-mac/` | Reader understands implemented behavior, broad permission and revocation |
+| How do I pin separate profile icons? | `chrome-profile-shortcuts-mac-dock/` | Reader can create a shortcut for the intended existing window |
+| How do I switch with the keyboard? | `switch-chrome-profiles-keyboard-mac/` | Reader can assign and verify a hotkey |
+| Why did my shortcut lose its window? | `chrome-shortcut-existing-window/` | Reader can reconnect without creating duplicate shortcuts |
+
+### First measurement cycle
+
+1. Check Search Console indexing and sitemap processing after deployment. Submission is not proof of indexing. Record actual inspection results; do not request indexing repeatedly for an already indexed URL.
+2. Once complete reporting days accumulate, inspect impressions, queries and clicks by landing page and language. Use the first 28 complete days as an initial observation window, not a traffic deadline. There may still be too little data for a conclusion.
+3. In GA4 compare landing pages and source/medium, then `download_click`. This is a click to Releases, not an installation; use it as an interest signal only. QA visits can appear in early data.
+4. If a page is not indexed, investigate crawl/inspection evidence before adding more articles. If indexed with no impressions, review the topic and discovery links. If it receives relevant impressions but few clicks, review its title and snippet against the actual queries. If visits do not lead to release clicks, check whether the article answered an informational question rather than assuming the download button failed.
+5. Expand only when observed queries reveal an unanswered task. Improve an existing page for closely related wording; avoid duplicate articles for every keyword variation.
+
+The analytics route allowlist includes all four new article URLs. Seven runtime tests cover default startup, preferences, sanitized events, local-preview isolation and new-route page views. Static validation checks all 14 pages and their internal links. No outreach, paid campaigns, automatic monitoring or native app telemetry was added in this content change.

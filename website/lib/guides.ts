@@ -1,6 +1,7 @@
+import { workRU, workEN, permissionRU, permissionEN } from "./guides-foundation";
 import type { ContentMetadata, SiteLanguage } from "./seo";
 
-export const guideSlugs = ["chrome-profile-shortcuts-mac-dock", "chrome-shortcut-existing-window", "switch-chrome-profiles-keyboard-mac"] as const;
+export const guideSlugs = ["chrome-profile-shortcuts-mac-dock", "chrome-shortcut-existing-window", "switch-chrome-profiles-keyboard-mac", "separate-work-personal-chrome-profiles-mac", "chrome-automation-permission-mac"] as const;
 export type GuideSlug = (typeof guideSlugs)[number];
 
 type GuideSection = {
@@ -27,7 +28,7 @@ export const guideCopy = {
     hubTitle: "Профили Chrome на Mac: инструкции для удобного Dock",
     hubDescription: "Профили Chrome на Mac: отдельные значки в Dock, переключение с клавиатуры и восстановление привязки окна. Практические инструкции ProfileDock.",
     heading: "Профили Chrome на Mac:\nDock, хоткеи и помощь.",
-    intro: "Настройте отдельные значки в Dock, назначьте сочетания клавиш и восстановите привязку, если нужное окно перестало открываться.",
+    intro: "Разделите работу и личное, выберите удобный способ переключения и разберитесь с разрешениями. Пять практических инструкций — от первого профиля до хоткеев.",
     hub: "Инструкции", home: "Главная", skip: "Перейти к содержанию", nav: "Навигация",
     download: "Скачать для Mac", source: "Код на GitHub", read: "Читать инструкцию", toc: "В этой статье",
     published: "9 сентября 2026", version: "Проверено по ProfileDock 0.1.6 beta", related: "Следующий полезный шаг",
@@ -42,7 +43,7 @@ export const guideCopy = {
     hubTitle: "Chrome Profiles on Mac: Practical Dock Guides",
     hubDescription: "Chrome profiles on Mac: separate Dock icons, keyboard shortcuts, and fixes for lost window connections. Practical ProfileDock setup and troubleshooting guides.",
     heading: "Chrome profiles on Mac:\nDock, hotkeys and help.",
-    intro: "Set up separate Dock icons, assign keyboard shortcuts, and repair the connection when a shortcut can no longer find its window.",
+    intro: "Separate work and personal browsing, choose a way to switch, and understand permissions. Five practical guides, from your first profile to hotkeys.",
     hub: "Guides", home: "Home", skip: "Skip to content", nav: "Navigation",
     download: "Download for Mac", source: "Source on GitHub", read: "Read the guide", toc: "In this guide",
     published: "September 9, 2026", version: "Checked against ProfileDock 0.1.6 beta", related: "One useful next step",
@@ -374,8 +375,8 @@ const hotkeysEN: Guide = {
 };
 
 export const guides: Record<SiteLanguage, Record<GuideSlug, Guide>> = {
-  ru: { "chrome-profile-shortcuts-mac-dock": setupRU, "chrome-shortcut-existing-window": troubleshootRU, "switch-chrome-profiles-keyboard-mac": hotkeysRU },
-  en: { "chrome-profile-shortcuts-mac-dock": setupEN, "chrome-shortcut-existing-window": troubleshootEN, "switch-chrome-profiles-keyboard-mac": hotkeysEN },
+  ru: { "chrome-profile-shortcuts-mac-dock": setupRU, "chrome-shortcut-existing-window": troubleshootRU, "switch-chrome-profiles-keyboard-mac": hotkeysRU, "separate-work-personal-chrome-profiles-mac": workRU, "chrome-automation-permission-mac": permissionRU },
+  en: { "chrome-profile-shortcuts-mac-dock": setupEN, "chrome-shortcut-existing-window": troubleshootEN, "switch-chrome-profiles-keyboard-mac": hotkeysEN, "separate-work-personal-chrome-profiles-mac": workEN, "chrome-automation-permission-mac": permissionEN },
 };
 
 export function guideMetadata(language: SiteLanguage, slug?: GuideSlug): ContentMetadata {

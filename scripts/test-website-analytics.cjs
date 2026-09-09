@@ -5,7 +5,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const runtime = fs.readFileSync(path.join(__dirname, '../website/public/analytics.js'), 'utf8').replace(/const id = '[^']*';/, "const id = 'G-QATEST1';");
 const key = 'profiledock.analytics-consent.v1';
-function fixture({choice, at=Date.now(), hostname='kunilingvistador.github.io', broken=false}={}) {
+function fixture({choice, at=Date.now(), hostname='kunilingvistador.github.io', pathname='/ProfileDock/en/', broken=false}={}) {
   class Element {
     constructor(tag) { this.tag=tag; this.children=[]; this.events={}; this.hidden=false; }
     append(...nodes) { this.children.push(...nodes); }
@@ -24,7 +24,7 @@ function fixture({choice, at=Date.now(), hostname='kunilingvistador.github.io', 
   let cookie='pd_ga=abc; pd_ga_QATEST1=def; unrelated=stay'; const cleared=[];
   Object.defineProperty(document,'cookie',{get:()=>cookie,set:v=>cleared.push(v)});
   let reloads=0;
-  const location={hostname,protocol:'https:',pathname:'/ProfileDock/en/',href:`https://${hostname}/ProfileDock/en/?email=private#secret`,reload:()=>reloads++};
+  const location={hostname,protocol:'https:',pathname,href:`https://${hostname}${pathname}?email=private#secret`,reload:()=>reloads++};
   const window=new Element('window');
   const storage={getItem:k=>{if(broken)throw Error('blocked');return data.get(k)||null;},setItem:(k,v)=>{if(broken)throw Error('blocked');data.set(k,v);}};
   vm.runInNewContext(runtime,{window,document,location,localStorage:storage,URL,Date,Element,CustomEvent:class { constructor(type,init){this.type=type;this.detail=init.detail;} }});
@@ -72,4 +72,17 @@ test('only release links emit a sanitized download click, and withdrawal stops c
  assert.equal(events[0][2].destination,'github_releases');assert(!JSON.stringify(events).includes('private'));assert(!JSON.stringify(events).includes('secret'));
  f.toggle.click();click('https://github.com/kunilingvistador/ProfileDock/releases');
  assert.equal(f.commands().filter(x=>x[1]==='download_click').length,1);
+});
+
+test('new guide routes are measured once without query or fragment data',()=>{
+ for (const slug of ['separate-work-personal-chrome-profiles-mac','chrome-automation-permission-mac']) {
+  for (const prefix of ['', 'en/']) {
+   const pathname=`/ProfileDock/${prefix}guides/${slug}/`;
+   const f=fixture({pathname}); const views=f.commands().filter(x=>x[0]==='event' && x[1]==='page_view');
+   assert.equal(views.length,1);
+   assert.equal(views[0][2].page_location,`https://kunilingvistador.github.io${pathname}`);
+   assert(!JSON.stringify(f.commands()).includes('private'));
+  }
+ }
+ assert.equal(fixture({pathname:'/ProfileDock/not-a-public-page/'}).commands().length,0);
 });
