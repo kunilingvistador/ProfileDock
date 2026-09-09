@@ -14,6 +14,7 @@ function fixture({choice, at=Date.now(), hostname='kunilingvistador.github.io', 
     addEventListener(name, callback) { this.events[name]=callback; }
     click() { this.events.click?.({target:this}); }
     focus() {}
+    dispatchEvent(event) { this.events[event.type]?.(event); }
     closest() { return this.tag==='a' ? this : null; }
   }
   const data=new Map(); if (choice) data.set(key,JSON.stringify({choice,at}));
@@ -26,19 +27,24 @@ function fixture({choice, at=Date.now(), hostname='kunilingvistador.github.io', 
   const location={hostname,protocol:'https:',pathname:'/ProfileDock/en/',href:`https://${hostname}/ProfileDock/en/?email=private#secret`,reload:()=>reloads++};
   const window=new Element('window');
   const storage={getItem:k=>{if(broken)throw Error('blocked');return data.get(k)||null;},setItem:(k,v)=>{if(broken)throw Error('blocked');data.set(k,v);}};
-  vm.runInNewContext(runtime,{window,document,location,localStorage:storage,URL,Date,Element});
-  const panel=document.body.children[0]; const buttons=panel.children.find(n=>n.tag==='div').children;
+  vm.runInNewContext(runtime,{window,document,location,localStorage:storage,URL,Date,Element,CustomEvent:class { constructor(type,init){this.type=type;this.detail=init.detail;} }});
+  const toggle={click:()=>document.events['profiledock:analytics-toggle']()};
   const commands=()=>Array.from(window.dataLayer||[],x=>Array.from(x));
-  return {window,document,data,buttons,commands,cleared,reloads:()=>reloads};
+  return {window,document,data,toggle,commands,cleared,reloads:()=>reloads};
 }
-test('no Google script or events before consent, after decline, or when storage is unavailable',()=>{
- for(const options of [{},{choice:'denied'},{broken:true},{choice:'granted',at:0},{choice:'granted',at:Date.now()+86400000}]) {
+test('default startup needs no interaction and creates no banner or floating button',()=>{
+ for(const options of [{},{choice:'granted'}]) {
+  const f=fixture(options);assert.equal(f.document.head.children.length,1);assert.equal(f.document.body.children.length,0);
+ }
+});
+test('saved refusals including older versions stay off; unreadable storage fails closed',()=>{
+ for(const options of [{choice:'denied'},{choice:'denied',at:1},{broken:true}]) {
   const f=fixture(options);assert.equal(f.document.head.children.length,0);assert.equal(f.commands().length,0);
  }
- const f=fixture(); f.buttons[1].click();assert.equal(f.commands().length,0);assert.equal(f.document.head.children.length,0);
 });
-test('consent loads one tag and one sanitized page view; repeated acceptance does not double count',()=>{
- const f=fixture();f.buttons[0].click();f.buttons[0].click();
+test('default startup sends one sanitized view; a saved refusal can be explicitly reversed',()=>{
+ const f=fixture();
+ const off=fixture({choice:'denied'});off.toggle.click();assert.equal(off.document.head.children.length,1);off.window.events.storage({key});assert.equal(off.document.head.children.length,1);
  assert.equal(f.document.head.children.length,1);
  const events=f.commands().filter(x=>x[0]==='event');assert.equal(events.length,1);assert.equal(events[0][1],'page_view');
  assert.equal(events[0][2].page_location,'https://kunilingvistador.github.io/ProfileDock/en/');assert.equal(events[0][2].page_referrer,'https://www.google.com/');
@@ -46,7 +52,7 @@ test('consent loads one tag and one sanitized page view; repeated acceptance doe
  assert(!JSON.stringify(f.commands()).includes('private'));
 });
 test('revoking stops dispatch, clears only project cookies and reloads the loaded document',()=>{
- const f=fixture({choice:'granted'});const count=f.commands().length;f.buttons[1].click();
+ const f=fixture({choice:'granted'});const count=f.commands().length;f.toggle.click();
  assert.equal(f.window['ga-disable-G-QATEST1'],true);assert.equal(f.commands().length,count);assert.equal(f.reloads(),1);
  assert(f.cleared.every(x=>x.startsWith('pd_ga')));assert.equal(f.cleared.length,2);
 });
@@ -64,6 +70,6 @@ test('only release links emit a sanitized download click, and withdrawal stops c
  click('https://github.com/kunilingvistador/ProfileDock/releases/tag/v0.1.6-beta?private=value#secret');
  const events=f.commands().filter(x=>x[1]==='download_click');assert.equal(events.length,1);
  assert.equal(events[0][2].destination,'github_releases');assert(!JSON.stringify(events).includes('private'));assert(!JSON.stringify(events).includes('secret'));
- f.buttons[1].click();click('https://github.com/kunilingvistador/ProfileDock/releases');
+ f.toggle.click();click('https://github.com/kunilingvistador/ProfileDock/releases');
  assert.equal(f.commands().filter(x=>x[1]==='download_click').length,1);
 });

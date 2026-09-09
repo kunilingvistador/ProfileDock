@@ -44,6 +44,7 @@ function GuideShell({ language, slug, children }: { language: SiteLanguage; slug
       <div className="footer-links">
         <a href={guidePath(language)}>{t.hub}</a>
         <a href={`${home}#privacy`}>{t.privacy}</a>
+        <a href={`${home}#website-analytics`}>{language === "ru" ? "Аналитика сайта" : "Website analytics"}</a>
         <a href={repositoryURL}>GitHub <ArrowUpRight size={13} aria-hidden="true" /></a>
       </div>
     </footer>

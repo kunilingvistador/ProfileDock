@@ -10,7 +10,7 @@ Each translation pair has its own reciprocal hreflang and self-canonical URLs. A
 
 The copy script now normalizes nested Vinext flat HTML exports to directory/index.html URLs. Validation checks all ten pages, metadata, paired language links, sitemap membership, resources and internal fragment links. The previous Markdown project documentation is preserved during the generated-file copy.
 
-The repository's homepage and nine relevant topics were added on 9 September. The README links to the guides and existing interactive demonstration and shows a screenshot using sample profiles. Voluntary public GitHub feedback forms ask for actionable steps and versions while requesting that private information be omitted. Those initial discovery changes introduced no website analytics or app telemetry. The separate opt-in website measurement added subsequently is documented below; the native app remains without telemetry.
+The repository's homepage and nine relevant topics were added on 9 September. The README links to the guides and existing interactive demonstration and shows a screenshot using sample profiles. Voluntary public GitHub feedback forms ask for actionable steps and versions while requesting that private information be omitted. Those initial discovery changes introduced no website analytics or app telemetry. The separate website measurement added subsequently is documented below; the native app remains without telemetry.
 
 Search Console verification uses the HTML token actually supplied by Google for this URL-prefix property in the account selected by the owner. Verification, sitemap submission and traffic collection must be confirmed in the live services; adding a token or sitemap alone does not prove completion or indexing.
 
@@ -61,14 +61,19 @@ The static validator now rejects duplicate canonical-page titles/descriptions an
 
 ### Measurement boundaries
 
-The owner requested Google Analytics for website traffic in the selected Google account. Website-only analytics is opt-in: no Google script or events before consent. Only known public routes are eligible, page query strings and fragments are removed from the configured location, referral URLs are reduced to origins, and advertising signals/personalization are disabled. The choice lasts up to 180 days and can be withdrawn. A `download_click` event means navigation to GitHub releases, not a completed download or app installation. The native Mac app has no new analytics code.
+The owner requested Google Analytics for website traffic in the selected Google account. At the owner’s explicit request, website analytics now starts by default without a consent popup. A saved browser refusal is respected, and an inline control in the privacy section can turn collection off or back on. Only known public routes are eligible, page query strings and fragments are removed from the configured location, referral URLs are reduced to origins, and advertising signals/personalization are disabled. The browser preference persists until changed or browser storage is cleared. A `download_click` event means navigation to GitHub releases, not a completed download or app installation. The native Mac app has no new analytics code.
 
-Test the consent implementation and live web stream before treating metrics as operational. Google Analytics includes only visitors who consent and whose browsers allow collection. Search Console is needed separately for Google impressions, query clicks, indexing and sitemap status. Neither service can reconstruct a pre-installation traffic baseline. See [Google basic consent mode](https://developers.google.com/tag-platform/security/concepts/consent-mode) and [GA4 configuration fields](https://developers.google.com/analytics/devguides/collection/ga4/reference/config).
+Test the default startup, opt-out and live web stream before treating metrics as operational. Google Analytics includes visitors whose browsers allow collection and who have not opted out. Search Console is needed separately for Google impressions, query clicks, indexing and sitemap status. Neither service can reconstruct a pre-installation traffic baseline. See [Google basic consent mode](https://developers.google.com/tag-platform/security/concepts/consent-mode) and [GA4 configuration fields](https://developers.google.com/analytics/devguides/collection/ga4/reference/config).
 
-After data arrives, compare query impressions, clicks, CTR and landing pages in Search Console; use GA4 page views, referral sources and `download_click` for consenting visits. Compare periods only after comparable complete days exist. Do not promise a date for indexing or infer installations from clicks. Promotion and monetization remain subsequent work.
+After data arrives, compare query impressions, clicks, CTR and landing pages in Search Console; use GA4 page views, referral sources and `download_click` for measured visits. Compare periods only after comparable complete days exist. Do not promise a date for indexing or infer installations from clicks. Promotion and monetization remain subsequent work.
 
-### Pre-publication validation
+### Initial opt-in release validation (historical)
 
 The ProfileDock website stream was created and its real public measurement ID was added. Enhanced Measurement was explicitly disabled in the saved stream and checked again after reopening its details. No other existing property's settings were changed.
 
 Local validation passed: TypeScript, production build, ten-page static SEO validation (262 local references/fragments), and five consent/event tests covering default refusal, acceptance, repeated acceptance, sanitized URLs, release-link events, withdrawal, cross-tab withdrawal and localhost isolation. Browser checks covered Russian and English navigation, consent settings and a narrow viewport without horizontal page overflow. Live ownership verification and receipt of events remain separate post-deployment checks.
+
+
+### Banner removal
+
+The owner explicitly requested removal of the popup and default-on analytics. The popup and floating settings button were removed. An inline browser opt-out remains in the website analytics section; older refusals remain effective. Site copy now describes default-on measurement. This is a product configuration change, not a claim of universal legal compliance. Native app code and Search Console verification are unchanged.

@@ -144,7 +144,7 @@ jobs:
           node-version: 22
           cache: npm
           cache-dependency-path: website/package-lock.json
-      - name: Test website analytics consent
+      - name: Test website analytics preferences
         run: node scripts/test-website-analytics.cjs
       - name: Build static website
         working-directory: website
