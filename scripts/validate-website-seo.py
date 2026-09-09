@@ -136,7 +136,7 @@ def single_meta(document: Document, key: str, page: str) -> str:
 
 def validate(root: Path):
     analytics = local_target(root, SITE + 'analytics.js')
-    require(analytics is not None, 'Missing first-party analytics consent runtime')
+    require(analytics is not None, 'Missing first-party analytics runtime')
     require("const id = 'G-VTDFFJ1TWQ';" in analytics.read_text(encoding='utf-8'), 'Missing actual ProfileDock measurement ID')
     rendered: dict[str, Document] = {}
     reference_count = 0
@@ -147,8 +147,8 @@ def validate(root: Path):
         require(target is not None, f'No HTML for {page}')
         document = Document(target.read_text(encoding='utf-8'))
         require(single_meta(document, 'google-site-verification', page) == 'myorIcY7TEsKKiQC5rc_fySB15tRPSfyGuDogpgtzfI', f'{page}: missing Search Console verification token')
-        require(PREFIX + 'analytics.js' in document.references, f'{page}: missing consent runtime')
-        require(not any(urlparse(ref).netloc.endswith(('googletagmanager.com', 'google-analytics.com')) for ref in document.references), f'{page}: Google resources must load only after consent')
+        require(PREFIX + 'analytics.js' in document.references, f'{page}: missing analytics runtime')
+        require(not any(urlparse(ref).netloc.endswith(('googletagmanager.com', 'google-analytics.com')) for ref in document.references), f'{page}: Google resources must load through the preference-aware runtime')
         rendered[key] = document
         require(document.language == language, f'{page}: initial HTML lang must be {language}')
         require(document.title_count == 1 and bool(''.join(document.title_parts).strip()), f'{page}: expected one title')

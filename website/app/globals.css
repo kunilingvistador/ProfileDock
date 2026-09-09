@@ -1535,16 +1535,9 @@ footer p {
   .guides-teaser-grid article { padding: 25px; }
 }
 
-/* Site-only, opt-in analytics. Equal-weight accept/decline controls. */
-.analytics-panel { position: fixed; z-index: 100; bottom: 20px; left: 20px; width: min(560px, calc(100vw - 40px)); padding: 22px; background: #fff; border: 1px solid var(--line); border-radius: 18px; box-shadow: 0 12px 60px #17232226; max-height: calc(100dvh - 40px); overflow-y: auto; }
-.analytics-panel[hidden], .analytics-settings[hidden] { display: none; }
-.analytics-panel h2 { font-size: 20px; margin: 0 0 10px; }
-.analytics-panel p { font-size: 14px; line-height: 1.55; margin: 0 0 12px; }
-.analytics-panel a { text-decoration: underline; font-size: 14px; }
-.analytics-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
-.analytics-actions button, .analytics-settings { border: 1px solid #52645a; border-radius: 9px; padding: 10px 13px; background: #fff; color: #23342b; font-size: 13px; cursor: pointer; }
-.analytics-actions button:hover, .analytics-settings:hover { background: #edf3ed; }
-.analytics-settings { position: fixed; z-index: 90; bottom: 12px; left: 12px; box-shadow: 0 3px 15px #17232212; }
+/* Site-only analytics setting within the privacy section; no overlay. */
+.analytics-toggle { border: 1px solid #52645a; border-radius: 9px; padding: 10px 13px; background: #fff; color: #23342b; font-size: 13px; cursor: pointer; margin-bottom: 16px; }
+.analytics-toggle:hover { background: #edf3ed; }
 .website-analytics-note { padding-top: 34px; padding-bottom: 34px; }
 .website-analytics-note h2 { font-size: 25px; margin-bottom: 16px; }
 .website-analytics-note p { max-width: 850px; font-size: 15px; line-height: 1.65; color: var(--muted); margin-bottom: 15px; }
