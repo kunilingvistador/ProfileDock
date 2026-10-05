@@ -50,8 +50,13 @@
       const link = event.target instanceof Element ? event.target.closest('a[href]') : null;
       if (!link) return;
       const url = new URL(link.href, location.href);
-      if (url.origin === 'https://github.com' && /^\/kunilingvistador\/ProfileDock\/releases(?:\/|$)/.test(url.pathname)) {
-        gtag('event', 'download_click', {...page, destination: 'github_releases', transport_type: 'beacon'});
+      const zip = /^\/kunilingvistador\/ProfileDock\/releases\/download\/[^/]+\/ProfileDock-[^/]+\.zip$/.test(url.pathname);
+      const notes = /^\/kunilingvistador\/ProfileDock\/releases(?:\/?|\/tag\/[^/]+\/?)$/.test(url.pathname);
+      if (url.origin === 'https://github.com' && (zip || notes)) {
+        const details = {...page, destination: zip ? 'github_zip' : 'github_releases', transport_type: 'beacon'};
+        // Keep the historical broad click metric; ZIP clicks are a subset, not completed downloads.
+        gtag('event', 'download_click', details);
+        if (zip) gtag('event', 'zip_download_click', details);
       }
     });
   }

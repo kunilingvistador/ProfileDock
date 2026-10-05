@@ -1,3 +1,4 @@
+import { downloadURL, releaseVersion } from "@/lib/release";
 import type { ReactNode } from "react";
 import { ArrowRight, ArrowUpRight, BookOpen, Check, Download, Keyboard, LifeBuoy, ShieldCheck, BriefcaseBusiness, UserRound } from "lucide-react";
 import { guideCopy, guideMetadata, guidePath, guides, guideSlugs, type Guide, type GuideSlug } from "@/lib/guides";
@@ -31,11 +32,16 @@ function GuideShell({ language, slug, children }: { language: SiteLanguage; slug
         </ol>
       </nav>
       {children}
+      {slug && <nav className="guide-directory" aria-label={t.allGuides}>
+        <h2>{t.allGuides}</h2>
+        <ul>{guideSlugs.filter(item => item !== slug).map(item => <li key={item}><a href={guidePath(language, item)}>{guides[language][item].shortTitle}</a></li>)}</ul>
+      </nav>}
       <section className="guide-download" aria-labelledby="guide-download-title">
         <div><h2 id="guide-download-title">{t.ctaTitle}</h2><p>{t.ctaBody}</p></div>
         <div className="guide-download-action">
-          <a className="button button-primary" href={releaseURL}><Download size={17} aria-hidden="true" />{t.download}</a>
-          <p>{t.beta}</p>
+          <a className="button button-primary" href={downloadURL}><Download size={17} aria-hidden="true" />{t.download}</a>
+          <p>ZIP · {releaseVersion} · macOS 13+ · Apple Silicon / Intel</p>
+          <p>{t.beta} <a href={releaseURL}>{language === "ru" ? "Примечания к выпуску" : "Release notes"}</a></p>
         </div>
       </section>
     </main>
@@ -112,7 +118,7 @@ export function GuideArticle({ language, slug }: { language: SiteLanguage; slug:
         <p className="eyebrow">{guide.category}</p>
         <h1>{guide.title}</h1>
         <p className="guide-lead">{guide.summary}</p>
-        <div className="guide-byline"><time dateTime="2026-09-09">{t.published}</time><span>{t.version}</span></div>
+        <div className="guide-byline"><time dateTime={guide.modified ?? "2026-09-09"}>{guide.modified ? `${language === "ru" ? "Обновлено" : "Updated"} ${new Intl.DateTimeFormat(language, { dateStyle: "long", timeZone: "UTC" }).format(new Date(guide.modified))}` : t.published}</time><span>{t.version}</span></div>
       </header>
       <div className="guide-reading-layout">
         <aside className="guide-toc" aria-label={t.toc}>

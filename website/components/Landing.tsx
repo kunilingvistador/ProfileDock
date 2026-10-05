@@ -16,8 +16,7 @@ import {
   PanelsTopLeft,
 } from "lucide-react";
 
-const repo = "https://github.com/kunilingvistador/ProfileDock";
-const release = `${repo}/releases`;
+import { repositoryURL as repo, releaseURL as release, downloadURL, releaseVersion, checksumURL } from "@/lib/release";
 const copy = {
   ru: {
     language: "Switch to English",
@@ -31,7 +30,7 @@ const copy = {
       "Закрепите каждый профиль отдельным ярлыком в Dock. Нажмите на его значок, чтобы вернуться к выбранному открытому окну Chrome.",
     download: "Скачать для Mac",
     see: "Посмотреть, как работает",
-    details: "Бесплатно · Открытый код · macOS 13+",
+    details: "Бесплатно · macOS 13+ · Apple Silicon и Intel",
     betaHint: "Бета-версия. При установке нужно подтверждение macOS.",
     demoBadge: "Попробуйте прямо здесь",
     demoTitle: "Три профиля. Три ярлыка.",
@@ -84,8 +83,8 @@ const copy = {
     ],
     installTitle: "Перед первым запуском",
     installText:
-      "Скачайте ZIP со страницы выпуска, распакуйте и перенесите ProfileDock в «Программы». Сборка пока без нотариализации Apple: если macOS блокирует запуск, следуйте инструкции в выпуске. Разрешите ProfileDock управлять Chrome, когда система попросит.",
-    installLink: "Открыть инструкцию установки",
+      "Скачайте ZIP кнопкой выше, распакуйте и перенесите ProfileDock в «Программы». Сборка пока без нотариализации Apple: если macOS блокирует запуск, следуйте инструкции в выпуске. Разрешите ProfileDock управлять Chrome, когда система попросит.",
+    installLink: "Настроить первый ярлык",
     faqKicker: "ХОРОШИЕ ВОПРОСЫ",
     faqTitle: "Что стоит знать.",
     faq: [
@@ -153,7 +152,7 @@ const copy = {
       "Give every profile its own Dock shortcut. Click its icon to bring your chosen open Chrome window back to the front.",
     download: "Download for Mac",
     see: "See how it works",
-    details: "Free · Open source · macOS 13+",
+    details: "Free · macOS 13+ · Apple Silicon & Intel",
     betaHint: "Beta software. macOS approval is needed during installation.",
     demoBadge: "Give it a try",
     demoTitle: "Three profiles. Three shortcuts.",
@@ -208,8 +207,8 @@ const copy = {
     ],
     installTitle: "Before your first launch",
     installText:
-      "Download the ZIP from the release page, unzip it and move ProfileDock to Applications. This build is not yet notarized by Apple. If macOS blocks it, follow the release instructions. Allow ProfileDock to control Chrome when macOS asks.",
-    installLink: "Read the installation guide",
+      "Download the ZIP with the button above, unzip it and move ProfileDock to Applications. This build is not yet notarized by Apple. If macOS blocks it, follow the release instructions. Allow ProfileDock to control Chrome when macOS asks.",
+    installLink: "Set up your first shortcut",
     faqKicker: "GOOD QUESTIONS",
     faqTitle: "A few things to know.",
     faq: [
@@ -345,7 +344,7 @@ export default function Landing({ initialLanguage }: { initialLanguage: "ru" | "
             </h1>
             <p className="intro">{t.intro}</p>
             <div className="hero-actions">
-              <a className="button button-primary" href={release}>
+              <a className="button button-primary" href={downloadURL}>
                 <ArrowDown size={19} aria-hidden="true" />
                 {t.download}
               </a>
@@ -354,7 +353,7 @@ export default function Landing({ initialLanguage }: { initialLanguage: "ru" | "
                 <ArrowRight size={17} aria-hidden="true" />
               </a>
             </div>
-            <p className="download-detail">{t.details}</p>
+            <p className="download-detail">{t.details}<br />ZIP · {releaseVersion} · 2.6 MB</p>
             <a className="beta-hint" href="#install">
               {t.betaHint}
             </a>
@@ -506,7 +505,8 @@ export default function Landing({ initialLanguage }: { initialLanguage: "ru" | "
             <div>
               <h3>{t.installTitle}</h3>
               <p>{t.installText}</p>
-              <a className="text-link" href={release}>
+              <p className="release-links"><a href={release}>{initialLanguage === "ru" ? "Что нового в версии 0.1.6" : "What’s new in version 0.1.6"}</a> · <a href={checksumURL}>SHA-256</a></p>
+              <a className="text-link" href={`${home}guides/chrome-profile-shortcuts-mac-dock/`}>
                 {t.installLink}
                 <ArrowUpRight size={16} aria-hidden="true" />
               </a>
@@ -554,7 +554,7 @@ export default function Landing({ initialLanguage }: { initialLanguage: "ru" | "
             <article>
               <h3>{initialLanguage === "ru" ? "Профили Chrome отдельными ярлыками в Dock" : "Chrome profile shortcuts in your Mac Dock"}</h3>
               <p>{initialLanguage === "ru" ? "Выберите окно, проверьте привязку и добавьте свой значок. Пошаговая инструкция для первого запуска." : "Choose a window, check the connection and pick an icon. A step-by-step guide for your first shortcut."}</p>
-              <a className="text-link" href={`${home}guides/chrome-profile-shortcuts-mac-dock/`}>{initialLanguage === "ru" ? "Настроить ярлык" : "Set up a shortcut"}<ArrowRight size={17} aria-hidden="true" /></a>
+              <a className="text-link" href={`${home}guides/chrome-profile-shortcuts-mac-dock/`}>{initialLanguage === "ru" ? "Добавить профили Chrome в Dock" : "Add Chrome profiles to the Dock"}<ArrowRight size={17} aria-hidden="true" /></a>
             </article>
             <article>
               <h3>{initialLanguage === "ru" ? "Как вернуться к нужному открытому окну" : "Return to the right existing window"}</h3>
@@ -597,7 +597,7 @@ export default function Landing({ initialLanguage }: { initialLanguage: "ru" | "
             <p>{t.closingText}</p>
           </div>
           <div className="closing-action">
-            <a className="button button-primary" href={release}>
+            <a className="button button-primary" href={downloadURL}>
               <ArrowDown size={19} aria-hidden="true" />
               {t.download}
             </a>

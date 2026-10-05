@@ -104,3 +104,16 @@ These are topic hypotheses, not measured search volumes or promised traffic. Pat
 5. Expand only when observed queries reveal an unanswered task. Improve an existing page for closely related wording; avoid duplicate articles for every keyword variation.
 
 The analytics route allowlist includes all four new article URLs. Seven runtime tests cover default startup, preferences, sanitized events, local-preview isolation and new-route page views. Static validation checks all 14 pages and their internal links. No outreach, paid campaigns, automatic monitoring or native app telemetry was added in this content change.
+
+
+## Discovery and download update — 5 October 2026
+
+- Home and guide download buttons link to the verified v0.1.6 beta universal ZIP. Release notes, compatibility and beta/notarization limitations remain visible. Update `website/lib/release.ts` and the displayed archive size when publishing a new app release.
+- English home title clarifies Chrome profile switching. The work/personal guide starts with four setup steps in both languages, has a direct-answer introduction, and uses a factual modification date in visible HTML, Open Graph, Article JSON-LD and sitemap. Other article modification dates remain September 9.
+- Every article includes crawlable links to the other four guides; the repository README also links to all five English guides.
+- Sitemap lastmod is editorial, not build time. Do not refresh dates on every build. No ineffective project-level robots.txt or invented ratings were added.
+- Since this publication, `download_click` includes release-note and ZIP links with `destination` distinguishing `github_releases` and `github_zip`. `zip_download_click` is the ZIP subset; do not add the two counters or call either completed downloads/installations. Checksum links do not emit download events. Existing opt-out and data minimization remain unchanged.
+- Validate all 14 prerendered routes, paired languages, canonical URLs, direct ZIP links, sitemap/Article date consistency and guide discovery using `scripts/validate-website-seo.py`. Runtime event tests cover ZIP, notes, unrelated assets, withdrawal and sanitized fields.
+- Before deployment, Google live URL inspection could fetch the English Dock guide, but the index did not know its URL. Sitemap processing is a separate Google status; a valid live fetch or a submitted request is not proof of successful processing or indexing.
+
+Sources: [Google sitemap troubleshooting](https://support.google.com/webmasters/answer/7451001?hl=en), [sitemap lastmod guidance](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap), [crawlable links](https://developers.google.com/search/docs/crawling-indexing/links-crawlable).
