@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
+import { repositoryURL, releaseURL, downloadURL, releaseVersion } from "./release";
 
 export type SiteLanguage = "ru" | "en";
 
 export const siteURL = "https://kunilingvistador.github.io/ProfileDock/";
-export const repositoryURL = "https://github.com/kunilingvistador/ProfileDock";
-// GitHub's /releases/latest excludes prereleases; the catalog works for betas.
-export const releaseURL = `${repositoryURL}/releases`;
+export { repositoryURL, releaseURL } from "./release";
 
 export const languageURLs: Record<SiteLanguage, string> = {
   ru: siteURL,
@@ -22,7 +21,7 @@ const descriptions = {
     alternateLocale: "en_US",
   },
   en: {
-    title: "ProfileDock — Chrome Profile Shortcuts for Mac",
+    title: "ProfileDock — Chrome Profile Switcher for Mac",
     description:
       "Switch Chrome profile windows on Mac with separate Dock shortcuts and global hotkeys. Custom photos and icons for your existing windows. Free and open source.",
     imageAlt: "ProfileDock: familiar Dock shortcuts for existing Chrome windows on Mac",
@@ -37,6 +36,7 @@ export type ContentMetadata = {
   /** Relative to each language's home URL, with a trailing slash. */
   path: string;
   article?: boolean;
+  modified?: string;
 };
 
 export function metadataFor(language: SiteLanguage, content?: ContentMetadata): Metadata {
@@ -67,7 +67,7 @@ export function metadataFor(language: SiteLanguage, content?: ContentMetadata): 
       locale: copy.locale,
       alternateLocale: [copy.alternateLocale],
       images: [{ url: image, alt: copy.imageAlt, width: 1200, height: 630 }],
-      ...(content?.article ? { publishedTime: "2026-09-09", modifiedTime: "2026-09-09" } : {}),
+      ...(content?.article ? { publishedTime: "2026-09-09", modifiedTime: content.modified ?? "2026-09-09" } : {}),
     },
     twitter: {
       card: "summary_large_image",
@@ -101,7 +101,8 @@ export function guideDataFor(language: SiteLanguage, content: ContentMetadata) {
         ...(content.article ? {
           headline: content.title,
           datePublished: "2026-09-09",
-          dateModified: "2026-09-09",
+          dateModified: content.modified ?? "2026-09-09",
+          author: { "@type": "Organization", name: "ProfileDock", url: repositoryURL },
           mainEntityOfPage: { "@type": "WebPage", "@id": url },
           image: `${siteURL}app-preview.jpg`,
           publisher: { "@type": "Organization", name: "ProfileDock", url: siteURL },
@@ -125,7 +126,8 @@ export function applicationDataFor(language: SiteLanguage) {
     inLanguage: language,
     license: `${repositoryURL}/blob/main/LICENSE`,
     sameAs: repositoryURL,
-    downloadUrl: releaseURL,
+    downloadUrl: downloadURL,
+    softwareVersion: releaseVersion,
     offers: { "@type": "Offer", price: 0, priceCurrency: "USD", url: releaseURL },
     // No ratings or reviews are published yet. Do not invent them for a rich result.
   };

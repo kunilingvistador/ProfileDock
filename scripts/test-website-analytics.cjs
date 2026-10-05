@@ -86,3 +86,21 @@ test('new guide routes are measured once without query or fragment data',()=>{
  }
  assert.equal(fixture({pathname:'/ProfileDock/not-a-public-page/'}).commands().length,0);
 });
+
+test('ZIP clicks are distinct from release notes; checksums and other assets are not downloads',()=>{
+ const f=fixture();
+ const click=href=>{const link=f.document.createElement('a');link.href=href;f.document.events.click({target:link});};
+ const base='https://github.com/kunilingvistador/ProfileDock/releases';
+ click(`${base}/download/v0.1.6-beta/SHA256SUMS`);
+ click(`${base}/download/v0.1.6-beta/source.tar.gz`);
+ assert.equal(f.commands().filter(x=>x[1]==='download_click').length,0);
+ click(`${base}/tag/v0.1.6-beta`);
+ assert.equal(f.commands().filter(x=>x[1]==='zip_download_click').length,0);
+ click(`${base}/download/v0.1.6-beta/ProfileDock-0.1.6-macos-universal-local.zip?private=secret`);
+ assert.equal(f.commands().filter(x=>x[1]==='download_click').length,2);
+ const zip=f.commands().filter(x=>x[1]==='zip_download_click');
+ assert.equal(zip.length,1);assert.equal(zip[0][2].destination,'github_zip');
+ assert(!JSON.stringify(zip).includes('secret'));
+ f.toggle.click();click(`${base}/download/v0.1.6-beta/ProfileDock-0.1.6-macos-universal-local.zip`);
+ assert.equal(f.commands().filter(x=>x[1]==='zip_download_click').length,1);
+});

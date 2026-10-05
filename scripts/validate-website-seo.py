@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+from datetime import date
 from collections import defaultdict
 from html.parser import HTMLParser
 import json
@@ -157,6 +158,7 @@ def validate(root: Path):
         require(single_meta(document, 'google-site-verification', page) == 'myorIcY7TEsKKiQC5rc_fySB15tRPSfyGuDogpgtzfI', f'{page}: missing Search Console verification token')
         require(PREFIX + 'analytics.js' in document.references, f'{page}: missing analytics runtime')
         require(not any(urlparse(ref).netloc.endswith(('googletagmanager.com', 'google-analytics.com')) for ref in document.references), f'{page}: Google resources must load through the preference-aware runtime')
+        require(any(re.fullmatch(r'https://github\.com/kunilingvistador/ProfileDock/releases/download/[^/]+/ProfileDock-[^/]+\.zip', href) for href in document.anchors), f'{page}: missing direct ZIP download')
         rendered[key] = document
         require(document.language == language, f'{page}: initial HTML lang must be {language}')
         require(document.title_count == 1 and bool(''.join(document.title_parts).strip()), f'{page}: expected one title')
@@ -248,6 +250,23 @@ def validate(root: Path):
     tree = ET.fromstring(sitemap.read_text(encoding='utf-8'))
     locations = [node.text for node in tree.findall('{http://www.sitemaps.org/schemas/sitemap/0.9}url/{http://www.sitemaps.org/schemas/sitemap/0.9}loc')]
     require(len(locations) == len(PAGES) and set(locations) == set(PAGES.values()), 'Sitemap must contain exactly the canonical pages')
+    for node in tree.findall('{http://www.sitemaps.org/schemas/sitemap/0.9}url'):
+        url = node.findtext('{http://www.sitemaps.org/schemas/sitemap/0.9}loc')
+        modified = node.findtext('{http://www.sitemaps.org/schemas/sitemap/0.9}lastmod')
+        require(bool(modified) and date.fromisoformat(modified) <= date.today(), f'{url}: invalid or future lastmod')
+        schema = json.loads(by_url[url].jsonld[0])
+        for entry in schema.get('@graph', []):
+            if entry.get('@type') == 'Article':
+                require(entry.get('dateModified') == modified, f'{url}: article and sitemap dates differ')
+                require(entry.get('author', {}).get('url') == 'https://github.com/kunilingvistador/ProfileDock', f'{url}: missing project authorship')
+    # An article reader should be able to discover every other guide without JavaScript.
+    for key, document in rendered.items():
+        group, language = key.split(':')
+        if group in {'home', 'guides'}:
+            continue
+        linked = {urljoin(PAGES[key], href) for href in document.anchors}
+        expected_guides = {pair[language] for name, pair in PAGE_GROUPS.items() if name not in {'home', 'guides'} and name != group}
+        require(expected_guides <= linked, f'{PAGES[key]}: guide directory is incomplete')
     print(f'PASS sitemap: {len(PAGES)} canonical URLs; {reference_count} local HTML references and internal fragments verified')
 
 

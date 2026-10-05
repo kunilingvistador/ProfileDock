@@ -15,6 +15,7 @@ export type Guide = {
   slug: GuideSlug;
   title: string;
   shortTitle: string;
+  modified?: string;
   description: string;
   summary: string;
   category: string;
@@ -382,7 +383,7 @@ export const guides: Record<SiteLanguage, Record<GuideSlug, Guide>> = {
 export function guideMetadata(language: SiteLanguage, slug?: GuideSlug): ContentMetadata {
   if (!slug) return { title: `${guideCopy[language].hubTitle} | ProfileDock`, description: guideCopy[language].hubDescription, path: "guides/" };
   const guide = guides[language][slug];
-  return { title: `${guide.title} | ProfileDock`, description: guide.description, path: `guides/${slug}/`, article: true };
+  return { title: `${guide.title} | ProfileDock`, description: guide.description, path: `guides/${slug}/`, article: true, modified: guide.modified };
 }
 
 export function guidePath(language: SiteLanguage, slug?: GuideSlug): string {
