@@ -1455,6 +1455,12 @@ footer p {
 .guide-figure { margin: 4px 0 46px; padding: 18px; background: #f2f1f7; border: 1px solid var(--line); border-radius: 17px; }
 .guide-figure img { border-radius: 9px; box-shadow: 0 8px 18px #25204412; }
 .guide-figure figcaption { color: var(--muted); font-size: 11px; line-height: 1.6; margin: 16px 2px 0; }
+.guide-prose > .guide-capture-note { margin: -12px 0 40px; font-size: 13px; line-height: 1.65; }
+.guide-screenshot { margin: 26px 0 22px; }
+.guide-screenshot > a { display: block; margin: 0 auto; border-radius: 9px; }
+.guide-screenshot img { display: block; width: 100%; height: auto; }
+.guide-screenshot figcaption a { display: inline-flex; align-items: center; gap: 3px; color: var(--accent-dark); text-decoration: underline; text-underline-offset: 3px; }
+.guide-prose section .guide-result { margin-top: 22px; padding: 17px 20px; background: var(--lavender); border-left: 3px solid var(--accent); border-radius: 0 10px 10px 0; font-size: 14px; line-height: 1.7; }
 .guide-prose .guide-sources { border-top: 1px solid var(--line); padding-top: 26px; margin-bottom: 26px; }
 .guide-prose .guide-sources h2 { font-size: 19px; letter-spacing: -.3px; }
 .guide-sources ul { padding-left: 18px; margin: 0; display: grid; gap: 10px; font-size: 13px; }

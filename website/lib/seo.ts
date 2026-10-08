@@ -38,6 +38,7 @@ export type ContentMetadata = {
   article?: boolean;
   published?: string;
   modified?: string;
+  images?: string[];
 };
 
 export function metadataFor(language: SiteLanguage, content?: ContentMetadata): Metadata {
@@ -105,7 +106,7 @@ export function guideDataFor(language: SiteLanguage, content: ContentMetadata) {
           dateModified: content.modified ?? content.published ?? "2026-09-09",
           author: { "@type": "Organization", name: "ProfileDock", url: repositoryURL },
           mainEntityOfPage: { "@type": "WebPage", "@id": url },
-          image: `${siteURL}app-preview.jpg`,
+          image: content.images?.length ? content.images.map(image => new URL(image, siteURL).href) : `${siteURL}app-preview.jpg`,
           publisher: { "@type": "Organization", name: "ProfileDock", url: siteURL },
         } : { breadcrumb: { "@id": `${url}#breadcrumbs` } }),
       },
