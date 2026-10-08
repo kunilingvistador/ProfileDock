@@ -5,10 +5,14 @@ import type { ContentMetadata, SiteLanguage } from "./seo";
 export const guideSlugs = ["chrome-profile-shortcuts-mac-dock", "chrome-shortcut-existing-window", "switch-chrome-profiles-keyboard-mac", "separate-work-personal-chrome-profiles-mac", "chrome-automation-permission-mac", "chrome-profiles-vs-google-accounts", "chrome-profiles-one-dock-icon-mac"] as const;
 export type GuideSlug = (typeof guideSlugs)[number];
 
+export type GuideImage = { src: string; alt: string; caption: string; width: number; height: number };
+
 type GuideSection = {
   id: string;
   title: string;
   paragraphs?: string[];
+  images?: GuideImage[];
+  check?: string;
   steps?: { title: string; body: string }[];
   points?: { title: string; body: string }[];
   links?: { title: string; slug: GuideSlug }[];
@@ -61,6 +65,7 @@ export const guideCopy = {
 } satisfies Record<SiteLanguage, Record<string, string>>;
 
 const setupRU: Guide = {
+  modified: "2026-10-08",
   slug: "chrome-profile-shortcuts-mac-dock",
   title: "Как добавить профили Chrome отдельными ярлыками в Dock на Mac",
   shortTitle: "Свои профили — отдельными значками в Dock",
@@ -80,17 +85,17 @@ const setupRU: Guide = {
       "Если macOS не может проверить разработчика, после попытки запуска можно открыть «Системные настройки → Конфиденциальность и безопасность» и подтвердить запуск именно этого приложения кнопкой «Всё равно открыть». Делайте это только для доверенной копии с официальной страницы проекта. Сообщения о вредоносном или повреждённом приложении требуют отдельной проверки; этот шаг не предназначен для их обхода. Инструкция Apple приведена в источниках ниже.",
       "Откройте ProfileDock, нажмите «Подключить Chrome» и разрешите управление Google Chrome в запросе macOS. Приложение работает в строке меню; через его значок можно снова открыть панель настройки.",
     ] },
-    { id: "choose-window", title: "2. Выберите окно и проверьте его", steps: [
+    { id: "choose-window", images: [{"src": "/ProfileDock/guide-images/create-ru.jpg", "alt": "Диалог создания: выбрано открытое окно Personal, задано имя, доступна кнопка «Создать ярлык».", "caption": "Окно и оформление выбираются отдельно. Перед «Создать ярлык» покажите выбранное окно и проверьте его в Chrome.", "width": 555, "height": 595}], check: "После создания в менеджере должна появиться карточка с вашим именем. Нажмите «Переключиться» и убедитесь, что вернулись к нужным вкладкам. Если показалось другое окно, исправьте привязку до добавления в Dock.", title: "2. Выберите окно и проверьте его", steps: [
       { title: "Создайте первый ярлык", body: "Нажмите «Создать первый ярлык». Если ярлыки уже есть, используйте «Добавить». В поле «Открытое окно» выберите нужное окно Chrome." },
       { title: "Покажите окно перед сохранением", body: "Нажмите «Показать окно», проверьте профиль и нужные вкладки в Chrome, затем вернитесь к настройке. Это особенно важно, если два окна имеют одинаковые заголовки." },
       { title: "Дайте понятное имя", body: "Например: «Работа», «Личное», «Проект». Поле «Имя и фото из профиля» необязательно: оно подставляет оформление, но не меняет выбранное окно. Нажмите «Создать ярлык»." },
     ] },
-    { id: "make-it-yours", title: "3. Добавьте картинку, которую легко узнать", paragraphs: [
-      "В меню ярлыка откройте «Настроить ярлык…». Можно выбрать фотографию или файл изображения. Через «Взять значок сайта…» можно загрузить иконку сайта.",
+    { id: "make-it-yours", images: [{"src": "/ProfileDock/guide-images/customize-ru.jpg", "alt": "Настройка Studio: имя, выбор картинки и значка сайта, кнопка «Сохранить».", "caption": "Кнопка «Настроить» открывает имя и картинку. Сохраните изменения, затем посмотрите на маленький значок.", "width": 555, "height": 440}], check: "Понятное имя видно в карточке и при наведении на значок Dock. После обновления картинки уже созданного ярлыка Dock иногда показывает старую иконку; уберите значок из Dock и перетащите тот же файл ярлыка из Finder снова.", title: "3. Добавьте картинку, которую легко узнать", paragraphs: [
+      "Нажмите «Настроить» в карточке или выберите «Настроить ярлык…» в её меню. Можно выбрать фотографию или файл изображения. Через «Взять значок сайта…» можно загрузить иконку сайта.",
       "Проверьте картинку в маленьком размере. Крупное лицо, простая форма или контрастный логотип различимее, чем скриншот с мелким текстом. Для нескольких ярлыков выбирайте разные силуэты и цвета, а не только разные подписи.",
       "Загрузка значка обращается к выбранному сайту: он видит IP-адрес и запрошенный URL. Cookies Chrome и данные профиля не передаются. В целях ограничения запросов поддерживаются только HTTPS и загрузки с того же хоста; некоторые сайты хранят значки на другом домене и не подойдут. В этом случае выберите файл изображения.",
     ] },
-    { id: "add-to-dock", title: "4. Закрепите ярлык в Dock", steps: [
+    { id: "add-to-dock", images: [{"src": "/ProfileDock/guide-images/overview-ru.jpg", "alt": "Карточки Studio и Personal с кнопкой создания ярлыка для Dock; у Research окно не найдено.", "caption": "На карточке нажмите «Создать ярлык для Dock». Следующий шаг выполняется в Finder: перетащите показанный файл в область приложений Dock.", "width": 940, "height": 692}], check: "Для проверки сверните привязанное окно Chrome и нажмите новый значок Dock. Ожидается восстановление того же окна с прежними вкладками. Пустое новое окно не является успешным результатом.", title: "4. Закрепите ярлык в Dock", steps: [
       { title: "Создайте приложение-ярлык", body: "Нажмите «Создать ярлык для Dock» рядом с настроенным ярлыком. ProfileDock покажет его в Finder." },
       { title: "Перетащите его в Dock", body: "Поместите значок в область приложений Dock, рядом с другими приложениями. Оставьте сам файл ярлыка на его исходном месте: Dock ссылается на него." },
       { title: "Проверьте переключение", body: "Перейдите в другое окно и нажмите новый значок. Привязанное окно Chrome должно выйти на передний план; свёрнутое окно восстановится. Повторите настройку для других постоянных окон." },
@@ -120,6 +125,7 @@ const setupRU: Guide = {
 };
 
 const setupEN: Guide = {
+  modified: "2026-10-08",
   slug: "chrome-profile-shortcuts-mac-dock",
   title: "How to add Chrome profile shortcuts to the Mac Dock",
   shortTitle: "Give each profile a familiar Dock icon",
@@ -139,17 +145,17 @@ const setupEN: Guide = {
       "For an unidentified-developer warning, after trying to open the app, System Settings → Privacy & Security may offer Open Anyway for that app. Use it only for a trusted copy from the official project. A warning about malware or a damaged app needs separate investigation; these steps are not a way around those warnings. Apple’s instructions are linked below.",
       "Open ProfileDock, click “Connect Chrome,” and allow it to control Google Chrome when macOS asks. ProfileDock runs in the menu bar; use its icon to reopen the setup panel.",
     ] },
-    { id: "choose-window", title: "2. Choose and check the window", steps: [
+    { id: "choose-window", images: [{"src": "/ProfileDock/guide-images/create-en.jpg", "alt": "Create shortcut dialog with the Personal window selected, a name entered and Create shortcut enabled.", "caption": "The window and appearance are separate choices. Use Show window and check it in Chrome before Create shortcut.", "width": 555, "height": 595}], check: "After creating it, the manager should show a card with your chosen name. Click Switch and check that your intended tabs appear. If another window appears, fix the connection before adding the icon to the Dock.", title: "2. Choose and check the window", steps: [
       { title: "Create your first shortcut", body: "Click “Create first shortcut.” If you already have shortcuts, use “Add.” Select the Chrome window you want in the “Open window” picker." },
       { title: "Show it before saving", body: "Click “Show window,” check the profile and tabs in Chrome, then return to setup. This matters especially when two windows share the same title." },
       { title: "Give it a clear name", body: "For example: “Work,” “Personal,” or a project name. “Name and photo from profile” is optional: it supplies appearance information without changing your selected window. Click “Create shortcut.”" },
     ] },
-    { id: "make-it-yours", title: "3. Choose a picture you can recognize", paragraphs: [
-      "Open “Edit shortcut…” from the shortcut menu. You can choose a photo or image file. “Use a website icon…” lets you download a site’s icon.",
+    { id: "make-it-yours", images: [{"src": "/ProfileDock/guide-images/customize-en.jpg", "alt": "Customize Studio dialog with name, image and website icon controls and Save.", "caption": "Customize opens the name and picture settings. Save your changes, then check the small icon.", "width": 555, "height": 440}], check: "Your name appears on the card and when hovering over its Dock icon. If Dock keeps displaying an old picture after an update, remove the icon from Dock and drag the same shortcut file from Finder back in.", title: "3. Choose a picture you can recognize", paragraphs: [
+      "Click “Customize” on the card, or open “Edit shortcut…” from its menu. You can choose a photo or image file. “Use a website icon…” lets you download a site’s icon.",
       "Check the picture at a small size. A large face, simple shape, or high-contrast logo is easier to recognize than a screenshot full of tiny text. Give your shortcuts different silhouettes and colors as well as different names.",
       "Fetching an icon contacts the chosen website, which sees your IP address and requested URL. Your Chrome cookies and profile data are not sent. Requests are limited to HTTPS and the same host; sites that keep their icons on another domain may not work. Choose an image file in that case.",
     ] },
-    { id: "add-to-dock", title: "4. Keep the shortcut in your Dock", steps: [
+    { id: "add-to-dock", images: [{"src": "/ProfileDock/guide-images/overview-en.jpg", "alt": "Studio and Personal cards with Create Dock shortcut controls; Research has a missing window.", "caption": "Click Create Dock shortcut on the card. The next step happens in Finder: drag the revealed file into the application area of Dock.", "width": 940, "height": 692}], check: "Minimize the connected Chrome window and click the new Dock icon. The same window should return with its existing tabs. A new blank window is not a successful result.", title: "4. Keep the shortcut in your Dock", steps: [
       { title: "Create the shortcut app", body: "Click “Create Dock shortcut” next to the shortcut you configured. ProfileDock shows it in Finder." },
       { title: "Drag it into the Dock", body: "Place the icon in the application area of your Dock, beside your other apps. Leave the actual shortcut file in its original location: the Dock refers to that file." },
       { title: "Try switching", body: "Go to another window and click the new icon. Your connected Chrome window should come forward; a minimized window will be restored. Repeat for your other permanent working windows." },
@@ -179,6 +185,7 @@ const setupEN: Guide = {
 };
 
 const troubleshootRU: Guide = {
+  modified: "2026-10-08",
   slug: "chrome-shortcut-existing-window",
   title: "Почему ярлык профиля Chrome не возвращает нужное открытое окно",
   shortTitle: "Почему открывается не то окно — и как это исправить",
@@ -197,15 +204,15 @@ const troubleshootRU: Guide = {
       "Обычный заголовок вкладки может меняться при переходах между сайтами. Привязка использует отдельное имя окна, а не текст активной страницы. Поэтому переход на другую страницу сам по себе не должен разорвать связь.",
       "Поле «Имя и фото из профиля» подставляет оформление ярлыка. Оно не выбирает окно вместо вас, не проверяет за вас аккаунт в его вкладках и не переключает сразу все окна одного профиля.",
     ] },
-    { id: "diagnose", title: "Проверьте симптом", points: [
+    { id: "diagnose", images: [{"src": "/ProfileDock/guide-images/overview-ru.jpg", "alt": "Research показывает «Окно не найдено» и кнопку «Выбрать окно»; Studio и Personal готовы.", "caption": "Статус «Окно не найдено» относится к привязке Research. Нажмите «Выбрать окно» в этой карточке.", "width": 940, "height": 692}], title: "Проверьте симптом", points: [
       { title: "Поднимается другое существующее окно", body: "Возможно, при настройке выбрано другое окно или в Dock остался прежний ярлык запуска Chrome. Сначала откройте менеджер ProfileDock и проверьте цель там. Одинаковые заголовки — повод показать окно перед повторной привязкой." },
       { title: "ProfileDock не находит окно", body: "Окно могли закрыть, переименовать или не восстановить после перезапуска Chrome. Новый экземпляр окна того же профиля не получает старую связь автоматически. Привяжите открытое окно заново." },
       { title: "Появляются пустое окно или новая вкладка", body: "Это не действие команды переключения ProfileDock. Проверьте, что нажимаете созданный им ярлык, а не старый ярлык запуска профиля. Посмотрите расположение файла через контекстное меню значка в Dock и сравните с тем, который показывает ProfileDock." },
       { title: "macOS запрещает управление Chrome", body: "Откройте «Системные настройки → Конфиденциальность и безопасность → Автоматизация» и проверьте разрешение Google Chrome для ProfileDock. Запрос относится к управлению приложением; универсальный доступ, запись экрана и полный доступ к диску не требуются." },
     ] },
-    { id: "reconnect", title: "Восстановите связь без перестановки значка в Dock", steps: [
+    { id: "reconnect", images: [{"src": "/ProfileDock/guide-images/reconnect-ru.jpg", "alt": "Перепривязка Research: выбрано окно Personal, доступны «Показать окно» и «Привязать окно».", "caption": "Название Personal здесь лишь пример. Выберите своё правильное окно, покажите его в Chrome и только затем подтвердите привязку.", "width": 535, "height": 430}], check: "Нажмите прежний значок в Dock из другого приложения. Должно появиться выбранное окно с нужными вкладками. Затем повторите проверку в свёрнутом состоянии. Имя, картинка и назначенный хоткей ярлыка должны сохраниться.", title: "Восстановите связь без перестановки значка в Dock", steps: [
       { title: "Откройте нужное обычное окно Chrome", body: "Перейдите в нужный профиль, убедитесь, что видите правильную задачу. Затем откройте менеджер ProfileDock через его значок в строке меню." },
-      { title: "Выберите «Привязать другое окно…»", body: "Откройте меню нужного ярлыка. Выберите окно в списке; если его ещё нет, нажмите «Обновить список окон»." },
+      { title: "Выберите «Привязать другое окно…»", body: "При статусе «Окно не найдено» нажмите «Выбрать окно» в карточке; иначе откройте меню нужного ярлыка и выберите «Привязать другое окно…». Выберите окно в списке; если его ещё нет, нажмите «Обновить список окон»." },
       { title: "Проверьте и сохраните", body: "Нажмите «Показать окно», проверьте его в Chrome, вернитесь к настройке и нажмите «Привязать окно». Имя и картинка ярлыка сохранятся." },
       { title: "Попробуйте прежний значок", body: "Перейдите в другое окно и нажмите существующий ярлык в Dock. Если вы случайно использовали старый ярлык запуска Chrome, создайте верный через «Создать ярлык для Dock» и закрепите его." },
     ] },
@@ -233,6 +240,7 @@ const troubleshootRU: Guide = {
 };
 
 const troubleshootEN: Guide = {
+  modified: "2026-10-08",
   slug: "chrome-shortcut-existing-window",
   title: "Why a Chrome profile shortcut does not return to the right open window",
   shortTitle: "Why the wrong window appears — and how to fix it",
@@ -251,15 +259,15 @@ const troubleshootEN: Guide = {
       "The ordinary tab title may change when you visit another website. The connection uses a separate window name, rather than the text of the active page. Navigating to another page should therefore not break the connection by itself.",
       "“Name and photo from profile” supplies the shortcut’s appearance. It does not choose a window for you, verify the account inside its tabs, or switch all windows of the same profile at once.",
     ] },
-    { id: "diagnose", title: "Start with the symptom", points: [
+    { id: "diagnose", images: [{"src": "/ProfileDock/guide-images/overview-en.jpg", "alt": "Research shows Window not found and Choose window, while Studio and Personal are ready.", "caption": "Window not found refers to Research’s connection. Click Choose window on that card.", "width": 940, "height": 692}], title: "Start with the symptom", points: [
       { title: "A different existing window comes forward", body: "You may have selected another window during setup, or the Dock may still contain an older Chrome launch shortcut. First check the target inside the ProfileDock manager. Matching titles are a reason to show the window before reconnecting it." },
       { title: "ProfileDock cannot find the window", body: "The window may have been closed, renamed, or not restored after restarting Chrome. A new window in the same profile does not automatically inherit the old connection. Reconnect an open window." },
       { title: "A blank window or a new tab appears", body: "This is not an action performed by ProfileDock’s switching command. Check that you are clicking its generated shortcut, rather than an older profile-launch shortcut. Use the Dock icon’s context menu to inspect its file location and compare it with the file ProfileDock reveals." },
       { title: "macOS denies control of Chrome", body: "Open System Settings → Privacy & Security → Automation and check Google Chrome permission for ProfileDock. This is permission to control an app; Accessibility, Screen Recording, and Full Disk Access are not required." },
     ] },
-    { id: "reconnect", title: "Reconnect without rearranging your Dock", steps: [
+    { id: "reconnect", images: [{"src": "/ProfileDock/guide-images/reconnect-en.jpg", "alt": "Reconnect Research dialog with Personal selected and Show window and Link window enabled.", "caption": "Personal is only a sample window name here. Select your intended window, show it in Chrome and then confirm the connection.", "width": 535, "height": 430}], check: "Click the existing Dock icon from another app. Your selected window should appear with the intended tabs. Repeat with that window minimized. The shortcut should keep its name, picture and assigned hotkey.", title: "Reconnect without rearranging your Dock", steps: [
       { title: "Open the right ordinary Chrome window", body: "Go to the correct profile and check that the intended task is visible. Then open the ProfileDock manager from its menu-bar icon." },
-      { title: "Choose “Choose another window…”", body: "Open the menu for the shortcut you want to repair. Select the window from the list; if it is missing, click “Refresh windows.”" },
+      { title: "Choose “Choose another window…”", body: "When the card says “Window not found,” click “Choose window”; otherwise open its menu and choose “Choose another window…”. Select the window from the list; if it is missing, click “Refresh windows.”" },
       { title: "Check and save", body: "Click “Show window,” check it in Chrome, return to setup, and click “Link window.” The shortcut keeps its name and picture." },
       { title: "Try the existing icon", body: "Go to another window and click your existing Dock shortcut. If you were accidentally using an older Chrome launch shortcut, use “Create Dock shortcut” to create the correct one and pin it." },
     ] },
@@ -287,6 +295,7 @@ const troubleshootEN: Guide = {
 };
 
 const hotkeysRU: Guide = {
+  modified: "2026-10-08",
   slug: "switch-chrome-profiles-keyboard-mac",
   title: "Как переключать профили Chrome на Mac с клавиатуры",
   shortTitle: "Нужное окно Chrome — сочетанием клавиш",
@@ -300,17 +309,17 @@ const hotkeysRU: Guide = {
       "Для постоянных переходов к одному выбранному окну можно назначить отдельное сочетание в ProfileDock. Например, одно — рабочей почте, другое — личному окну. Это особенно полезно, когда окна нескольких профилей уже открыты и лежат друг за другом.",
       "Профиль и окно — разные вещи. В одном профиле Chrome может быть несколько окон. ProfileDock связывает сочетание с сохранённым ярлыком конкретного окна; оно не поднимает автоматически все окна этого профиля и не создаёт отдельное приложение Chrome.",
     ] },
-    { id: "assign", title: "Как назначить горячую клавишу окну", steps: [
+    { id: "assign", images: [{"src": "/ProfileDock/guide-images/hotkey-ru.jpg", "alt": "Запись хоткея для Studio: сочетание ⌥⌘1 и доступная кнопка «Сохранить».", "caption": "⌥ означает Option (Alt), ⌘ — Command. Нажмите обе клавиши вместе с 1 внутри поля записи.", "width": 535, "height": 381}], check: "После сохранения комбинация должна появиться на карточке. Закройте редактор, перейдите в другое приложение и проверьте физическим нажатием: появляется то же окно, которое возвращает кнопка «Переключиться».", title: "Как назначить горячую клавишу окну", steps: [
       { title: "Подготовьте ярлык", body: "Установите ProfileDock 0.1.6 beta или новее, подключите Chrome и сохраните нужное обычное окно. Если ярлык уже есть, создавать его заново не нужно. Проверьте выбранное окно кнопкой переключения на карточке." },
       { title: "Запишите сочетание", body: "На карточке нажмите «Назначить сочетание», затем поле записи. Нажмите клавишу вместе как минимум с двумя модификаторами, включая Command или Control. Например, Option + Command + 1. Option на некоторых клавиатурах подписан Alt." },
       { title: "Сохраните и проверьте", body: "Нажмите «Сохранить», перейдите в другое приложение и нажмите выбранное сочетание на клавиатуре. Должно появиться связанное окно Chrome. Для следующего ярлыка выберите другую комбинацию, например Option + Command + 2." },
     ] },
-    { id: "choose", title: "Какие сочетания выбрать", paragraphs: [
+    { id: "choose", images: [{"src": "/ProfileDock/guide-images/hotkey-saved-ru.jpg", "alt": "На карточке Studio отображается сохранённое сочетание ⌥⌘1.", "caption": "Записанное сочетание видно прямо на карточке. В этом примере оно назначено только Studio.", "width": 940, "height": 692}], title: "Какие сочетания выбрать", paragraphs: [
       "Начните с одного или двух часто используемых окон. Цифры с одинаковыми модификаторами проще запомнить, чем разные комбинации для каждого проекта. Примеры здесь не назначаются автоматически и могут оказаться заняты в вашей системе.",
       "Поддерживаются буквы, цифры, обычные знаки пунктуации, пробел и стрелки. Fn, мультимедийные клавиши, Tab, Escape и комбинации только из модификаторов не подходят. Escape завершает запись, а Tab переводит фокус к следующему элементу настройки.",
       "При смене раскладки привязка остаётся на той же физической клавише, а отображаемый символ меняется. Для начала цифра часто понятнее буквы: проверьте результат на тех раскладках, которыми действительно пользуетесь.",
     ] },
-    { id: "not-working", title: "Если хоткей не срабатывает", points: [
+    { id: "not-working", images: [{"src": "/ProfileDock/guide-images/hotkey-conflict-ru.jpg", "alt": "Повтор ⌥⌘1 для Personal: сообщение о назначении Studio и отключённая кнопка сохранения.", "caption": "Повтор внутри ProfileDock обнаруживается сразу. Выберите другую комбинацию; отключённую кнопку «Сохранить» нажимать не нужно.", "width": 535, "height": 415}], check: "Если комбинация записалась, но не работает, сначала проверьте кнопку переключения самого ярлыка. Если она тоже не находит окно, исправьте привязку; если она работает, проверьте запуск ProfileDock, паузу сочетаний и конфликт клавиш.", title: "Если хоткей не срабатывает", points: [
       { title: "ProfileDock завершён", body: "Откройте приложение снова. Закрытие окна настройки оставляет хоткеи активными, а команда «Завершить ProfileDock» отключает их. В версии 0.1.6 автоматический запуск при входе в macOS не добавлен." },
       { title: "Открыто окно записи или сочетания отключены", body: "На время редактирования приложение приостанавливает свои хоткеи. Сохраните изменения или нажмите «Отмена». В дополнительных действиях проверьте, включены ли сочетания клавиш." },
       { title: "Комбинация занята", body: "ProfileDock сообщает о повторе внутри приложения, известных системных сочетаниях и отказе macOS зарегистрировать хоткей. Выберите другой вариант или повторите регистрацию через дополнительные действия. Обнаружить все команды всех сторонних приложений невозможно." },
@@ -333,6 +342,7 @@ const hotkeysRU: Guide = {
 };
 
 const hotkeysEN: Guide = {
+  modified: "2026-10-08",
   slug: "switch-chrome-profiles-keyboard-mac",
   title: "Switch Chrome Profiles on Mac with Keyboard Shortcuts",
   shortTitle: "A keyboard shortcut for your chosen Chrome window",
@@ -346,21 +356,21 @@ const hotkeysEN: Guide = {
       "For repeated trips to a particular open window, ProfileDock lets you assign a dedicated combination. One can bring forward your work mail, another your personal window. This is useful when several profile windows are already open behind each other.",
       "A profile can contain multiple windows. ProfileDock connects a hotkey to the saved shortcut for one chosen window. It does not automatically bring forward every window in that profile or turn Chrome into separate applications.",
     ] },
-    { id: "assign", title: "Assign a hotkey to an existing window", steps: [
+    { id: "assign", images: [{"src": "/ProfileDock/guide-images/hotkey-en.jpg", "alt": "Hotkey editor for Studio with Option–Command–1 recorded and Save enabled.", "caption": "⌥ means Option (Alt); ⌘ means Command. Hold both keys and press 1 in the recording field.", "width": 535, "height": 381}], check: "After saving, the combination should appear on the card. Close the editor, switch to another app and press it on your physical keyboard: it should return the same window as the Switch button.", title: "Assign a hotkey to an existing window", steps: [
       { title: "Prepare a saved shortcut", body: "Install ProfileDock 0.1.6 beta or later, connect Chrome and save the ordinary window you want. If its shortcut already exists, keep it. Use the switch button on the card to check that it selects the right window." },
       { title: "Record a combination", body: "Click Set hotkey on the card, then click the recording field. Press a supported key with at least two modifiers, including Command or Control. Option + Command + 1 is one example. Some keyboards label Option as Alt." },
       { title: "Save and try it", body: "Save, switch to another app, and press the combination on your physical keyboard. The connected Chrome window should come forward. Choose a different combination for the next shortcut, such as Option + Command + 2." },
     ] },
-    { id: "choose", title: "Choose combinations you can remember", paragraphs: [
+    { id: "choose", images: [{"src": "/ProfileDock/guide-images/hotkey-saved-en.jpg", "alt": "Studio’s card displays its saved Option–Command–1 combination.", "caption": "The saved combination is visible on the card. In this example it belongs only to Studio.", "width": 940, "height": 692}], title: "Choose combinations you can remember", paragraphs: [
       "Begin with one or two windows you use frequently. Number keys with the same modifiers can be easier to remember than a different pattern for every project. The examples here are not assigned automatically and may already be in use on your Mac.",
       "Supported keys include letters, digits, ordinary punctuation, Space and arrows. Fn, media keys, Tab, Escape and modifier-only combinations are not assignable. Escape ends recording; Tab moves focus through the editor.",
       "Changing keyboard layout keeps the same physical key assigned while the displayed character changes. A number can be a clearer starting point than a letter. Check the result with the layouts you actually use.",
     ] },
-    { id: "not-working", title: "If the keyboard shortcut does not work", points: [
+    { id: "not-working", images: [{"src": "/ProfileDock/guide-images/hotkey-conflict-en.jpg", "alt": "Personal’s duplicate Option–Command–1 shows a conflict with Studio and a disabled Save button.", "caption": "A duplicate inside ProfileDock is detected immediately. Choose a different combination; the disabled Save button cannot apply it.", "width": 535, "height": 415}], check: "If the combination was saved but does not work, first try the shortcut’s Switch button. If that also fails to find the window, fix its connection. If it works, check that ProfileDock is running, hotkeys are enabled and the combination is not taken.", title: "If the keyboard shortcut does not work", points: [
       { title: "ProfileDock has quit", body: "Launch it again. Closing the manager window keeps hotkeys active; Quit ProfileDock stops them. Version 0.1.6 does not automatically launch at login." },
       { title: "The recorder is open or hotkeys are paused", body: "ProfileDock pauses its hotkeys during editing. Save or cancel the editor. In More options, check that keyboard shortcuts are enabled." },
       { title: "The combination is in use", body: "ProfileDock reports duplicates, exposed system shortcuts and macOS registration failures. Choose another combination or retry registration from More options. No conflict check can discover every shortcut mechanism used by every other app." },
-      { title: "The target window was closed", body: "Hotkeys use the same connection as Dock shortcuts. Open your intended Chrome window and choose Reconnect window from the shortcut menu. A missing target does not automatically create a blank replacement window." },
+      { title: "The target window was closed", body: "Hotkeys use the same connection as Dock shortcuts. Open your intended Chrome window and choose “Choose another window…” from the shortcut menu. A missing target does not automatically create a blank replacement window." },
     ] },
     { id: "keep-settings", title: "Keep assignments through updates and renaming", paragraphs: [
       "The combination is saved locally against the shortcut. Renaming it, changing its photo or reconnecting its window keeps the assignment. ProfileDock reloads assignments when it launches; a combination taken by another app may need a different key or a registration retry.",
@@ -386,7 +396,7 @@ export const guides: Record<SiteLanguage, Record<GuideSlug, Guide>> = {
 export function guideMetadata(language: SiteLanguage, slug?: GuideSlug): ContentMetadata {
   if (!slug) return { title: `${guideCopy[language].hubTitle} | ProfileDock`, description: guideCopy[language].hubDescription, path: "guides/" };
   const guide = guides[language][slug];
-  return { title: `${guide.title} | ProfileDock`, description: guide.description, path: `guides/${slug}/`, article: true, published: guide.published, modified: guide.modified };
+  return { title: `${guide.title} | ProfileDock`, description: guide.description, path: `guides/${slug}/`, article: true, published: guide.published, modified: guide.modified, images: guide.sections.flatMap(section => section.images?.map(image => image.src) ?? []) };
 }
 
 export function guidePath(language: SiteLanguage, slug?: GuideSlug): string {

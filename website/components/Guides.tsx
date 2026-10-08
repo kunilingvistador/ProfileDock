@@ -1,7 +1,7 @@
 import { downloadURL, releaseVersion } from "@/lib/release";
 import type { ReactNode } from "react";
 import { ArrowRight, ArrowUpRight, BookOpen, Check, Download, Keyboard, LifeBuoy, ShieldCheck, BriefcaseBusiness, UserRound } from "lucide-react";
-import { guideCopy, guideMetadata, guidePath, guides, guideSlugs, type Guide, type GuideSlug } from "@/lib/guides";
+import { guideCopy, guideMetadata, guidePath, guides, guideSlugs, type Guide, type GuideImage, type GuideSlug } from "@/lib/guides";
 import { guideDataFor, languageURLs, releaseURL, repositoryURL, serializeJSONLD, type SiteLanguage } from "@/lib/seo";
 
 function GuideShell({ language, slug, children }: { language: SiteLanguage; slug?: GuideSlug; children: ReactNode }) {
@@ -101,6 +101,15 @@ export function GuideHub({ language }: { language: SiteLanguage }) {
   </GuideShell>;
 }
 
+function GuideScreenshot({ image, language }: { image: GuideImage; language: SiteLanguage }) {
+  return <figure className="guide-figure guide-screenshot">
+    <a href={image.src} style={{ maxWidth: image.width }} aria-label={language === "ru" ? `Открыть полный скриншот: ${image.alt}` : `Open full screenshot: ${image.alt}`}>
+      <img src={image.src} alt={image.alt} width={image.width} height={image.height} loading="lazy" decoding="async" />
+    </a>
+    <figcaption>{image.caption} <a href={image.src}>{language === "ru" ? "Открыть в полном размере" : "Open at full size"}<ArrowUpRight size={12} aria-hidden="true" /></a></figcaption>
+  </figure>;
+}
+
 export function GuideArticle({ language, slug }: { language: SiteLanguage; slug: GuideSlug }) {
   const guide = guides[language][slug];
   const t = guideCopy[language];
@@ -132,12 +141,17 @@ export function GuideArticle({ language, slug }: { language: SiteLanguage; slug:
         </aside>
         <div className="guide-prose">
           <p className="guide-takeaway">{guide.takeaway}</p>
+          {guide.sections.some(section => section.images?.length) && <p className="guide-capture-note">{language === "ru"
+            ? "Скриншоты сняты в настоящем ProfileDock 0.1.6 (12), в режиме предпросмотра. Studio, Personal и Research — демонстрационные имена. Они показывают интерфейс, а результат переключения нужно проверить на своём открытом окне Chrome. Нажмите на изображение, чтобы рассмотреть кнопки."
+            : "Screenshots were captured in the real ProfileDock 0.1.6 (12) interface using preview mode. Studio, Personal and Research are sample names. They illustrate the controls; verify switching against your own open Chrome window. Click an image to inspect the controls."}</p>}
           {guide.sections.map((section, index) => <div key={section.id}>
             <section id={section.id} aria-labelledby={`${section.id}-heading`}>
               <h2 id={`${section.id}-heading`}>{section.title}</h2>
               {section.paragraphs?.map(paragraph => <p key={paragraph}>{paragraph}</p>)}
               {section.steps && <ol className="guide-steps">{section.steps.map(step => <li key={step.title}><h3>{step.title}</h3><p>{step.body}</p></li>)}</ol>}
               {section.points && <div className="guide-symptoms">{section.points.map(point => <div key={point.title}><h3>{point.title}</h3><p>{point.body}</p></div>)}</div>}
+              {section.images?.map(image => <GuideScreenshot key={image.src} image={image} language={language} />)}
+              {section.check && <p className="guide-result"><strong>{language === "ru" ? "Проверьте результат. " : "Check the result. "}</strong>{section.check}</p>}
               {section.links?.map(link => <p key={link.slug}><a className="text-link" href={guidePath(language, link.slug)}>{link.title}<ArrowRight size={16} aria-hidden="true" /></a></p>)}
             </section>
             {slug === "separate-work-personal-chrome-profiles-mac" && index === 0 && <figure className="guide-figure guide-context-figure">
@@ -146,10 +160,6 @@ export function GuideArticle({ language, slug }: { language: SiteLanguage; slug:
                 <div><UserRound size={30} aria-hidden="true" /><strong>{language === "ru" ? "Личное" : "Personal"}</strong><span>{language === "ru" ? "Покупки · поездки · хобби" : "Shopping · travel · hobbies"}</span></div>
               </div>
               <figcaption>{language === "ru" ? "Пример организации: два отдельных профиля Chrome. Для постоянно открытого окна каждого профиля можно создать свой ярлык." : "Example setup: two separate Chrome profiles. Each profile’s everyday window can have its own shortcut."}</figcaption>
-            </figure>}
-            {slug === "chrome-profile-shortcuts-mac-dock" && index === 2 && <figure className="guide-figure">
-              <img src="/ProfileDock/app-preview.jpg" alt={t.figureAlt} width="940" height="692" loading="lazy" />
-              <figcaption>{t.figureCaption}</figcaption>
             </figure>}
           </div>)}
           <section className="guide-sources" aria-labelledby="guide-sources-title">
