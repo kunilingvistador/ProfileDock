@@ -5,7 +5,7 @@
   const host = 'kunilingvistador.github.io';
   const prefix = '/ProfileDock/';
   const key = 'profiledock.analytics-consent.v1';
-  const paths = ['', 'en/', 'guides/', 'en/guides/', ...['chrome-profile-shortcuts-mac-dock', 'chrome-shortcut-existing-window', 'switch-chrome-profiles-keyboard-mac', 'separate-work-personal-chrome-profiles-mac', 'chrome-automation-permission-mac'].flatMap(slug => [`guides/${slug}/`, `en/guides/${slug}/`])];
+  const paths = ['', 'en/', 'guides/', 'en/guides/', ...['chrome-profile-shortcuts-mac-dock', 'chrome-shortcut-existing-window', 'switch-chrome-profiles-keyboard-mac', 'separate-work-personal-chrome-profiles-mac', 'chrome-automation-permission-mac', 'chrome-profiles-vs-google-accounts', 'chrome-profiles-one-dock-icon-mac'].flatMap(slug => [`guides/${slug}/`, `en/guides/${slug}/`])];
   const path = location.pathname;
   if (!/^G-[A-Z0-9]+$/.test(id) || !paths.includes(path.slice(prefix.length)) || !path.startsWith(prefix)) return;
   let loaded = false;
@@ -52,6 +52,10 @@
       const url = new URL(link.href, location.href);
       const zip = /^\/kunilingvistador\/ProfileDock\/releases\/download\/[^/]+\/ProfileDock-[^/]+\.zip$/.test(url.pathname);
       const notes = /^\/kunilingvistador\/ProfileDock\/releases(?:\/?|\/tag\/[^/]+\/?)$/.test(url.pathname);
+      const repository = /^\/kunilingvistador\/ProfileDock\/?$/.test(url.pathname);
+      if (url.origin === 'https://github.com' && repository) {
+        gtag('event', 'repository_click', {...page, destination: 'github_repository', transport_type: 'beacon'});
+      }
       if (url.origin === 'https://github.com' && (zip || notes)) {
         const details = {...page, destination: zip ? 'github_zip' : 'github_releases', transport_type: 'beacon'};
         // Keep the historical broad click metric; ZIP clicks are a subset, not completed downloads.

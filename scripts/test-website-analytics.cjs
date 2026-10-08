@@ -5,6 +5,9 @@ const fs = require('node:fs');
 const path = require('node:path');
 const runtime = fs.readFileSync(path.join(__dirname, '../website/public/analytics.js'), 'utf8').replace(/const id = '[^']*';/, "const id = 'G-QATEST1';");
 const key = 'profiledock.analytics-consent.v1';
+// Use the content route inventory so a newly published guide cannot silently go unmeasured.
+const guideSource = fs.readFileSync(path.join(__dirname, '../website/lib/guides.ts'), 'utf8');
+const guideSlugs = JSON.parse(guideSource.match(/export const guideSlugs = (\[[^\]]+\])/)[1]);
 function fixture({choice, at=Date.now(), hostname='kunilingvistador.github.io', pathname='/ProfileDock/en/', broken=false}={}) {
   class Element {
     constructor(tag) { this.tag=tag; this.children=[]; this.events={}; this.hidden=false; }
@@ -74,8 +77,8 @@ test('only release links emit a sanitized download click, and withdrawal stops c
  assert.equal(f.commands().filter(x=>x[1]==='download_click').length,1);
 });
 
-test('new guide routes are measured once without query or fragment data',()=>{
- for (const slug of ['separate-work-personal-chrome-profiles-mac','chrome-automation-permission-mac']) {
+test('every published guide route is measured once without query or fragment data',()=>{
+ for (const slug of guideSlugs) {
   for (const prefix of ['', 'en/']) {
    const pathname=`/ProfileDock/${prefix}guides/${slug}/`;
    const f=fixture({pathname}); const views=f.commands().filter(x=>x[0]==='event' && x[1]==='page_view');
@@ -85,6 +88,28 @@ test('new guide routes are measured once without query or fragment data',()=>{
   }
  }
  assert.equal(fixture({pathname:'/ProfileDock/not-a-public-page/'}).commands().length,0);
+});
+
+test('repository visits are distinct from ZIP and release clicks on every public page',()=>{
+ const paths=['/ProfileDock/','/ProfileDock/en/','/ProfileDock/guides/','/ProfileDock/en/guides/',...guideSlugs.flatMap(slug=>[`/ProfileDock/guides/${slug}/`,`/ProfileDock/en/guides/${slug}/`])];
+ for (const pathname of paths) {
+  const f=fixture({pathname});
+  const click=href=>{const link=f.document.createElement('a');link.href=href;f.document.events.click({target:link});};
+  click('https://github.com/kunilingvistador/ProfileDock?private=secret#readme');
+  click('https://github.com/kunilingvistador/ProfileDock/');
+  click('https://github.com/kunilingvistador/ProfileDock/issues');
+  click('https://github.com/kunilingvistador/ProfileDock-fake');
+  click('https://example.com/kunilingvistador/ProfileDock');
+  const repository=f.commands().filter(x=>x[1]==='repository_click');
+  assert.equal(repository.length,2);assert.equal(repository[0][2].destination,'github_repository');
+  assert(!JSON.stringify(repository).includes('private'));assert(!JSON.stringify(repository).includes('secret'));
+  assert.equal(f.commands().filter(x=>x[1]==='download_click').length,0);
+  click('https://github.com/kunilingvistador/ProfileDock/releases/download/v0.1.6-beta/ProfileDock-0.1.6-macos-universal-local.zip');
+  assert.equal(f.commands().filter(x=>x[1]==='zip_download_click').length,1);
+  assert.equal(f.commands().filter(x=>x[1]==='repository_click').length,2);
+  f.toggle.click();click('https://github.com/kunilingvistador/ProfileDock');
+  assert.equal(f.commands().filter(x=>x[1]==='repository_click').length,2);
+ }
 });
 
 test('ZIP clicks are distinct from release notes; checksums and other assets are not downloads',()=>{
