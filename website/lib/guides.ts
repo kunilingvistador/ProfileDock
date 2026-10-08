@@ -1,7 +1,8 @@
 import { workRU, workEN, permissionRU, permissionEN } from "./guides-foundation";
+import { accountsRU, accountsEN, dockRU, dockEN } from "./guides-discovery";
 import type { ContentMetadata, SiteLanguage } from "./seo";
 
-export const guideSlugs = ["chrome-profile-shortcuts-mac-dock", "chrome-shortcut-existing-window", "switch-chrome-profiles-keyboard-mac", "separate-work-personal-chrome-profiles-mac", "chrome-automation-permission-mac"] as const;
+export const guideSlugs = ["chrome-profile-shortcuts-mac-dock", "chrome-shortcut-existing-window", "switch-chrome-profiles-keyboard-mac", "separate-work-personal-chrome-profiles-mac", "chrome-automation-permission-mac", "chrome-profiles-vs-google-accounts", "chrome-profiles-one-dock-icon-mac"] as const;
 export type GuideSlug = (typeof guideSlugs)[number];
 
 type GuideSection = {
@@ -10,11 +11,13 @@ type GuideSection = {
   paragraphs?: string[];
   steps?: { title: string; body: string }[];
   points?: { title: string; body: string }[];
+  links?: { title: string; slug: GuideSlug }[];
 };
 export type Guide = {
   slug: GuideSlug;
   title: string;
   shortTitle: string;
+  published?: string;
   modified?: string;
   description: string;
   summary: string;
@@ -29,7 +32,7 @@ export const guideCopy = {
     hubTitle: "Профили Chrome на Mac: инструкции для удобного Dock",
     hubDescription: "Профили Chrome на Mac: отдельные значки в Dock, переключение с клавиатуры и восстановление привязки окна. Практические инструкции ProfileDock.",
     heading: "Профили Chrome на Mac:\nDock, хоткеи и помощь.",
-    intro: "Разделите работу и личное, выберите удобный способ переключения и разберитесь с разрешениями. Пять практических инструкций — от первого профиля до хоткеев.",
+    intro: "Разберитесь с профилями и аккаунтами, разделите работу и личное, выберите удобный способ переключения. Семь практических инструкций — от одного значка Chrome до своих хоткеев.",
     hub: "Инструкции", home: "Главная", skip: "Перейти к содержанию", nav: "Навигация",
     download: "Скачать для Mac", source: "Код на GitHub", read: "Читать инструкцию", toc: "В этой статье",
     published: "9 сентября 2026", version: "Проверено по ProfileDock 0.1.6 beta", related: "Следующий полезный шаг",
@@ -44,7 +47,7 @@ export const guideCopy = {
     hubTitle: "Chrome Profiles on Mac: Practical Dock Guides",
     hubDescription: "Chrome profiles on Mac: separate Dock icons, keyboard shortcuts, and fixes for lost window connections. Practical ProfileDock setup and troubleshooting guides.",
     heading: "Chrome profiles on Mac:\nDock, hotkeys and help.",
-    intro: "Separate work and personal browsing, choose a way to switch, and understand permissions. Five practical guides, from your first profile to hotkeys.",
+    intro: "Understand profiles and accounts, separate work and personal browsing, and choose a way to switch. Seven practical guides, from one Chrome icon to your own hotkeys.",
     hub: "Guides", home: "Home", skip: "Skip to content", nav: "Navigation",
     download: "Download for Mac", source: "Source on GitHub", read: "Read the guide", toc: "In this guide",
     published: "September 9, 2026", version: "Checked against ProfileDock 0.1.6 beta", related: "One useful next step",
@@ -376,14 +379,14 @@ const hotkeysEN: Guide = {
 };
 
 export const guides: Record<SiteLanguage, Record<GuideSlug, Guide>> = {
-  ru: { "chrome-profile-shortcuts-mac-dock": setupRU, "chrome-shortcut-existing-window": troubleshootRU, "switch-chrome-profiles-keyboard-mac": hotkeysRU, "separate-work-personal-chrome-profiles-mac": workRU, "chrome-automation-permission-mac": permissionRU },
-  en: { "chrome-profile-shortcuts-mac-dock": setupEN, "chrome-shortcut-existing-window": troubleshootEN, "switch-chrome-profiles-keyboard-mac": hotkeysEN, "separate-work-personal-chrome-profiles-mac": workEN, "chrome-automation-permission-mac": permissionEN },
+  ru: { "chrome-profile-shortcuts-mac-dock": setupRU, "chrome-shortcut-existing-window": troubleshootRU, "switch-chrome-profiles-keyboard-mac": hotkeysRU, "separate-work-personal-chrome-profiles-mac": workRU, "chrome-automation-permission-mac": permissionRU, "chrome-profiles-vs-google-accounts": accountsRU, "chrome-profiles-one-dock-icon-mac": dockRU },
+  en: { "chrome-profile-shortcuts-mac-dock": setupEN, "chrome-shortcut-existing-window": troubleshootEN, "switch-chrome-profiles-keyboard-mac": hotkeysEN, "separate-work-personal-chrome-profiles-mac": workEN, "chrome-automation-permission-mac": permissionEN, "chrome-profiles-vs-google-accounts": accountsEN, "chrome-profiles-one-dock-icon-mac": dockEN },
 };
 
 export function guideMetadata(language: SiteLanguage, slug?: GuideSlug): ContentMetadata {
   if (!slug) return { title: `${guideCopy[language].hubTitle} | ProfileDock`, description: guideCopy[language].hubDescription, path: "guides/" };
   const guide = guides[language][slug];
-  return { title: `${guide.title} | ProfileDock`, description: guide.description, path: `guides/${slug}/`, article: true, modified: guide.modified };
+  return { title: `${guide.title} | ProfileDock`, description: guide.description, path: `guides/${slug}/`, article: true, published: guide.published, modified: guide.modified };
 }
 
 export function guidePath(language: SiteLanguage, slug?: GuideSlug): string {

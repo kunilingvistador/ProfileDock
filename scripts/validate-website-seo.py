@@ -39,6 +39,14 @@ PAGE_GROUPS = {
         'ru': SITE + 'guides/chrome-shortcut-existing-window/',
         'en': SITE + 'en/guides/chrome-shortcut-existing-window/',
     },
+    'accounts': {
+        'ru': SITE + 'guides/chrome-profiles-vs-google-accounts/',
+        'en': SITE + 'en/guides/chrome-profiles-vs-google-accounts/',
+    },
+    'dock-basics': {
+        'ru': SITE + 'guides/chrome-profiles-one-dock-icon-mac/',
+        'en': SITE + 'en/guides/chrome-profiles-one-dock-icon-mac/',
+    },
 }
 PAGES = {f'{group}:{language}': url for group, pages in PAGE_GROUPS.items() for language, url in pages.items()}
 REPO = Path(__file__).resolve().parents[1]
@@ -200,6 +208,13 @@ def validate(root: Path):
             require(entry.get('url') == page and entry.get('inLanguage') == language, f'{page}: incorrect localized guide data')
             if group != 'guides':
                 require(entry.get('headline') and entry.get('datePublished'), f'{page}: missing article metadata')
+                published = entry.get('datePublished')
+                modified = entry.get('dateModified')
+                require(date.fromisoformat(published) <= date.fromisoformat(modified) <= date.today(), f'{page}: invalid article chronology')
+                require(single_meta(document, 'article:published_time', page).startswith(published), f'{page}: social publication date differs')
+                require(single_meta(document, 'article:modified_time', page).startswith(modified), f'{page}: social update date differs')
+                expected_publication = '2026-10-08' if group in {'accounts', 'dock-basics'} else '2026-09-09'
+                require(published == expected_publication, f'{page}: incorrect original publication date')
                 require(len(text) > 1800, f'{page}: article body missing from static HTML')
             breadcrumbs = [item for item in graph if item.get('@type') == 'BreadcrumbList']
             require(len(breadcrumbs) == 1, f'{page}: expected one breadcrumb list')

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://kunilingvistador.github.io/ProfileDock/</loc><lastmod>2026-10-05</lastmod></url>
-  <url><loc>https://kunilingvistador.github.io/ProfileDock/en/</loc><lastmod>2026-10-05</lastmod></url>
-  <url><loc>https://kunilingvistador.github.io/ProfileDock/guides/</loc><lastmod>2026-10-05</lastmod></url>
-  <url><loc>https://kunilingvistador.github.io/ProfileDock/en/guides/</loc><lastmod>2026-10-05</lastmod></url>
+  <url><loc>https://kunilingvistador.github.io/ProfileDock/</loc><lastmod>2026-10-08</lastmod></url>
+  <url><loc>https://kunilingvistador.github.io/ProfileDock/en/</loc><lastmod>2026-10-08</lastmod></url>
+  <url><loc>https://kunilingvistador.github.io/ProfileDock/guides/</loc><lastmod>2026-10-08</lastmod></url>
+  <url><loc>https://kunilingvistador.github.io/ProfileDock/en/guides/</loc><lastmod>2026-10-08</lastmod></url>
   <url><loc>https://kunilingvistador.github.io/ProfileDock/guides/chrome-profile-shortcuts-mac-dock/</loc><lastmod>2026-09-09</lastmod></url>
   <url><loc>https://kunilingvistador.github.io/ProfileDock/en/guides/chrome-profile-shortcuts-mac-dock/</loc><lastmod>2026-09-09</lastmod></url>
   <url><loc>https://kunilingvistador.github.io/ProfileDock/guides/chrome-shortcut-existing-window/</loc><lastmod>2026-09-09</lastmod></url>
@@ -14,4 +14,8 @@
   <url><loc>https://kunilingvistador.github.io/ProfileDock/en/guides/separate-work-personal-chrome-profiles-mac/</loc><lastmod>2026-10-05</lastmod></url>
   <url><loc>https://kunilingvistador.github.io/ProfileDock/guides/chrome-automation-permission-mac/</loc><lastmod>2026-09-09</lastmod></url>
   <url><loc>https://kunilingvistador.github.io/ProfileDock/en/guides/chrome-automation-permission-mac/</loc><lastmod>2026-09-09</lastmod></url>
+  <url><loc>https://kunilingvistador.github.io/ProfileDock/guides/chrome-profiles-vs-google-accounts/</loc><lastmod>2026-10-08</lastmod></url>
+  <url><loc>https://kunilingvistador.github.io/ProfileDock/guides/chrome-profiles-one-dock-icon-mac/</loc><lastmod>2026-10-08</lastmod></url>
+  <url><loc>https://kunilingvistador.github.io/ProfileDock/en/guides/chrome-profiles-vs-google-accounts/</loc><lastmod>2026-10-08</lastmod></url>
+  <url><loc>https://kunilingvistador.github.io/ProfileDock/en/guides/chrome-profiles-one-dock-icon-mac/</loc><lastmod>2026-10-08</lastmod></url>
 </urlset>
