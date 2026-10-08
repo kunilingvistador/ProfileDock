@@ -117,3 +117,14 @@ The analytics route allowlist includes all four new article URLs. Seven runtime 
 - Before deployment, Google live URL inspection could fetch the English Dock guide, but the index did not know its URL. Sitemap processing is a separate Google status; a valid live fetch or a submitted request is not proof of successful processing or indexing.
 
 Sources: [Google sitemap troubleshooting](https://support.google.com/webmasters/answer/7451001?hl=en), [sitemap lastmod guidance](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap), [crawlable links](https://developers.google.com/search/docs/crawling-indexing/links-crawlable).
+
+## Measurement repair — 8 October 2026
+
+- The two discovery topics published on October 8 were missing from the analytics route allowlist. All four RU/EN routes are now included. The runtime test reads the actual guide slug inventory, so publishing a future guide without analytics coverage fails validation.
+- `repository_click` records a click from a measured website page to the GitHub repository root (including its README fragment). Release notes, ZIP assets, feedback links, and other GitHub destinations are not repository-root clicks. It does not observe subsequent navigation inside GitHub or confirm that the destination loaded.
+- GA4 property 553434114 previously had only the default `purchase` key event, with no active stream; neither existing download event was marked key. `zip_download_click` and `repository_click` are now marked key and count once per session, with no monetary value assigned. This configuration is in GA4, not in JavaScript. Historical ordinary event counts remain available; historical key-event counts are not backfilled by marking an event key.
+- For people who clicked, use the GA4 Total users metric filtered to each event separately; do not call the number of key events unique people. One person may trigger both events, or return in multiple sessions. Total users measures browser identities, not verified individuals.
+- `download_click` remains the historical broad release/ZIP metric and is not key. `zip_download_click` is its subset. Do not add the two or sum download and repository goals as distinct people. GitHub release-asset download counts are cumulative file downloads, not unique people or installations; native app telemetry remains absent.
+- Nine runtime tests cover all 18 public routes, repository/ZIP separation, invalid destinations, opt-out, and sanitized fields. This repair changes only static analytics JavaScript and its tests/documentation; the HTML, native app, and release are unchanged.
+
+Sources: [Google key-event setup](https://support.google.com/analytics/answer/13128484?hl=en), [counting methods](https://support.google.com/analytics/answer/13366706?hl=en).
