@@ -36,6 +36,7 @@ export type ContentMetadata = {
   /** Relative to each language's home URL, with a trailing slash. */
   path: string;
   article?: boolean;
+  published?: string;
   modified?: string;
 };
 
@@ -67,7 +68,7 @@ export function metadataFor(language: SiteLanguage, content?: ContentMetadata): 
       locale: copy.locale,
       alternateLocale: [copy.alternateLocale],
       images: [{ url: image, alt: copy.imageAlt, width: 1200, height: 630 }],
-      ...(content?.article ? { publishedTime: "2026-09-09", modifiedTime: content.modified ?? "2026-09-09" } : {}),
+      ...(content?.article ? { publishedTime: content.published ?? "2026-09-09", modifiedTime: content.modified ?? content.published ?? "2026-09-09" } : {}),
     },
     twitter: {
       card: "summary_large_image",
@@ -100,8 +101,8 @@ export function guideDataFor(language: SiteLanguage, content: ContentMetadata) {
         isAccessibleForFree: true,
         ...(content.article ? {
           headline: content.title,
-          datePublished: "2026-09-09",
-          dateModified: content.modified ?? "2026-09-09",
+          datePublished: content.published ?? "2026-09-09",
+          dateModified: content.modified ?? content.published ?? "2026-09-09",
           author: { "@type": "Organization", name: "ProfileDock", url: repositoryURL },
           mainEntityOfPage: { "@type": "WebPage", "@id": url },
           image: `${siteURL}app-preview.jpg`,

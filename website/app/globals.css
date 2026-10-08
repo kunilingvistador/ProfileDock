@@ -1428,6 +1428,7 @@ footer p {
 .guide-article-heading h1 { font-size: clamp(34px, 4vw, 51px); line-height: 1.13; letter-spacing: -1.9px; margin: 19px 0 23px; }
 .guide-lead { max-width: 760px; font-size: 18px; color: var(--muted); line-height: 1.65; }
 .guide-byline { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 24px; color: var(--muted); font-size: 11px; }
+.guide-byline a:hover { color: var(--accent-dark); text-decoration: underline; }
 .guide-byline span { padding-left: 18px; border-left: 1px solid var(--line); }
 .guide-reading-layout { display: grid; grid-template-columns: 215px minmax(0, 710px); column-gap: clamp(34px, 6vw, 86px); align-items: start; }
 .guide-toc { position: sticky; top: 32px; border-top: 1px solid var(--line); padding-top: 20px; }
@@ -1559,6 +1560,10 @@ footer p {
 @media (max-width: 640px) {
   .guide-methods, .guide-contexts { grid-template-columns: 1fr; }
   .guide-methods > article + article { border-top: 1px solid var(--line); padding-top: 20px; }
+}
+@media (max-width: 360px) {
+  .guide-header { height: auto; flex-wrap: wrap; padding-block: 20px; }
+  .guide-header nav { width: 100%; justify-content: flex-end; }
 }
 
 /* Useful crawlable next steps, also readable on narrow screens. */

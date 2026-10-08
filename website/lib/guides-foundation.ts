@@ -20,7 +20,7 @@ export const workRU: Guide = {
       "Допустим, в одном окне открыты личная почта и покупки, а в другом — рабочие документы. Если оба окна принадлежат одному профилю Chrome, само наличие двух окон ещё не разделяет их браузерные данные. Новая вкладка тоже не создаёт отдельный профиль.",
       "Профили Chrome хранят свои закладки, историю, пароли и настройки отдельно. Аккаунт Google — это учётная запись: переключение аккаунта внутри сайта не равнозначно переключению профиля браузера. Синхронизация с аккаунтом — отдельная настройка Chrome.",
       "Для начала достаточно двух профилей: «Работа» и «Личное». Профиль на каждый сайт обычно усложняет выбор. Создавайте третий, когда появляется самостоятельный контекст: например, другой проект с отдельными входами и закладками.",
-    ] },
+    ], links: [{ title: "Профиль Chrome и аккаунт Google: какой вариант нужен вам", slug: "chrome-profiles-vs-google-accounts" }] },
     { id: "recognize", title: "Сделайте окна узнаваемыми с первого взгляда", paragraphs: [
       "Назовите контексты так, как думаете о них в течение дня: «Работа», «Дом», «Клиент». Длинный email трудно быстро прочитать в меню, а одинаковые портреты легко перепутать. Сочетание короткого имени и различимого изображения даёт два независимых ориентира.",
       "Для рабочего значка можно использовать простой символ проекта, для личного — фотографию. Проверьте их в обычном размере Dock, а не только крупно в редакторе. Если различие держится исключительно на оттенке, добавьте разную форму: это помогает и при слабом зрении, и на маленьком экране.",
@@ -64,7 +64,7 @@ export const workEN: Guide = {
       "Imagine personal mail and shopping in one window, with work documents in another. If both windows belong to the same Chrome profile, having two windows does not separate their browser data. Opening another tab does not create a profile either.",
       "Chrome profiles keep their own bookmarks, history, passwords and settings. A Google account is a login: changing accounts inside a website is different from switching browser profiles. Saving browser information to an account is a separate Chrome setting.",
       "Start with two profiles called Work and Personal. A profile for every website can make the choice harder. Add a third when you have a distinct context, such as another project with its own logins and bookmarks.",
-    ] },
+    ], links: [{ title: "Chrome profiles vs Google accounts: choose your setup", slug: "chrome-profiles-vs-google-accounts" }] },
     { id: "recognize", title: "Make the windows recognizable at a glance", paragraphs: [
       "Name each context the way you think about it during the day: Work, Home or Client. A long email address is hard to scan in a menu, and matching portraits are easy to confuse. A short name and a distinctive image give you two independent cues.",
       "Try a simple project symbol for work and a photo for personal browsing. Check them at your normal Dock size, rather than only in a large editor preview. If the difference depends entirely on color, use different shapes as well; this also helps on small screens and with reduced vision.",

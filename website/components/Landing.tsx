@@ -568,6 +568,7 @@ export default function Landing({ initialLanguage }: { initialLanguage: "ru" | "
             </article>
           </div>
           <p className="guide-comparison-note">{initialLanguage === "ru" ? "Начинаете с нуля? " : "Starting from scratch? "}<a className="text-link" href={`${home}guides/separate-work-personal-chrome-profiles-mac/`}>{initialLanguage === "ru" ? "Разделите работу и личное" : "Separate work and personal browsing"}</a>{initialLanguage === "ru" ? ". Есть вопрос о доступе? " : ". Unsure about access? "}<a className="text-link" href={`${home}guides/chrome-automation-permission-mac/`}>{initialLanguage === "ru" ? "Разберитесь с разрешением Chrome" : "Understand Chrome permissions"}</a>.</p>
+          <p className="guide-comparison-note"><a className="text-link" href={`${home}guides/chrome-profiles-one-dock-icon-mac/`}>{initialLanguage === "ru" ? "Почему у всех профилей один значок Chrome?" : "Why do all profiles share one Chrome icon?"}</a>{" · "}<a className="text-link" href={`${home}guides/chrome-profiles-vs-google-accounts/`}>{initialLanguage === "ru" ? "Профиль и аккаунт Google: в чём разница?" : "Chrome profiles vs Google accounts"}</a></p>
         </section>
         <section className="faq-section wrap" id="questions" aria-labelledby="faq-title">
           <div className="faq-heading">

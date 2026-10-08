@@ -10,6 +10,8 @@ A small, open-source macOS utility for people who keep several Chrome profiles o
 
 [Switch with hotkeys](https://kunilingvistador.github.io/ProfileDock/en/guides/switch-chrome-profiles-keyboard-mac/) · [Create work and personal profiles](https://kunilingvistador.github.io/ProfileDock/en/guides/separate-work-personal-chrome-profiles-mac/) · [Understand Chrome permissions](https://kunilingvistador.github.io/ProfileDock/en/guides/chrome-automation-permission-mac/)
 
+[Why profiles share one Dock icon](https://kunilingvistador.github.io/ProfileDock/en/guides/chrome-profiles-one-dock-icon-mac/) · [Chrome profiles vs Google accounts](https://kunilingvistador.github.io/ProfileDock/en/guides/chrome-profiles-vs-google-accounts/)
+
 ![ProfileDock manager showing fictional Studio, Personal and Research shortcuts](docs/app-preview.jpg)
 
 **Status: early beta.** The packaging script produces an ad-hoc-signed development build by default. It is not notarized, and macOS may require manual approval before opening the downloaded app. See the [validation record](docs/VALIDATION.md) for completed checks and remaining gaps, and the [release checklist](docs/RELEASE.md) for public distribution.

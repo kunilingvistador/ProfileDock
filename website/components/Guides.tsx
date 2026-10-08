@@ -59,7 +59,7 @@ function GuideShell({ language, slug, children }: { language: SiteLanguage; slug
 
 function GuideCard({ language, guide }: { language: SiteLanguage; guide: Guide }) {
   const isSetup = guide.slug === "chrome-profile-shortcuts-mac-dock";
-  const Icon = isSetup ? BookOpen : guide.slug === "switch-chrome-profiles-keyboard-mac" ? Keyboard : guide.slug === "chrome-automation-permission-mac" ? ShieldCheck : guide.slug === "separate-work-personal-chrome-profiles-mac" ? BriefcaseBusiness : LifeBuoy;
+  const Icon = isSetup || guide.slug === "chrome-profiles-one-dock-icon-mac" ? BookOpen : guide.slug === "chrome-profiles-vs-google-accounts" ? UserRound : guide.slug === "switch-chrome-profiles-keyboard-mac" ? Keyboard : guide.slug === "chrome-automation-permission-mac" ? ShieldCheck : guide.slug === "separate-work-personal-chrome-profiles-mac" ? BriefcaseBusiness : LifeBuoy;
   return <article className="guide-card">
     <div className={`guide-card-icon ${isSetup ? "" : "guide-card-icon-peach"}`}><Icon size={24} aria-hidden="true" /></div>
     <p className="guide-category">{guide.category}</p>
@@ -104,12 +104,16 @@ export function GuideHub({ language }: { language: SiteLanguage }) {
 export function GuideArticle({ language, slug }: { language: SiteLanguage; slug: GuideSlug }) {
   const guide = guides[language][slug];
   const t = guideCopy[language];
+  const articleDate = guide.modified ?? guide.published ?? "2026-09-09";
+  const dateLabel = `${guide.modified ? (language === "ru" ? "Обновлено " : "Updated ") : ""}${new Intl.DateTimeFormat(language, { dateStyle: "long", timeZone: "UTC" }).format(new Date(articleDate))}`;
   const next: Record<GuideSlug, GuideSlug[]> = {
     "chrome-profile-shortcuts-mac-dock": ["switch-chrome-profiles-keyboard-mac", "chrome-automation-permission-mac"],
     "chrome-shortcut-existing-window": ["chrome-profile-shortcuts-mac-dock", "chrome-automation-permission-mac"],
     "switch-chrome-profiles-keyboard-mac": ["chrome-shortcut-existing-window", "separate-work-personal-chrome-profiles-mac"],
     "separate-work-personal-chrome-profiles-mac": ["chrome-profile-shortcuts-mac-dock", "switch-chrome-profiles-keyboard-mac"],
     "chrome-automation-permission-mac": ["chrome-profile-shortcuts-mac-dock", "chrome-shortcut-existing-window"],
+    "chrome-profiles-vs-google-accounts": ["separate-work-personal-chrome-profiles-mac", "chrome-profiles-one-dock-icon-mac"],
+    "chrome-profiles-one-dock-icon-mac": ["chrome-profile-shortcuts-mac-dock", "chrome-shortcut-existing-window"],
   };
   const related = next[slug].map(other => guides[language][other]);
   return <GuideShell language={language} slug={slug}>
@@ -118,7 +122,7 @@ export function GuideArticle({ language, slug }: { language: SiteLanguage; slug:
         <p className="eyebrow">{guide.category}</p>
         <h1>{guide.title}</h1>
         <p className="guide-lead">{guide.summary}</p>
-        <div className="guide-byline"><time dateTime={guide.modified ?? "2026-09-09"}>{guide.modified ? `${language === "ru" ? "Обновлено" : "Updated"} ${new Intl.DateTimeFormat(language, { dateStyle: "long", timeZone: "UTC" }).format(new Date(guide.modified))}` : t.published}</time><span>{t.version}</span></div>
+        <div className="guide-byline"><a href={repositoryURL}>{language === "ru" ? "Проект ProfileDock" : "The ProfileDock project"}</a><time dateTime={articleDate}>{dateLabel}</time><span>{t.version}</span></div>
       </header>
       <div className="guide-reading-layout">
         <aside className="guide-toc" aria-label={t.toc}>
@@ -134,6 +138,7 @@ export function GuideArticle({ language, slug }: { language: SiteLanguage; slug:
               {section.paragraphs?.map(paragraph => <p key={paragraph}>{paragraph}</p>)}
               {section.steps && <ol className="guide-steps">{section.steps.map(step => <li key={step.title}><h3>{step.title}</h3><p>{step.body}</p></li>)}</ol>}
               {section.points && <div className="guide-symptoms">{section.points.map(point => <div key={point.title}><h3>{point.title}</h3><p>{point.body}</p></div>)}</div>}
+              {section.links?.map(link => <p key={link.slug}><a className="text-link" href={guidePath(language, link.slug)}>{link.title}<ArrowRight size={16} aria-hidden="true" /></a></p>)}
             </section>
             {slug === "separate-work-personal-chrome-profiles-mac" && index === 0 && <figure className="guide-figure guide-context-figure">
               <div className="guide-contexts">
