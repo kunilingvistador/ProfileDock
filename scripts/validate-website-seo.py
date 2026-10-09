@@ -128,6 +128,9 @@ def local_target(root: Path, absolute_url: str) -> Path | None:
     parsed = urlparse(absolute_url)
     if parsed.scheme not in {'http', 'https'} or parsed.netloc != urlparse(SITE).netloc:
         return None
+    # These are independent hosted projects, not missing ProfileDock assets.
+    if absolute_url in {'https://kunilingvistador.github.io/ScreenQR/', 'https://kunilingvistador.github.io/ScreenQR/en/'}:
+        return None
     require(parsed.path.startswith(PREFIX), f'Local reference escapes project subpath: {absolute_url}')
     relative = unquote(parsed.path.removeprefix(PREFIX))
     # Vinext emits prefixed assets before the Pages copy normalizes the tree.

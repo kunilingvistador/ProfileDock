@@ -608,6 +608,12 @@ export default function Landing({ initialLanguage }: { initialLanguage: "ru" | "
             </a>
           </div>
         </section>
+        <section className="wrap website-analytics-note" aria-labelledby="screenqr-title">
+          <p className="eyebrow">{initialLanguage === "ru" ? "ЕЩЁ ОДНА УТИЛИТА ДЛЯ MAC" : "ANOTHER SMALL MAC UTILITY"}</p>
+          <h2 id="screenqr-title">{initialLanguage === "ru" ? "QR уже на экране?" : "QR code already on your screen?"}</h2>
+          <p>{initialLanguage === "ru" ? "ScreenQR читает QR прямо с экрана Mac. Нажмите значок в строке меню, выделите код, проверьте адрес и откройте ссылку — без телефона и сохранения скриншота." : "ScreenQR reads QR codes directly from your Mac screen. Click the menu bar icon, select the code, inspect the address and open the link — no phone or saved screenshot needed."}</p>
+          <a className="text-link" href={`https://kunilingvistador.github.io/ScreenQR/${initialLanguage === "en" ? "en/" : ""}`}>{initialLanguage === "ru" ? "Посмотреть ScreenQR" : "Explore ScreenQR"}<ArrowUpRight size={17} aria-hidden="true" /></a>
+        </section>
       </main>
       <footer className="wrap">
         <div>
