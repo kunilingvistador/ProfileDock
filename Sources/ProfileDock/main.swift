@@ -13,6 +13,7 @@ import ProfileDockCore
     private var statusRefreshItem: NSMenuItem?
     private var statusUpdateItem: NSMenuItem?
     private var managerRefreshTask: Task<Void, Never>?
+    private var managerToolbar: ManagerToolbarController?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         PerformanceTrace.record("controller.didFinishLaunching")
@@ -44,11 +45,13 @@ import ProfileDockCore
 
     private func ensureManagerWindow() {
         guard window == nil else { return }
-        window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 940, height: 660), styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
-        window.title = "ProfileDock"
+        window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 940, height: 600), styleMask: [.titled, .closable, .miniaturizable, .resizable], backing: .buffered, defer: false)
+        window.title = model.demoMode ? "ProfileDock Preview" : "ProfileDock"
         window.minSize = NSSize(width: 860, height: 600)
         window.isReleasedWhenClosed = false
         window.contentView = NSHostingView(rootView: ContentView(model: model))
+        managerToolbar = ManagerToolbarController(model: model)
+        managerToolbar?.install(on: window)
         // Repeatable screenshot QA affects this sample window only, never system settings.
         if model.demoMode {
             if CommandLine.arguments.contains("--demo-dark") {
@@ -133,7 +136,7 @@ import ProfileDockCore
             Text(L("Is this the window you want? The shortcut has not been changed yet.", "Это нужное окно? Связь ярлыка пока не изменена."))
                 .font(.system(size: 12)).fixedSize(horizontal: false, vertical: true)
             Button(L("Return to setup", "Вернуться к настройке")) { [weak self] in self?.showWindow() }
-                .buttonStyle(.borderedProminent).tint(.indigo)
+                .buttonStyle(.borderedProminent)
                 .keyboardShortcut(.defaultAction)
         }.padding(18).frame(width: 330, height: 132, alignment: .leading))
         if let screen = NSScreen.screens.first(where: { NSMouseInRect(NSEvent.mouseLocation, $0.frame, false) }) ?? NSScreen.main {
@@ -150,7 +153,34 @@ import ProfileDockCore
     @objc func layoutChanged() { model?.hotKeyRevision += 1; menuIsDirty = true }
     func applicationWillTerminate(_ notification: Notification) { model?.stopHotKeys() }
     @objc func quit() { NSApp.terminate(nil) }
+    @objc func showSupport() { showWindow(); model.projectSectionRequest = model.showsSupportPrototype ? .support : .status }
+    @objc func showFeedback() { showWindow(); model.projectSectionRequest = .feedback }
+    @objc func showStatus() { showWindow(); model.projectSectionRequest = .status }
+    @objc func showData() { showWindow(); model.projectSectionRequest = .data }
+    @objc func previewLight() { window?.appearance = NSAppearance(named: .aqua) }
+    @objc func previewDark() { window?.appearance = NSAppearance(named: .darkAqua) }
+    @objc func previewSystem() { window?.appearance = nil }
+    @objc func previewCompact() { window?.setContentSize(NSSize(width: 860, height: 600)) }
+    @objc func previewRegular() { window?.setContentSize(NSSize(width: 940, height: 600)) }
+    @objc func previewEmpty() {
+        guard model.demoMode else { return }
+        model.shortcuts = []; model.notice = nil; model.selectedShortcutID = nil
+    }
+    @objc func previewTimeout() {
+        guard model.demoMode else { return }
+        model.errorMessage = ChromeError(code: -1712, detail: "Preview timeout").localizedDescription
+    }
+    @objc func previewDisconnected() {
+        guard model.demoMode else { return }
+        model.chromeRunning = false; model.hasWindowSnapshot = false; model.notice = nil
+    }
+    @objc func previewConnected() {
+        guard model.demoMode else { return }
+        model.chromeRunning = true; model.permissionGranted = true; model.hasWindowSnapshot = true
+    }
     @objc func refresh() { Task { await model.refresh() } }
+    @objc func addShortcut() { showWindow(); model.managerCommandRequest = .create }
+    @objc func findShortcut() { showWindow(); managerToolbar?.focusSearch(in: window) }
     @objc func updateLaunchers() { model.updateLaunchers() }
     @objc func focusMenuItem(_ item: NSMenuItem) {
         guard let id = item.representedObject as? UUID, let shortcut = model.shortcuts.first(where: { $0.id == id }) else { return }
@@ -162,18 +192,57 @@ import ProfileDockCore
         let appItem = NSMenuItem(); let appMenu = NSMenu(title: "ProfileDock")
         let open = NSMenuItem(title: L("Open ProfileDock…", "Открыть ProfileDock…"), action: #selector(showWindow), keyEquivalent: ",")
         open.target = self; appMenu.addItem(open); appMenu.addItem(.separator())
+        for (title, action) in [(L("Status and troubleshooting…", "Состояние и помощь…"), #selector(showStatus)),
+                                (L("Feedback and ideas…", "Обратная связь и идеи…"), #selector(showFeedback)),
+                                (L("Privacy…", "Приватность…"), #selector(showData))] {
+            let item = NSMenuItem(title: title, action: action, keyEquivalent: "")
+            item.target = self; appMenu.addItem(item)
+        }
+        appMenu.addItem(.separator())
         appMenu.addItem(withTitle: L("Hide ProfileDock", "Скрыть ProfileDock"), action: #selector(NSApplication.hide(_:)), keyEquivalent: "h")
         appMenu.addItem(.separator())
         let quit = NSMenuItem(title: L("Quit ProfileDock", "Завершить ProfileDock"), action: #selector(self.quit), keyEquivalent: "q")
         quit.target = self; appMenu.addItem(quit)
         appItem.submenu = appMenu; bar.addItem(appItem)
+        let fileItem = NSMenuItem(); let file = NSMenu(title: L("File", "Файл"))
+        let add = NSMenuItem(title: L("New shortcut…", "Новый ярлык…"), action: #selector(addShortcut), keyEquivalent: "n")
+        add.target = self; file.addItem(add)
+        fileItem.submenu = file; bar.addItem(fileItem)
         let editItem = NSMenuItem(); let edit = NSMenu(title: L("Edit", "Правка"))
         for (title, action, key) in [(L("Undo", "Отменить"), "undo:", "z"), (L("Redo", "Повторить"), "redo:", "Z"),
                                       (L("Cut", "Вырезать"), "cut:", "x"), (L("Copy", "Скопировать"), "copy:", "c"),
                                       (L("Paste", "Вставить"), "paste:", "v"), (L("Select All", "Выбрать всё"), "selectAll:", "a")] {
             edit.addItem(withTitle: title, action: Selector(action), keyEquivalent: key)
         }
+        edit.addItem(.separator())
+        let find = NSMenuItem(title: L("Find shortcut…", "Найти ярлык…"), action: #selector(findShortcut), keyEquivalent: "f")
+        find.target = self; edit.addItem(find)
         editItem.submenu = edit; bar.addItem(editItem)
+        let viewItem = NSMenuItem(); let view = NSMenu(title: L("View", "Вид"))
+        let refresh = NSMenuItem(title: L("Refresh windows", "Обновить окна"), action: #selector(self.refresh), keyEquivalent: "r")
+        refresh.target = self; view.addItem(refresh)
+        viewItem.submenu = view; bar.addItem(viewItem)
+        // Local QA controls affect this preview window, never system appearance.
+        if model.demoMode {
+            let item = NSMenuItem(); let preview = NSMenu(title: L("Preview", "Предпросмотр"))
+            for (title, action) in [(L("Light appearance", "Светлая тема"), #selector(previewLight)),
+                                    (L("Dark appearance", "Тёмная тема"), #selector(previewDark)),
+                                    (L("System appearance", "Как в системе"), #selector(previewSystem)),
+                                    (L("Compact window", "Компактное окно"), #selector(previewCompact)),
+                                    (L("Regular window", "Обычное окно"), #selector(previewRegular))] {
+                let command = NSMenuItem(title: title, action: action, keyEquivalent: "")
+                command.target = self; preview.addItem(command)
+            }
+            preview.addItem(.separator())
+            for (title, action) in [(L("QA: No shortcuts", "Проверка: нет ярлыков"), #selector(previewEmpty)),
+                                    (L("QA: Chrome unavailable", "Проверка: Chrome недоступен"), #selector(previewDisconnected)),
+                                    (L("QA: Chrome available", "Проверка: Chrome доступен"), #selector(previewConnected)),
+                                    (L("QA: Chrome timeout", "Проверка: Chrome не отвечает"), #selector(previewTimeout))] {
+                let command = NSMenuItem(title: title, action: action, keyEquivalent: "")
+                command.target = self; preview.addItem(command)
+            }
+            item.submenu = preview; bar.addItem(item)
+        }
         NSApp.mainMenu = bar
     }
 
@@ -205,6 +274,15 @@ import ProfileDockCore
         update.target = self
         menu.addItem(update)
         statusUpdateItem = update
+        menu.addItem(.separator())
+        for (title, action) in [(L("Status and troubleshooting…", "Состояние и помощь…"), #selector(showStatus)),
+                                (L("Feedback and ideas…", "Обратная связь и идеи…"), #selector(showFeedback)),
+                                (L("Support ProfileDock…", "Поддержать ProfileDock…"), #selector(showSupport))] {
+            if action == #selector(showSupport) && !model.showsSupportPrototype { continue }
+            let item = NSMenuItem(title: title, action: action, keyEquivalent: "")
+            item.target = self; menu.addItem(item)
+        }
+        menu.addItem(.separator())
         let quit = NSMenuItem(title: L("Quit ProfileDock", "Завершить ProfileDock"), action: #selector(quit), keyEquivalent: "q")
         quit.target = self; menu.addItem(quit)
     }

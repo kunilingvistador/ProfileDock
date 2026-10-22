@@ -25,7 +25,9 @@ Every macOS job:
 
 The static website builds once on `ubuntu-24.04`, outside the macOS matrix. Independent matrix jobs continue if one fails. A newer run for the same branch cancels an obsolete run.
 
-**Status:** [CI run 34209812166](https://github.com/kunilingvistador/ProfileDock/actions/runs/34209812166) passed on all four Mac configurations for source `9155f13`. The detailed candidate-specific results and live desktop limits are in [VALIDATION.md](VALIDATION.md).
+**0.1.7 (18), 22 October 2026:** [CI 39798008777](https://github.com/kunilingvistador/ProfileDock/actions/runs/39798008777) passed all five jobs for tested commit [`0c72378`](https://github.com/kunilingvistador/ProfileDock/commit/0c72378eebbeacb9eab33bb21a2c22eaa74a3590). Each native configuration passed **84 XCTest tests**, **13 analyzer tests**, **8 launcher compatibility cases / 134 assertions**, diagnostic typechecks and package checks. All 26 Swift files in the separately verified universal build-18 archive match that source. Local upgrade/preservation, manager switching, minimized-window restoration and warm/cold Finder helper launches were also checked on one Apple Silicon Mac. Physical Dock clicks and physical global-keyboard activation were not revalidated. See [VALIDATION.md](VALIDATION.md#017-18-validation) for boundaries and [PR 14](https://github.com/kunilingvistador/ProfileDock/pull/14) for later documentation/website dependency revisions and their checks.
+
+**Historical matrix evidence:** [CI run 34209812166](https://github.com/kunilingvistador/ProfileDock/actions/runs/34209812166) passed all four Mac configurations for source `9155f13` (0.1.1). Later release-specific records are retained in [VALIDATION.md](VALIDATION.md); this historical run does not validate the current candidate.
 
 ## Coverage that requires a desktop session
 

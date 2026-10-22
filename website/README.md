@@ -9,3 +9,11 @@ Run `npm run validate:seo` after building. It checks both actual HTML documents,
 To refresh the local Pages copy, run `python3 ../scripts/publish-website-files.py` after building. This normalizes Vinext’s prefixed static assets for GitHub Pages, includes the English route and public assets, and validates the copied tree again. For an isolated rehearsal, pass `--dest /path/to/temporary/pages`. The script only copies files; publishing still requires committing and deploying the result.
 
 CI runs the same copy/validation in a temporary directory. See [the SEO notes](../docs/SEO.md) for scope, primary references and remaining live checks.
+
+## Release content checks
+
+Keep instructions aligned with the released manager: add uses + in the native toolbar; names, pictures, window connections and Dock export live in each card’s ⋯ menu. Manager keys (⌘F, arrow keys, Return) are distinct from optional global hotkeys. Home and overview images use sample data, never a person’s account names or real window titles. Current overview captures and earlier editor captures are identified separately in the guides.
+
+After a release change, rebuild and re-run SEO and analytics validation before copying the Pages tree. Keep the existing RU/EN URL pairs, self canonicals and `G-VTDFFJ1TWQ` measurement runtime. `lastmod` and Article dates track meaningful content edits, not every build; update only the relevant sitemap entries. Downloads are link clicks, not installations, and the native app has no analytics.
+
+This follows Google’s guidance on [helpful content](https://developers.google.com/search/docs/fundamentals/creating-helpful-content), [accurate sitemap dates](https://developers.google.com/search/docs/crawling-indexing/sitemaps/build-sitemap) and [crawl requests](https://developers.google.com/search/docs/crawling-indexing/ask-google-to-recrawl). A successful export and a valid sitemap do not prove Google has crawled or indexed the update. Check actual Search Console results after deployment; repeated requests do not speed up crawling.

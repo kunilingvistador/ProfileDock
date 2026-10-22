@@ -7,6 +7,8 @@ struct ChromeError: LocalizedError {
     var errorDescription: String? {
         switch code {
         case -1743: return L("Allow ProfileDock to control Google Chrome in System Settings → Privacy & Security → Automation.", "Разрешите ProfileDock управлять Google Chrome: Системные настройки → Конфиденциальность и безопасность → Автоматизация.")
+        case -1712: return L("Chrome did not respond in time. Check for an open dialog in Chrome, then try switching again.", "Chrome не ответил вовремя. Проверьте, нет ли в Chrome открытого диалогового окна, затем повторите переключение.")
+        case -609: return L("The connection to Chrome was interrupted. Wait until Chrome is ready, then try again.", "Связь с Chrome прервалась. Дождитесь, пока Chrome будет готов, и повторите действие.")
         case -600: return L("Open Chrome and your existing work window, then refresh.", "Откройте Chrome и своё рабочее окно, затем обновите список.")
         case -27001: return L("The linked window is not open. Restore it in Chrome or reconnect this shortcut to an existing window.", "Связанное окно не открыто. Восстановите его в Chrome или привяжите ярлык к существующему окну.")
         case -27002: return L("More than one window has this name. Reconnect the shortcut to one exact window.", "Несколько окон имеют одинаковое имя. Перепривяжите ярлык к одному нужному окну.")

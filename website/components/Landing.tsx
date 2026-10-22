@@ -53,24 +53,24 @@ const copy = {
     appKicker: "НЕБОЛЬШОЕ ПРИЛОЖЕНИЕ. БОЛЬШЕ ПОРЯДКА.",
     appTitle: "Все ваши окна.\nНа своих местах.",
     appIntro:
-      "Одна спокойная панель для настройки. А для ежедневного переключения — привычный Dock.",
+      "Узнаваемые карточки, поиск в панели macOS и действия рядом с каждым ярлыком. Для ежедневного переключения — привычный Dock.",
     appPoints: [
       [
-        "Проверьте перед привязкой",
-        "Посмотрите выбранное окно Chrome, прежде чем сохранить ярлык.",
+        "Узнавайте с первого взгляда",
+        "Крупная картинка и имя помогают различать рабочие окна в сетке карточек.",
       ],
-      ["Сделайте своим", "Имя и изображение настраиваются рядом с каждым ярлыком."],
-      ["Вернитесь без путаницы", "Закрыли окно? Выберите новое для того же ярлыка."],
+      ["Найдите с клавиатуры", "⌘F открывает поиск. Стрелки выбирают карточку, Return переключает выбранное окно."],
+      ["Всё рядом", "В меню ⋯ карточки — имя, картинка, привязка окна и создание ярлыка для Dock."],
     ],
     screenshot:
-      "Интерфейс ProfileDock: три демонстрационных ярлыка Studio, Personal и Research с настройками и кнопками переключения.",
+      "ProfileDock: семь демонстрационных ярлыков в двух колонках, поиск в панели macOS, сочетания клавиш и кнопки переключения окон.",
     screenshotNote: "Настоящий интерфейс приложения · демонстрационные данные",
     setupKicker: "ТРИ ПРОСТЫХ ШАГА",
     setupTitle: "Один раз настроить.\nКаждый день пользоваться.",
     steps: [
       [
         "Выберите окно",
-        "Откройте нужный профиль в Chrome. В ProfileDock нажмите «Добавить» и выберите его окно.",
+        "Откройте нужный профиль в Chrome. В ProfileDock нажмите + в панели окна и выберите его окно.",
       ],
       [
         "Добавьте свой значок",
@@ -78,7 +78,7 @@ const copy = {
       ],
       [
         "Закрепите в Dock",
-        "Нажмите «Создать ярлык для Dock» и перетащите готовое приложение из Finder в Dock.",
+        "В меню ⋯ карточки выберите «Создать ярлык для Dock» и перетащите приложение из Finder в Dock.",
       ],
     ],
     installTitle: "Перед первым запуском",
@@ -88,7 +88,7 @@ const copy = {
     faqKicker: "ХОРОШИЕ ВОПРОСЫ",
     faqTitle: "Что стоит знать.",
     faq: [
-      ["Можно переключаться с клавиатуры?", "Да. В версии 0.1.6 можно назначить каждому ярлыку свою комбинацию, например ⌥⌘1. Она возвращает то же открытое окно. ProfileDock должен быть запущен в строке меню; назначение необязательное и сохраняется при обновлении."],
+      ["Можно переключаться с клавиатуры?", "Да. Каждому ярлыку можно назначить свою комбинацию, например ⌥⌘1. Она возвращает то же открытое окно. ProfileDock должен быть запущен в строке меню; назначение необязательное и сохраняется при обновлении."],
       [
         "Это переключатель профилей Chrome или окон?",
         "ProfileDock привязывает каждый ярлык к конкретному открытому окну Chrome. Поэтому можно держать разные профили — или несколько окон одного профиля — и выбирать нужное через Dock.",
@@ -180,21 +180,21 @@ const copy = {
     ],
     appKicker: "A SMALL APP. A LITTLE MORE ORDER.",
     appTitle: "Every window.\nIn its own place.",
-    appIntro: "One quiet panel to set things up. Your familiar Dock for everyday switching.",
+    appIntro: "Recognizable cards, search in the macOS toolbar, and actions beside each shortcut. Your familiar Dock for everyday switching.",
     appPoints: [
-      ["Check before you connect", "Preview the chosen Chrome window before saving its shortcut."],
-      ["Make it yours", "The name and picture are easy to change beside every shortcut."],
-      ["Reconnect without confusion", "Closed a window? Choose a new one for the same shortcut."],
+      ["Recognize it at a glance", "Large pictures and clear names distinguish your working windows in a two-column grid."],
+      ["Find it from the keyboard", "⌘F opens search. Arrow keys select a card; Return switches to its connected window."],
+      ["Keep actions close", "Each card’s ⋯ menu holds its name, picture, window connection and Create Dock shortcut action."],
     ],
     screenshot:
-      "The ProfileDock app with three demo shortcuts, Studio, Personal and Research, and visible customization and switching actions.",
+      "ProfileDock with seven sample shortcuts in two columns, search in the macOS toolbar, hotkeys and window-switching buttons.",
     screenshotNote: "Actual app interface · demo data",
     setupKicker: "THREE SIMPLE STEPS",
     setupTitle: "Set it up once.\nEnjoy it every day.",
     steps: [
       [
         "Choose a window",
-        "Open the profile you want in Chrome. Click Add in ProfileDock and select its window.",
+        "Open the profile you want in Chrome. Click + in ProfileDock’s toolbar and select its window.",
       ],
       [
         "Pick a familiar icon",
@@ -202,7 +202,7 @@ const copy = {
       ],
       [
         "Keep it in the Dock",
-        "Click Create Dock shortcut, then drag the generated app from Finder into your Dock.",
+        "Choose Create Dock shortcut from the card’s ⋯ menu, then drag the app from Finder into your Dock.",
       ],
     ],
     installTitle: "Before your first launch",
@@ -212,7 +212,7 @@ const copy = {
     faqKicker: "GOOD QUESTIONS",
     faqTitle: "A few things to know.",
     faq: [
-      ["Can I switch using the keyboard?", "Yes. Version 0.1.6 lets you assign a combination such as Option–Command–1 to each shortcut. It returns the same existing window. ProfileDock must be running in the menu bar; assignments are optional and persist across updates."],
+      ["Can I switch using the keyboard?", "Yes. You can assign a combination such as Option–Command–1 to each shortcut. It returns the same existing window. ProfileDock must be running in the menu bar; assignments are optional and persist across updates."],
       [
         "Does it switch Chrome profiles or windows?",
         "Each shortcut connects to a specific open Chrome window. You can keep different profiles, or several windows of the same profile, and choose the one you want from the Dock.",
@@ -353,7 +353,7 @@ export default function Landing({ initialLanguage }: { initialLanguage: "ru" | "
                 <ArrowRight size={17} aria-hidden="true" />
               </a>
             </div>
-            <p className="download-detail">{t.details}<br />ZIP · {releaseVersion} · 2.6 MB</p>
+            <p className="download-detail">{t.details}<br />ZIP · {releaseVersion}</p>
             <a className="beta-hint" href="#install">
               {t.betaHint}
             </a>
@@ -478,7 +478,7 @@ export default function Landing({ initialLanguage }: { initialLanguage: "ru" | "
                 <img
                   src="/ProfileDock/app-preview.jpg"
                   width="940"
-                  height="692"
+                  height="672"
                   loading="lazy"
                   decoding="async"
                   alt={t.screenshot}
@@ -505,7 +505,7 @@ export default function Landing({ initialLanguage }: { initialLanguage: "ru" | "
             <div>
               <h3>{t.installTitle}</h3>
               <p>{t.installText}</p>
-              <p className="release-links"><a href={release}>{initialLanguage === "ru" ? "Что нового в версии 0.1.6" : "What’s new in version 0.1.6"}</a> · <a href={checksumURL}>SHA-256</a></p>
+              <p className="release-links"><a href={release}>{initialLanguage === "ru" ? `Что нового в ${releaseVersion}` : `What’s new in ${releaseVersion}`}</a> · <a href={checksumURL}>SHA-256</a></p>
               <a className="text-link" href={`${home}guides/chrome-profile-shortcuts-mac-dock/`}>
                 {t.installLink}
                 <ArrowUpRight size={16} aria-hidden="true" />

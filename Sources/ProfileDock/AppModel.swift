@@ -15,6 +15,10 @@ import ProfileDockCore
     @Published var recoveryShortcutID: UUID?
     @Published var chromeRunning = false
     @Published var permissionGranted = false
+    @Published var projectSectionRequest: ProjectSection?
+    @Published var managerCommandRequest: ManagerCommand?
+    @Published var searchText = ""
+    @Published var searchFieldFocused = false
     @Published var legacyLauncherCount = 0
     @Published var isMaintainingLaunchers = false
     @Published var launcherMaintenanceNotice: String?
@@ -34,8 +38,10 @@ import ProfileDockCore
     let service = ChromeService()
     let store: ShortcutStore
     let demoMode: Bool
+    var showsSupportPrototype: Bool { demoMode && !CommandLine.arguments.contains("--demo-production-ui") }
     var didChange: (() -> Void)?
     var didPreviewWindow: (() -> Void)?
+    var didRequestSearchFocus: (() -> Void)?
     private var writable = true
     private var focusRequest = UUID()
     private struct CachedIcon {
@@ -52,12 +58,16 @@ import ProfileDockCore
             : FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("ProfileDock")
         store = ShortcutStore(directory: base)
         if demoMode {
-            shortcuts = ["Studio", "Personal", "Research"].map { Shortcut(name: $0, windowName: $0) }
-            windows = shortcuts.prefix(2).enumerated().map { BrowserWindow(id: String($0.offset), givenName: $0.element.windowName, title: $0.element.name, minimized: false) }
+            shortcuts = ["Studio", "Personal", "Research", "Design", "Finance", "Sandbox", "Archive"].map { Shortcut(name: $0, windowName: $0) }
+            windows = shortcuts.filter { $0.name != "Research" }.enumerated().map { BrowserWindow(id: String($0.offset), givenName: $0.element.windowName, title: $0.element.name, minimized: false) }
             hasWindowSnapshot = true
             profiles = [.init(id: "Default", name: "Personal"), .init(id: "Profile 1", name: "Studio")]
             chromeRunning = true; permissionGranted = true
-            notice = L("Interface preview — no browser windows will be changed.", "Предпросмотр интерфейса — окна браузера не изменяются.")
+            for (index, shortcut) in shortcuts.prefix(2).enumerated() {
+                hotKeyDocument = hotKeyDocument.assigning(
+                    HotKey(keyCode: index == 0 ? 18 : 19, modifiers: HotKey.option | HotKey.command), to: shortcut.id)
+            }
+            // The window title and header identify this isolated sample preview.
         } else {
             do { shortcuts = try store.load() }
             catch { writable = false; errorMessage = error.localizedDescription }
