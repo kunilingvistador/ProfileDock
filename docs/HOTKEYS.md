@@ -1,6 +1,6 @@
 # Keyboard shortcuts
 
-Available since **0.1.6 beta**, retained in the **0.1.7 (18) candidate**. Each saved window can have one optional global hotkey. Clicking a Dock helper and pressing the hotkey use the same existing-window connection.
+Available since **0.1.6 beta**, retained in **0.1.7 (18)**. Each saved window can have one optional global hotkey. Clicking a Dock helper and pressing the hotkey use the same existing-window connection.
 
 ## Assign, change or remove
 
@@ -34,4 +34,4 @@ The implementation registers selected combinations through RegisterEventHotKey. 
 
 Core tests exercise storage compatibility, unsafe input, duplicates, failed registration and failed saves, suspension, disabled assignments, partial startup conflicts, repeat suppression, stale events and removed UUIDs. Live desktop and package results for the release are recorded in [VALIDATION.md](VALIDATION.md). Hosted builds cannot establish behavior on every keyboard, Spaces/fullscreen setup, Secure Input session or physical Mac. No specific click-to-visible latency improvement is claimed without measurement.
 
-For the 0.1.7 candidate, local standalone checks passed repeat/stale-event, suspension and failed-persistence scenarios with an in-memory backend, plus separate shortcut/hotkey-file preservation. The existing installation had no global assignments before the update, so preservation there cannot prove an assigned physical hotkey works. Final-candidate CI and live input checks remain pending in the validation record; the 0.1.6 physical-keyboard result is historical.
+For **0.1.7 (18)**, [CI 39798008777](https://github.com/kunilingvistador/ProfileDock/actions/runs/39798008777) passed 84 XCTest tests on each native Mac configuration, including the hotkey suite, for application source `0c72378`. Local standalone checks also passed repeat/stale-event, suspension and failed-persistence scenarios with an in-memory backend. On the installed update, a combination was recorded, saved and removed, restoring the original hotkey-file bytes. The installation began with no assigned hotkeys. A global synthetic-key attempt did not independently verify the target window, so **physical-keyboard global dispatch was not revalidated**; the 0.1.6 physical-keyboard result remains historical. See [VALIDATION.md](VALIDATION.md#017-18-validation) for the separate archive, live-window and final-revision boundaries.

@@ -27,6 +27,8 @@ A small, open-source macOS utility for people who keep several Chrome profiles o
 - Reports missing or ambiguous bindings instead of opening a blank window.
 - Keeps Chrome control in one app, so each shortcut does not need its own Automation permission.
 - Refreshes existing compatible Dock helpers when you open ProfileDock after an app update.
+- Keeps shortcut pictures, status and hotkeys together in compact cards, with native toolbar search and keyboard navigation.
+- Shows connection status and lets you prepare feedback without sending it automatically.
 
 The switching command does not open windows or tabs, change the selected tab, or resize/reposition windows. Native focus behavior still needs broader testing across macOS configurations; see [known limits](#known-limits).
 
@@ -101,7 +103,7 @@ No personal profiles, account names, photographs, or browser data belong in this
 
 The project uses Swift Package Manager, AppKit/SwiftUI, and Apple events. It has no browser extension or bundled Chromium runtime. The controller is `ProfileDock`; the generic Dock helper is `ProfileDockLauncher`.
 
-For interface-only QA of the next UI, build the isolated local preview:
+For interface-only QA, build the isolated local preview:
 
 ```sh
 python3 scripts/preview.py
@@ -110,7 +112,7 @@ open 'dist/preview/ProfileDock Preview.app'
 
 This copy has its own bundle ID, sample shortcuts and temporary storage. It does not register the `profiledock://` URL scheme, control Chrome, enable global hotkeys or update real Dock helpers. It can be reviewed alongside the installed app. Its **Preview** menu changes only sample data, the preview window's appearance and size. QA commands can simulate an empty library, Chrome unavailability and a timeout without controlling Chrome. The native toolbar includes search (⌘F) and a new shortcut command (⌘N). In the two-column card grid, use arrow keys to select and Return to switch or reconnect a missing window. Each card keeps its picture, window status, hotkey and actions together; the final tile creates a new shortcut. Escape clears a search or closes a sheet. Seven sample shortcuts are included to review the compact layout. Notices stay in a fixed-height footer. Search and selection are reconciled after renaming or removing sample shortcuts; keyboard focus returns after sheets close.
 
-The local prototype includes project support, a feedback draft with optional technical details, connection status and a statistics-consent mockup. Payments, an account-free feedback inbox and usage reporting are not connected. The statistics switch is session-only and sends nothing. Feedback can be copied locally; opening GitHub does not submit it.
+The preview includes a project-support prototype alongside the release's status, feedback and privacy panels. Payments are not connected, and the support prototype is hidden in the normal app. Neither version sends usage or installation statistics. Feedback can be copied locally; opening GitHub does not submit it. Add `--demo-production-ui` when launching the preview to hide the support prototype too.
 
 The existing demo flags are also available on a normal development build:
 
