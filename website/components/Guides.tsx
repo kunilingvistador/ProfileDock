@@ -142,8 +142,8 @@ export function GuideArticle({ language, slug }: { language: SiteLanguage; slug:
         <div className="guide-prose">
           <p className="guide-takeaway">{guide.takeaway}</p>
           {guide.sections.some(section => section.images?.length) && <p className="guide-capture-note">{language === "ru"
-            ? "Скриншоты сняты в настоящем ProfileDock 0.1.6 (12), в режиме предпросмотра. Studio, Personal и Research — демонстрационные имена. Они показывают интерфейс, а результат переключения нужно проверить на своём открытом окне Chrome. Нажмите на изображение, чтобы рассмотреть кнопки."
-            : "Screenshots were captured in the real ProfileDock 0.1.6 (12) interface using preview mode. Studio, Personal and Research are sample names. They illustrate the controls; verify switching against your own open Chrome window. Click an image to inspect the controls."}</p>}
+            ? "Общий вид показывает ProfileDock 0.1.7; отдельные редакторы сняты в 0.1.6, их основные действия сохранились. Это настоящий интерфейс с демонстрационными данными. Проверьте переключение на своём открытом окне Chrome; нажмите на изображение, чтобы рассмотреть кнопки."
+            : "The overview shows ProfileDock 0.1.7; individual editors were captured in 0.1.6 and their main actions remain the same. This is the real interface using sample data. Verify switching against your own open Chrome window; click an image to inspect the controls."}</p>}
           {guide.sections.map((section, index) => <div key={section.id}>
             <section id={section.id} aria-labelledby={`${section.id}-heading`}>
               <h2 id={`${section.id}-heading`}>{section.title}</h2>

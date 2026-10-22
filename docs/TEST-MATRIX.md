@@ -25,7 +25,9 @@ Every macOS job:
 
 The static website builds once on `ubuntu-24.04`, outside the macOS matrix. Independent matrix jobs continue if one fails. A newer run for the same branch cancels an obsolete run.
 
-**Status:** [CI run 34209812166](https://github.com/kunilingvistador/ProfileDock/actions/runs/34209812166) passed on all four Mac configurations for source `9155f13`. The detailed candidate-specific results and live desktop limits are in [VALIDATION.md](VALIDATION.md).
+**Current candidate — 0.1.7 (18), 22 October 2026:** exact final-source CI is **pending**. Local arm64 checks passed eight launcher compatibility cases / 134 assertions, 13 analyzer tests, five core smoke scenarios, five supplemental persistence scenarios and both diagnostic harness typechecks. The local universal ZIP separately passed version/build, architecture, CRC and fresh-extraction signature checks. These checks do not replace XCTest or live Chrome/input testing. Track completion and limits in [VALIDATION.md](VALIDATION.md#ui-and-stability-beta-candidate-017-18).
+
+**Historical matrix evidence:** [CI run 34209812166](https://github.com/kunilingvistador/ProfileDock/actions/runs/34209812166) passed all four Mac configurations for source `9155f13` (0.1.1). Later release-specific records are retained in [VALIDATION.md](VALIDATION.md); this historical run does not validate the current candidate.
 
 ## Coverage that requires a desktop session
 

@@ -1,6 +1,29 @@
 # Validation record
 
-## Hotkey beta candidate: 0.1.6 (12)
+## UI and stability beta candidate: 0.1.7 (18)
+
+Record started **22 October 2026**. Intended release: `v0.1.7-beta`, universal arm64 + x86_64, macOS 13 minimum. The candidate remains **ad-hoc signed and unnotarized**, with manual updates. The local archive is verified; final-candidate CI and live window/input checks are pending. Historical results below do not substitute for them.
+
+This update replaces the wide profile list with two-column cards and a native toolbar/search. It adds keyboard navigation and status/feedback/privacy panels, keeps notifications from moving cards, reconciles selection after search/rename/removal, protects an open editor from other commands, and explains Chrome errors `-1712` and `-609`. Switching, UUID routes, controller bundle identity and stored-data formats remain unchanged. Donation and installation-analytics prototypes are excluded from the release UI.
+
+| Current check | Evidence and boundary |
+| --- | --- |
+| Launcher update and migration | **8 cases / 134 assertions passed**, using `python3 scripts/test-launcher-compatibility.py` against the production exporter. Same-path replacement and controller moves preserve helper root identity, UUID, bundle ID, icon/localization bytes and settings. Legacy backups, repeated updates and protected-path refusals pass. Helpers are copied and signed, never executed by this suite. |
+| Trace analyzer | **13 tests passed** with `python3 scripts/test-summarize-focus-traces.py`. |
+| Focus/hotkey core smoke | **5 scenarios passed** against production core sources with an in-memory registration backend: 1,000 obsolete queued requests, held-key repeat suppression, suspend/resume with stale-token rejection, failed persistence and removed UUIDs. This is not physical hotkey or sleep/wake evidence. |
+| Supplemental persistence smoke | **5 scenarios passed** in temporary fixtures: version-1 reopen/save, names/bindings/icon bytes, independent hotkey storage, original UUID route validation, controller move/re-record and unsupported-version preservation. Adapted from existing storage/controller-location assertions; not a full XCTest run. |
+| Diagnostic harnesses | Active and passive latency harnesses both typecheck. No new latency result is claimed. |
+| Earlier sample Preview | Seven sample cards, compact light/dark layouts, search, arrow/Return/Escape navigation, editor protection and selection/recovery states were reviewed locally. This isolated Preview did not control Chrome and is separate from the final release binary. |
+| Existing installation baseline | **0.1.6 (12)**, four original shortcuts, zero assigned hotkeys; a backup was made before the update. Its old UI displayed two ready/two missing connections from a stale cached snapshot, which is not a refreshed inventory or a reliable before/after window comparison. |
+| Candidate installation | The exact packaged **0.1.7 (18)** app is installed and reads the four original shortcuts and zero assigned hotkeys. Full data/helper preservation and actual Chrome/Dock/hotkey scenarios remain **pending**. |
+| Final local universal archive | **Passed**: **0.1.7 (18)**, arm64 + x86_64 in both controller and helper, ZIP CRC, no packaged user settings/icons, and strict signatures after fresh extraction. Archive size **2,997,803 bytes**; SHA-256 `e88eb4b82b947aa3b18392d7f8215ee8210370da52294ca2dc7813cbcef5174b`. This is a local package check, not a downloaded-release or clean-Mac Gatekeeper check. |
+| Exact final-source CI | **Pending**. Local Command Line Tools do not provide XCTest; no standard XCTest pass is claimed for this candidate yet. |
+
+Local automated checks above ran on **macOS 26.5.2, arm64, Swift 6.3.3**, using standalone Command Line Tools. Core storage, route, helper and registration-contract sources were unchanged from the existing baseline when checked. Public records omit private configuration, paths, profile names and screenshots of working browser content.
+
+These checks do not establish fresh Gatekeeper or Automation consent, Developer ID trust/notarization, physical Intel Chrome behavior, macOS 13/14 runtime behavior, full VoiceOver coverage, multiple displays, Spaces/fullscreen or hardware sleep/wake. The historical migrated-helper FinderInfo limitation remains separate from the verified release archive. Complete the pending final-candidate rows before publication, preserving these limits.
+
+## Historical hotkey beta: 0.1.6 (12)
 
 Validated **9 September 2026**. Optional per-shortcut global hotkeys use the existing window-focus path. Settings are stored separately from legacy shortcut records. See [HOTKEYS.md](HOTKEYS.md) for use, conflict handling, privacy and remaining limits.
 

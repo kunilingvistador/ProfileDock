@@ -1,16 +1,20 @@
 # Keyboard shortcuts
 
-Available in **0.1.6 beta**. Each saved window can have one optional global hotkey. Clicking a Dock helper and pressing the hotkey use the same existing-window connection.
+Available since **0.1.6 beta**, retained in the **0.1.7 (18) candidate**. Each saved window can have one optional global hotkey. Clicking a Dock helper and pressing the hotkey use the same existing-window connection.
 
 ## Assign, change or remove
 
-1. Click **Set hotkey** on a shortcut card (Russian: **Назначить сочетание**).
+1. Click **Set hotkey** on a shortcut card (Russian: **Назначить клавиши**), or click its existing combination. The card's ellipsis menu also contains **Keyboard shortcut…** (**Сочетание клавиш…**).
 2. Click the recording field and press a supported key with at least two modifiers, including Command or Control. Example: Option–Command–1. No combinations are assigned automatically.
 3. Save. To remove a combination, choose **Remove hotkey**, then save. Cancel or Escape during recording leaves the previous saved assignment intact.
 
 The physical key remains fixed across keyboard layouts; the displayed character follows the current layout. Supported keys include letters, digits, ordinary punctuation, Space and arrows. Media keys, modifier-only combinations, Fn, Escape and Tab are not assignable. Tab navigates the editor, and Escape exits recording.
 
-Closing the manager window keeps hotkeys active. **Quit ProfileDock** stops them until the app is launched again. This version does not automatically start at login. **More options → Keyboard shortcuts enabled** pauses all saved assignments; **Retry hotkey registration** retries unavailable combinations. The app releases its registrations while the hotkey editor is open, including when the Mac wakes with that editor still open.
+Closing the manager window keeps hotkeys active. **Quit ProfileDock** stops them until the app is launched again. This version does not automatically start at login. In the toolbar's **More** menu (**Ещё**), **Keyboard shortcuts enabled** pauses all saved assignments; **Retry hotkey registration** retries unavailable combinations. The app releases its registrations while the hotkey editor is open, including when the Mac wakes with that editor still open.
+
+## Manager keyboard controls in 0.1.7
+
+When the manager window is active, **Command–F** focuses search, **Command–N** opens the new-shortcut editor and **Command–R** refreshes windows. In the card grid, Left/Right move by one card and Up/Down by one row. **Return** switches to the selected ready window or opens reconnection for a missing/ambiguous window. **Escape** closes an editor or clears search; inside hotkey recording it first exits recording. These local controls do not assign or replace global hotkeys. Commands cannot replace an already open editor; Return in the feedback text area remains text input.
 
 ## Conflicts and recovery
 
@@ -29,3 +33,5 @@ The implementation registers selected combinations through RegisterEventHotKey. 
 ## Validation scope
 
 Core tests exercise storage compatibility, unsafe input, duplicates, failed registration and failed saves, suspension, disabled assignments, partial startup conflicts, repeat suppression, stale events and removed UUIDs. Live desktop and package results for the release are recorded in [VALIDATION.md](VALIDATION.md). Hosted builds cannot establish behavior on every keyboard, Spaces/fullscreen setup, Secure Input session or physical Mac. No specific click-to-visible latency improvement is claimed without measurement.
+
+For the 0.1.7 candidate, local standalone checks passed repeat/stale-event, suspension and failed-persistence scenarios with an in-memory backend, plus separate shortcut/hotkey-file preservation. The existing installation had no global assignments before the update, so preservation there cannot prove an assigned physical hotkey works. Final-candidate CI and live input checks remain pending in the validation record; the 0.1.6 physical-keyboard result is historical.

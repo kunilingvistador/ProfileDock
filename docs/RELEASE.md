@@ -2,21 +2,29 @@
 
 The current published download is an **ad-hoc-signed, unnotarized beta**. The normal Developer ID distribution process below remains future release work. GitHub Actions builds development artifacts; it does not create a GitHub Release or publish a site.
 
+## 0.1.7 (18) candidate
+
+The next candidate is **0.1.7, build 18**, intended for the tag `v0.1.7-beta` and a universal arm64 + x86_64 ZIP. It is not yet published. The update adds a native toolbar and search, two-column shortcut cards, keyboard navigation, stable notification placement, more reliable selection/editor focus, a connection-status panel and explicit feedback sharing. Chrome timeout and interrupted-connection errors now explain the next step. These are interface and recovery changes; no new switching-speed benchmark is claimed.
+
+The controller bundle ID, `profiledock://focus/<UUID>` routes, version-1 shortcut records and separate hotkey storage remain unchanged. Existing names, images and bindings should remain in place; compatible Dock helpers do not need to be recreated. Updating is still manual: quit ProfileDock, replace the app, and open the new copy once. Donation and installation-analytics prototypes are not enabled in the release.
+
+On **22 October 2026**, local launcher compatibility passed **8 cases / 134 assertions**, the trace analyzer passed **13 tests**, and standalone core/persistence smoke checks passed. The final local universal ZIP passed CRC, version/build and both-binary architecture checks, plus strict signature verification after fresh extraction; its SHA-256 is `e88eb4b82b947aa3b18392d7f8215ee8210370da52294ca2dc7813cbcef5174b`. The installed candidate loads the four original shortcuts and zero assigned hotkeys. Final-candidate CI and live window/input checks are **pending**. See [VALIDATION.md](VALIDATION.md#ui-and-stability-beta-candidate-017-18) for the separate results and limits.
+
 ## Local build
 
 Requires macOS 13+, Apple Command Line Tools with Swift 5.9+, and Python 3. The full Xcode IDE is not needed for this SwiftPM build. Check your selected toolchain with `xcrun swift --version`.
 
 ```sh
-python3 scripts/build.py
+python3 scripts/build.py --universal --version 0.1.7 --build-number 18
 ```
 
 Outputs:
 
 - `dist/ProfileDock.app`
-- `dist/ProfileDock-0.1.5-macos-<architecture>-local.zip`
+- `dist/ProfileDock-0.1.7-macos-universal-local.zip`
 - `dist/SHA256SUMS`
 
-The default targets the current machine, signs ad-hoc, and does not contact the Apple notary service. Use `--universal` to combine arm64 and x86_64 builds. `--scratch-path` controls the SwiftPM cache; the default is outside the repository in the system temporary directory. The script only replaces an existing `dist/ProfileDock.app` if its bundle identifier belongs to this project.
+Without `--universal`, the script targets the current machine. It signs ad-hoc by default and does not contact the Apple notary service. `--scratch-path` controls the SwiftPM cache; the default is outside the repository in the system temporary directory. The script only replaces an existing `dist/ProfileDock.app` if its bundle identifier belongs to this project.
 
 Run `swift test` with a full Xcode installation selected before releasing. XCTest is unavailable in the standalone Command Line Tools environment used for the initial local build, even though that toolchain can compile the app. CI uses a macOS runner with full Xcode. End users of the packaged app need only macOS 13+ and Chrome, not these developer tools.
 
@@ -122,7 +130,7 @@ Apple requires a Developer ID Application identity, valid executable signatures,
 Install the appropriate signing identity using your own Apple developer account. Never commit it or its password. This project does not provision certificates or automatically upload builds.
 
 ```sh
-python3 scripts/build.py --universal --version 0.1.5 --build-number 11 \
+python3 scripts/build.py --universal --version 0.1.7 --build-number 18 \
   --identity 'Developer ID Application: Your Name (TEAMID)'
 ```
 
@@ -133,7 +141,7 @@ With `--identity`, the script signs the helper, enables Hardened Runtime, adds t
 Set up a `notarytool` keychain profile following Apple's documentation, using your own credentials. The example below assumes you named it `ProfileDock-notary`. Review the submission result and its log; continue only if Apple reports acceptance.
 
 ```sh
-xcrun notarytool submit dist/ProfileDock-0.1.5-macos-universal-signed.zip \
+xcrun notarytool submit dist/ProfileDock-0.1.7-macos-universal-signed.zip \
   --keychain-profile ProfileDock-notary --wait
 xcrun stapler staple dist/ProfileDock.app
 xcrun stapler validate dist/ProfileDock.app
@@ -145,9 +153,9 @@ Repackage the app after stapling, so the download includes the ticket. Use a fre
 
 ```sh
 ditto -c -k --keepParent --sequesterRsrc \
-  dist/ProfileDock.app dist/ProfileDock-0.1.5-macos-universal.zip
+  dist/ProfileDock.app dist/ProfileDock-0.1.7-macos-universal.zip
 cd dist
-shasum -a 256 ProfileDock-0.1.5-macos-universal.zip > SHA256SUMS
+shasum -a 256 ProfileDock-0.1.7-macos-universal.zip > SHA256SUMS
 ```
 
 Test the actual final ZIP downloaded through a browser on a clean Mac, including first launch, Automation consent, shortcut creation, and switching. Locally copying an app does not exercise the same Gatekeeper path as an internet download. Do not instruct users to disable Gatekeeper or remove quarantine as the normal installation procedure.

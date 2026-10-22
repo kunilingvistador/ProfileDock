@@ -101,7 +101,18 @@ No personal profiles, account names, photographs, or browser data belong in this
 
 The project uses Swift Package Manager, AppKit/SwiftUI, and Apple events. It has no browser extension or bundled Chromium runtime. The controller is `ProfileDock`; the generic Dock helper is `ProfileDockLauncher`.
 
-For interface-only QA, quit any running ProfileDock instance first, then launch a preview with sample shortcuts:
+For interface-only QA of the next UI, build the isolated local preview:
+
+```sh
+python3 scripts/preview.py
+open 'dist/preview/ProfileDock Preview.app'
+```
+
+This copy has its own bundle ID, sample shortcuts and temporary storage. It does not register the `profiledock://` URL scheme, control Chrome, enable global hotkeys or update real Dock helpers. It can be reviewed alongside the installed app. Its **Preview** menu changes only sample data, the preview window's appearance and size. QA commands can simulate an empty library, Chrome unavailability and a timeout without controlling Chrome. The native toolbar includes search (⌘F) and a new shortcut command (⌘N). In the two-column card grid, use arrow keys to select and Return to switch or reconnect a missing window. Each card keeps its picture, window status, hotkey and actions together; the final tile creates a new shortcut. Escape clears a search or closes a sheet. Seven sample shortcuts are included to review the compact layout. Notices stay in a fixed-height footer. Search and selection are reconciled after renaming or removing sample shortcuts; keyboard focus returns after sheets close.
+
+The local prototype includes project support, a feedback draft with optional technical details, connection status and a statistics-consent mockup. Payments, an account-free feedback inbox and usage reporting are not connected. The statistics switch is session-only and sends nothing. Feedback can be copied locally; opening GitHub does not submit it.
+
+The existing demo flags are also available on a normal development build:
 
 ```sh
 open dist/ProfileDock.app --args --demo --demo-dark --demo-compact
