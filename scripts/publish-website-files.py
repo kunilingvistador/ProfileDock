@@ -37,6 +37,9 @@ pages = {
     for url in seo.PAGES.values()
 }
 public_names = {entry.name for entry in (repo / 'website/public').iterdir()}
+conflicting_aliases = sorted(public_names.intersection(seo.SITEMAP_ALIASES))
+if conflicting_aliases:
+    raise SystemExit(f'Generated sitemap aliases must not be editable public assets: {conflicting_aliases}')
 if any(name.endswith('.md') for name in public_names):
     raise SystemExit('Public assets must not replace the Markdown project documentation in docs/.')
 missing_public = sorted(name for name in public_names if not (source / name).exists())
@@ -44,7 +47,7 @@ if missing_public:
     raise SystemExit(f'Rebuild the website: these public assets are missing from the export: {missing_public}')
 owned = {
     '_next', 'en', 'guides', 'en.html', 'guides.html', 'en.rsc', 'index.html', 'index.rsc', '404.html',
-    'vinext-client-entry-manifest.json', *public_names,
+    'vinext-client-entry-manifest.json', *public_names, *seo.SITEMAP_ALIASES,
 }
 dest.mkdir(parents=True, exist_ok=True)
 for name in sorted(owned):
@@ -58,7 +61,7 @@ for name in sorted(owned):
         shutil.rmtree(target)
     elif target.exists():
         target.unlink()
-    if name in {'en', 'guides', 'en.html', 'guides.html', 'index.html'}:
+    if name in {'en', 'guides', 'en.html', 'guides.html', 'index.html'} or name in seo.SITEMAP_ALIASES:
         continue
     if original.is_dir():
         shutil.copytree(original, target)
@@ -69,6 +72,9 @@ for relative, original in pages.items():
     target = dest / relative / 'index.html'
     target.parent.mkdir(parents=True, exist_ok=True)
     shutil.copy2(original, target)
+
+for name in seo.SITEMAP_ALIASES:
+    shutil.copy2(source / 'sitemap.xml', dest / name)
 
 (dest / '.nojekyll').write_text('', encoding='utf-8')
 subprocess.run([sys.executable, str(validator), '--root', str(dest)], check=True)

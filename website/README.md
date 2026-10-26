@@ -10,6 +10,8 @@ To refresh the local Pages copy, run `python3 ../scripts/publish-website-files.p
 
 CI runs the same copy/validation in a temporary directory. See [the SEO notes](../docs/SEO.md) for scope, primary references and remaining live checks.
 
+The Pages publisher also generates `sitemap-pages.xml` as a byte-for-byte alias of `sitemap.xml` for one controlled Search Console fetch diagnostic. Edit only `public/sitemap.xml`; do not add a separately maintained alias under `public/`. The original address, canonical URLs and modification dates stay in place. The validator checks an alias when present, while the initial Vinext export need not contain it. An alternative address is a diagnostic, not a confirmed fix or a promise of crawling, indexing or traffic; record Google's actual processing result following its [sitemap troubleshooting guidance](https://support.google.com/webmasters/answer/7451001?hl=en).
+
 ## Release content checks
 
 Keep instructions aligned with the released manager: add uses + in the native toolbar; names, pictures, window connections and Dock export live in each card’s ⋯ menu. Manager keys (⌘F, arrow keys, Return) are distinct from optional global hotkeys. Home and overview images use sample data, never a person’s account names or real window titles. Current overview captures and earlier editor captures are identified separately in the guides.
