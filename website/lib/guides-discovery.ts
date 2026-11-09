@@ -1,4 +1,5 @@
 import type { Guide } from "./guides";
+import { releaseURL, releaseVersion } from "./release";
 
 export const accountsRU: Guide = {
   slug: "chrome-profiles-vs-google-accounts",
@@ -95,6 +96,7 @@ export const accountsEN: Guide = {
 export const dockRU: Guide = {
   slug: "chrome-profiles-one-dock-icon-mac",
   published: "2026-10-08",
+  modified: "2026-11-09",
   title: "Почему у профилей Chrome на Mac один значок в Dock",
   shortTitle: "Несколько профилей, один значок Chrome",
   description: "Профили Chrome на Mac остаются за одним значком приложения. Как выбрать нужное окно встроенными средствами или добавить отдельные ярлыки в Dock.",
@@ -115,7 +117,7 @@ export const dockRU: Guide = {
     { id: "dedicated", title: "Когда отдельный значок удобнее", paragraphs: [
       "Возьмите две постоянные задачи: рабочая почта и личный браузер. Если оба окна весь день стоят друг за другом, выбираемая заранее картинка сокращает поиск. Это особенно заметно, когда в каждом окне похожая почта, календарь или стартовая страница.",
       "Ярлык стоит называть по задаче, если в одном профиле несколько окон: «Работа · почта» и «Работа · документы». Так две похожие картинки не обещают один и тот же результат. Для первого опыта достаточно двух часто используемых окон.",
-      "ProfileDock 0.1.6 beta возвращает одно выбранное существующее окно. Он не выбирает все окна профиля и не создаёт пустую замену при потере связи. Это важно, если вам нужен запуск закрытого профиля, а не возврат к постоянно открытому окну.",
+      "ProfileDock возвращает одно выбранное существующее окно. Он не выбирает все окна профиля и не создаёт пустую замену при потере связи. Это важно, если вам нужен запуск закрытого профиля, а не возврат к постоянно открытому окну.",
     ] },
     { id: "try", title: "Проверьте один ярлык перед настройкой остальных", steps: [
       { title: "Откройте нужное обычное окно", body: "В Chrome выберите профиль и оставьте в нём знакомую страницу. Если у профиля несколько окон, заранее решите, какое хотите возвращать. Инкогнито не подходит для постоянной связи." },
@@ -128,7 +130,7 @@ export const dockRU: Guide = {
       "Если у вас уже есть скрипт или Automator-ярлык, проверьте его результат: вернулись ли ваши вкладки или появилось новое окно? ProfileDock полезен именно для связи с выбранным существующим окном. Он не переносит аккаунты и не требует повторного входа ради создания ярлыка.",
     ] },
     { id: "after-close", title: "Закрытие окна, перезапуск и обновление", paragraphs: [
-      "После закрытия связанного окна может понадобиться «Переподключить окно» в меню ярлыка. Откройте нужное окно, проверьте его и сохраните новую связь. Имя, картинку, сочетание клавиш и существующий значок Dock можно сохранить.",
+      "Если связанное окно закрыли, откройте нужное окно Chrome. В меню ⋯ карточки ярлыка выберите «Привязать другое окно…». Выберите нужное окно в списке, проверьте его кнопкой «Показать окно» и нажмите «Привязать окно». После этого тем же значком Dock и сочетанием клавиш можно возвращаться к выбранному окну.",
       "После обновления ProfileDock один раз откройте новую копию приложения, чтобы зарегистрировать её местоположение. Полноэкранный режим, несколько Spaces, Stage Manager и мониторы всё ещё требуют более широких проверок. Для таких конфигураций бета не обещает одинаковое поведение во всех случаях.",
     ], links: [{ title: "Если ярлык не находит прежнее окно", slug: "chrome-shortcut-existing-window" }] },
   ],
@@ -136,13 +138,14 @@ export const dockRU: Guide = {
     { title: "Apple: использование Dock на Mac", href: "https://support.apple.com/ru-ru/guide/mac-help/mh35859/mac" },
     { title: "Apple: открытые окна в Mission Control", href: "https://support.apple.com/ru-ru/guide/mac-help/mh35798/mac" },
     { title: "Google: переключение профилей Chrome", href: "https://support.google.com/chrome/answer/2364824?hl=ru" },
-    { title: "ProfileDock 0.1.6 beta: загрузка и ограничения", href: "https://github.com/kunilingvistador/ProfileDock/releases/tag/v0.1.6-beta" },
+    { title: `ProfileDock ${releaseVersion}: загрузка и ограничения`, href: releaseURL },
   ],
 };
 
 export const dockEN: Guide = {
   slug: "chrome-profiles-one-dock-icon-mac",
   published: "2026-10-08",
+  modified: "2026-11-09",
   title: "Why Chrome Profiles Share One Dock Icon on Mac",
   shortTitle: "Several profiles, one Chrome icon",
   description: "Multiple Chrome profiles on Mac still use one browser app icon. Find the right window with built-in tools or add separate shortcuts to your Dock.",
@@ -163,7 +166,7 @@ export const dockEN: Guide = {
     { id: "dedicated", title: "When a dedicated icon helps", paragraphs: [
       "Consider two everyday tasks: work mail and personal browsing. If their windows spend the day stacked behind each other, a picture chosen in advance makes the target easier to find. It is especially helpful when both windows show similar inboxes, calendars or start pages.",
       "Name shortcuts by task when one profile has several windows: Work · Mail and Work · Documents. Two similar pictures should not suggest the same destination. Start with just two windows you return to frequently.",
-      "ProfileDock 0.1.6 beta returns one selected existing window. It does not select every window in a profile or create a blank replacement when the connection is lost. Consider that distinction if you want to launch a closed profile rather than return to a window you keep open.",
+      "ProfileDock returns one selected existing window. It does not select every window in a profile or create a blank replacement when the connection is lost. Consider that distinction if you want to launch a closed profile rather than return to a window you keep open.",
     ] },
     { id: "try", title: "Try one shortcut before setting up the rest", steps: [
       { title: "Open the intended ordinary window", body: "Select the profile in Chrome and keep a familiar page open. If that profile has several windows, decide which one you want to return to. Incognito is unsuitable for a persistent connection." },
@@ -176,7 +179,7 @@ export const dockEN: Guide = {
       "If you already have a script or Automator shortcut, check its result: did your tabs return, or did a new window appear? ProfileDock serves the particular case of connecting to one existing window. Creating a shortcut does not move your accounts or require signing into them again.",
     ] },
     { id: "after-close", title: "Closing a window, restarting and updating", paragraphs: [
-      "After closing a connected window, you may need Reconnect window in the shortcut menu. Open the intended replacement, verify it and save the new connection. You can keep the shortcut’s name, image, key combination and existing Dock icon.",
+      "If the connected window is closed, open the intended Chrome window. Open the shortcut card’s ⋯ menu and select “Choose another window…”. Select the window from the list, check it with “Show window”, and click “Link window”. You can use the same Dock icon and hotkey to return to the newly connected window.",
       "After updating ProfileDock, open the new copy once to register its location. Fullscreen, multiple Spaces, Stage Manager and multiple displays still need broader testing. The beta does not promise identical behavior across all those setups.",
     ], links: [{ title: "If a shortcut cannot find its previous window", slug: "chrome-shortcut-existing-window" }] },
   ],
@@ -184,6 +187,6 @@ export const dockEN: Guide = {
     { title: "Apple: use the Dock on Mac", href: "https://support.apple.com/guide/mac-help/mh35859/mac" },
     { title: "Apple: open windows in Mission Control", href: "https://support.apple.com/guide/mac-help/mh35798/mac" },
     { title: "Google: switch Chrome profiles", href: "https://support.google.com/chrome/answer/2364824?hl=en" },
-    { title: "ProfileDock 0.1.6 beta: download and limitations", href: "https://github.com/kunilingvistador/ProfileDock/releases/tag/v0.1.6-beta" },
+    { title: `ProfileDock ${releaseVersion}: download and limitations`, href: releaseURL },
   ],
 };

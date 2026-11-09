@@ -2,7 +2,7 @@ import type { Guide } from "./guides";
 
 export const workRU: Guide = {
   slug: "separate-work-personal-chrome-profiles-mac",
-  modified: "2026-10-05",
+  modified: "2026-11-09",
   title: "Как разделить рабочий и личный Chrome на Mac",
   shortTitle: "Работа и личное — в разных профилях",
   description: "Как настроить рабочий и личный профили Chrome на Mac, не путать аккаунты и возвращаться к нужному окну через меню, Dock или сочетание клавиш.",
@@ -33,7 +33,7 @@ export const workRU: Guide = {
     ] },
     { id: "daily-check", title: "Что проверить на следующий день", paragraphs: [
       "После обычного рабочего дня станет понятно, хватает ли двух окон. Не создавайте дубликаты ярлыков только потому, что открылась ещё одна вкладка. Если в рабочем профиле нужны два самостоятельных окна, назовите их по задачам — например, «Работа · почта» и «Работа · документы».",
-      "Если связанное окно закрыли и ярлык больше его не находит, откройте нужное окно Chrome и выберите «Переподключить окно» в меню ярлыка. В ProfileDock 0.1.6 такой ярлык не создаёт пустое окно автоматически. Имя, картинку и хоткей можно сохранить при переподключении.",
+      "Если ярлык потерял связь, сначала откройте нужное окно Chrome. В меню ⋯ карточки ярлыка выберите «Привязать другое окно…». Выберите нужное окно в списке, проверьте его кнопкой «Показать окно» и нажмите «Привязать окно». Так можно продолжить пользоваться тем же ярлыком с его именем, картинкой и хоткеем.",
       "Профили удобны для порядка, но не защищают данные от другого человека, который пользуется той же учётной записью Mac: он может переключить профиль. Для совместного компьютера рассмотрите отдельные учётные записи macOS. На рабочем Mac сначала проверьте правила вашей организации.",
     ] },
   ],
@@ -46,7 +46,7 @@ export const workRU: Guide = {
 
 export const workEN: Guide = {
   slug: "separate-work-personal-chrome-profiles-mac",
-  modified: "2026-10-05",
+  modified: "2026-11-09",
   title: "How to Set Up Work and Personal Chrome Profiles on Mac",
   shortTitle: "Keep work and personal browsing separate",
   description: "Create separate Chrome profiles on Mac in four steps. Keep work and personal accounts apart, then switch with Chrome’s menu, Dock icons or keyboard shortcuts.",
@@ -77,7 +77,7 @@ export const workEN: Guide = {
     ] },
     { id: "daily-check", title: "Check your setup after a normal working day", paragraphs: [
       "A day of ordinary use will show whether two windows are enough. Do not duplicate a shortcut just because you opened another tab. If your work profile needs two independent windows, name them by task: Work · Mail and Work · Documents, for example.",
-      "If you close the connected window and its shortcut can no longer find it, open the intended Chrome window and use Reconnect window in the shortcut menu. ProfileDock 0.1.6 does not automatically create a blank replacement. Reconnecting can keep the shortcut’s name, image and hotkey.",
+      "If the shortcut loses its connection, open the intended Chrome window first. Open the shortcut card’s ⋯ menu and select “Choose another window…”. Select the window from the list, check it with “Show window”, and click “Link window” to save the connection. You can keep using the shortcut with its name, picture and hotkey.",
       "Profiles help with organization, but do not protect your browsing from another person using the same Mac login: they can switch profiles. Consider separate macOS user accounts for a shared computer. On a work-managed Mac, check your organization’s rules first.",
     ] },
   ],
