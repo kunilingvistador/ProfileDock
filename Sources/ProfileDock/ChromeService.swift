@@ -7,7 +7,7 @@ struct ChromeError: LocalizedError {
     var errorDescription: String? {
         switch code {
         case -1743: return L("Allow ProfileDock to control Google Chrome in System Settings → Privacy & Security → Automation.", "Разрешите ProfileDock управлять Google Chrome: Системные настройки → Конфиденциальность и безопасность → Автоматизация.")
-        case -1712: return L("Chrome did not respond in time. Check for an open dialog in Chrome, then try switching again.", "Chrome не ответил вовремя. Проверьте, нет ли в Chrome открытого диалогового окна, затем повторите переключение.")
+        case -1712: return L("Chrome did not respond in time. Check for an open dialog in Chrome, then try again.", "Chrome не ответил вовремя. Проверьте, нет ли в Chrome открытого диалогового окна, затем повторите попытку.")
         case -609: return L("The connection to Chrome was interrupted. Wait until Chrome is ready, then try again.", "Связь с Chrome прервалась. Дождитесь, пока Chrome будет готов, и повторите действие.")
         case -600: return L("Open Chrome and your existing work window, then refresh.", "Откройте Chrome и своё рабочее окно, затем обновите список.")
         case -27001: return L("The linked window is not open. Restore it in Chrome or reconnect this shortcut to an existing window.", "Связанное окно не открыто. Восстановите его в Chrome или привяжите ярлык к существующему окну.")
@@ -16,6 +16,15 @@ struct ChromeError: LocalizedError {
         default: return detail
         }
     }
+}
+
+/// Keeps window-state recovery testable without sending Apple events to Chrome.
+protocol ChromeWindowControlling: Sendable {
+    var isRunning: Bool { get }
+    func windows() async throws -> [BrowserWindow]
+    func rename(windowID: String, to name: String) async throws
+    @MainActor func focus(name: String) async throws
+    @MainActor func preview(windowID: String) async throws
 }
 
 /// Local diagnostic timings contain no window names, IDs, titles, or URLs.
@@ -34,7 +43,7 @@ struct ChromePerformanceSample: Sendable {
 /// In-process Apple events keep Automation permission attached to this controller.
 /// The compiled script and diagnostic buffer are accessed only on the serial queue.
 /// The request gate independently synchronizes publications from the main actor.
-final class ChromeService: @unchecked Sendable {
+final class ChromeService: ChromeWindowControlling, @unchecked Sendable {
     static let bundleID = "com.google.Chrome"
     private let queue = DispatchQueue(label: "ProfileDock.ChromeAppleEvents", qos: .userInitiated)
     private let focusRequests = FocusRequestGate()

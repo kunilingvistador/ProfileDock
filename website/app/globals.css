@@ -698,6 +698,7 @@ h1 em {
 .install-note > svg {
   color: #8b80ab;
   margin-top: 3px;
+  flex-shrink: 0;
 }
 .install-note h3 {
   font-size: 14px;
@@ -714,6 +715,12 @@ h1 em {
 .install-note .text-link {
   font-size: 12px;
 }
+.install-note, .guide-download { scroll-margin-top: 24px; }
+.install-instructions { color: var(--muted); font-size: 14px; line-height: 1.6; }
+.install-instructions ol { list-style: decimal; padding-inline-start: 1.45em; margin: 12px 0; }
+.install-instructions li + li { margin-top: 5px; }
+.install-instructions p { font-size: 13px; }
+.install-instructions a { text-decoration: underline; text-underline-offset: 3px; }
 .faq-section {
   display: grid;
   grid-template-columns: 0.7fr 1.4fr;
@@ -1427,6 +1434,7 @@ footer p {
 .guide-article-heading { max-width: 870px; margin-bottom: 48px; }
 .guide-article-heading h1 { font-size: clamp(34px, 4vw, 51px); line-height: 1.13; letter-spacing: -1.9px; margin: 19px 0 23px; }
 .guide-lead { max-width: 760px; font-size: 18px; color: var(--muted); line-height: 1.65; }
+.guide-install-jump { margin-top: 14px; }
 .guide-byline { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 24px; color: var(--muted); font-size: 11px; }
 .guide-byline a:hover { color: var(--accent-dark); text-decoration: underline; }
 .guide-byline span { padding-left: 18px; border-left: 1px solid var(--line); }
@@ -1477,7 +1485,7 @@ footer p {
 .guide-related > .text-link { margin-top: 20px; }
 .guide-download { display: flex; align-items: center; justify-content: space-between; gap: 40px; padding: 38px; background: var(--lavender); border-radius: 22px; margin: 72px 0 55px; }
 .guide-download h2 { font-size: 32px; letter-spacing: -1px; }
-.guide-download > div > p { font-size: 14px; color: var(--muted); margin-top: 14px; max-width: 430px; }
+.guide-download .install-instructions { max-width: 620px; }
 .guide-download-action { width: 280px; flex-shrink: 0; }
 .guide-download-action .button { width: 100%; }
 .guide-download .guide-download-action p { font-size: 11px; text-align: center; line-height: 1.6; margin-top: 12px; }

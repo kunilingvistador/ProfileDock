@@ -4,7 +4,7 @@
 
 A small, open-source macOS utility for people who keep several Chrome profiles open. Give each working window a recognizable name and icon, then bring it forward with one click.
 
-[Download the beta](https://github.com/kunilingvistador/ProfileDock/releases) · [Website](https://kunilingvistador.github.io/ProfileDock/)
+[Download 0.1.8 beta](https://github.com/kunilingvistador/ProfileDock/releases/tag/v0.1.8-beta) · [Installation](https://kunilingvistador.github.io/ProfileDock/en/#install) · [Website](https://kunilingvistador.github.io/ProfileDock/)
 
 [Setup guide](https://kunilingvistador.github.io/ProfileDock/en/guides/chrome-profile-shortcuts-mac-dock/) · [Reconnect an existing window](https://kunilingvistador.github.io/ProfileDock/en/guides/chrome-shortcut-existing-window/) · [Interactive Dock demonstration](https://kunilingvistador.github.io/ProfileDock/en/#hero-title)
 
@@ -28,7 +28,8 @@ A small, open-source macOS utility for people who keep several Chrome profiles o
 - Keeps Chrome control in one app, so each shortcut does not need its own Automation permission.
 - Refreshes existing compatible Dock helpers when you open ProfileDock after an app update.
 - Keeps shortcut pictures, status and hotkeys together in compact cards, with native toolbar search and keyboard navigation.
-- Shows connection status and lets you prepare feedback without sending it automatically.
+- Shows Chrome connection errors and lets you retry a failed window check from the status panel.
+- Lets you prepare feedback without sending it automatically.
 
 The switching command does not open windows or tabs, change the selected tab, or resize/reposition windows. Native focus behavior still needs broader testing across macOS configurations; see [known limits](#known-limits).
 
@@ -123,6 +124,8 @@ open dist/ProfileDock.app --args --demo --demo-dark --demo-compact
 `--demo-dark` gives the preview window a dark appearance; `--demo-compact` starts it at the minimum 860 × 600 window size. Both flags require `--demo` and can be used independently. They do not change system preferences or control Chrome. Quit the preview with ⌘Q when finished.
 
 Run `swift test` for core model and parsing checks with a full Xcode installation selected: the XCTest framework is not included in the standalone Command Line Tools environment used for this project's initial build. The GitHub macOS runner has Xcode for these tests. Real window activation must also be checked on macOS: unit tests cannot verify Dock behavior or preservation of other windows. See the [architecture and integration checklist](docs/ARCHITECTURE.md).
+
+Run `python3 Tests/ProfileDockAppSmoke/run.py` with the Command Line Tools to check the window status and recovery paths against a simulated Chrome connection, without using real profiles or app settings.
 
 The original app icon is drawn with AppKit by `scripts/make-app-icon.swift`. The source and that artwork are covered by the [MIT license](LICENSE). Chrome and other product names belong to their respective owners; this is an independent project.
 

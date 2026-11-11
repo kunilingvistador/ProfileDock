@@ -8,6 +8,8 @@ import ProfileDockCore
     @Published var profiles: [BrowserProfile] = []
     @Published var windows: [BrowserWindow] = []
     @Published var hasWindowSnapshot = false
+    @Published private(set) var windowRefreshError: String?
+    @Published private(set) var isRefreshingWindows = false
     @Published var isBusy = false
     @Published var errorMessage: String?
     @Published var notice: String?
@@ -35,8 +37,10 @@ import ProfileDockCore
     private var recordingHotKey = false
     private var hotKeysSleeping = false
 
-    let service = ChromeService()
+    let service: any ChromeWindowControlling
     let store: ShortcutStore
+    private let preferences: UserDefaults
+    private let profileRoot: URL
     let demoMode: Bool
     var showsSupportPrototype: Bool { demoMode && !CommandLine.arguments.contains("--demo-production-ui") }
     var didChange: (() -> Void)?
@@ -51,12 +55,17 @@ import ProfileDockCore
     }
     private var iconCache: [UUID: CachedIcon] = [:]
 
-    init() {
+    init(service: any ChromeWindowControlling = ChromeService(), dataDirectory: URL? = nil,
+         preferences: UserDefaults = .standard, profileRoot: URL? = nil) {
+        self.service = service
+        self.preferences = preferences
+        self.profileRoot = profileRoot ?? FileManager.default.homeDirectoryForCurrentUser
+            .appendingPathComponent("Library/Application Support/Google/Chrome")
         demoMode = CommandLine.arguments.contains("--demo") || Bundle.main.bundleIdentifier == "io.github.profiledock.preview"
         let base = demoMode
             ? FileManager.default.temporaryDirectory.appendingPathComponent("ProfileDock-Preview-\(ProcessInfo.processInfo.processIdentifier)")
             : FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("ProfileDock")
-        store = ShortcutStore(directory: base)
+        store = ShortcutStore(directory: dataDirectory ?? base)
         if demoMode {
             shortcuts = ["Studio", "Personal", "Research", "Design", "Finance", "Sandbox", "Archive"].map { Shortcut(name: $0, windowName: $0) }
             windows = shortcuts.filter { $0.name != "Research" }.enumerated().map { BrowserWindow(id: String($0.offset), givenName: $0.element.windowName, title: $0.element.name, minimized: false) }
@@ -72,7 +81,7 @@ import ProfileDockCore
             do { shortcuts = try store.load() }
             catch { writable = false; errorMessage = error.localizedDescription }
             chromeRunning = service.isRunning
-            permissionGranted = UserDefaults.standard.bool(forKey: "ChromePermissionGranted")
+            permissionGranted = preferences.bool(forKey: "ChromePermissionGranted")
         }
         selectedShortcutID = shortcuts.first?.id
     }
@@ -168,6 +177,24 @@ import ProfileDockCore
         }
     }
 
+    // Cached windows remain usable for switching after a transient read failure.
+    // A successful focus alone does not revalidate the complete window list.
+    var hasFreshWindowSnapshot: Bool {
+        hasWindowSnapshot && windowRefreshError == nil && !isRefreshingWindows
+    }
+
+    private func acceptWindowSnapshot(_ fresh: [BrowserWindow]) {
+        windows = fresh
+        hasWindowSnapshot = true
+        windowRefreshError = nil
+    }
+
+    /// A refresh may have started before the status panel opened. Once its
+    /// explanation is visible there, do not repeat it as an alert on dismissal.
+    func acknowledgeWindowRefreshError() {
+        if let windowRefreshError, errorMessage == windowRefreshError { errorMessage = nil }
+    }
+
     func icon(for shortcut: Shortcut) -> NSImage? {
         if let cached = iconCache[shortcut.id], cached.name == shortcut.name, cached.iconFile == shortcut.iconFile {
             return cached.image
@@ -225,22 +252,29 @@ import ProfileDockCore
         }
     }
 
-    func refresh() async {
+    func refresh(presentErrorGlobally: Bool = true) async {
         guard !isBusy, !demoMode, !Task.isCancelled else { return }
-        isBusy = true; errorMessage = nil
-        defer { isBusy = false; didChange?() }
+        isBusy = true; isRefreshingWindows = true; errorMessage = nil
+        defer { isBusy = false; isRefreshingWindows = false; didChange?() }
         loadProfiles(); chromeRunning = service.isRunning
-        guard chromeRunning else { windows = []; hasWindowSnapshot = false; return }
+        guard chromeRunning else {
+            let error = ChromeError(code: -600, detail: "Chrome is not running.")
+            windowRefreshError = error.localizedDescription
+            // Opening the manager with Chrome closed should remain quiet. The
+            // connection controls and status panel explain how to reconnect.
+            handle(error, presentErrorGlobally: false)
+            return
+        }
         do {
             let fresh = try await service.windows()
             guard !Task.isCancelled else { return }
-            windows = fresh
-            hasWindowSnapshot = true
+            acceptWindowSnapshot(fresh)
             permissionGranted = true
-            UserDefaults.standard.set(true, forKey: "ChromePermissionGranted")
+            preferences.set(true, forKey: "ChromePermissionGranted")
         } catch {
-            guard !Task.isCancelled else { return }
-            handle(error)
+            guard !Task.isCancelled, !(error is CancellationError) else { return }
+            windowRefreshError = error.localizedDescription
+            handle(error, presentErrorGlobally: presentErrorGlobally)
         }
     }
 
@@ -268,7 +302,7 @@ import ProfileDockCore
             selectedShortcutID = new.id
             if !demoMode {
                 permissionGranted = true; chromeRunning = true
-                if let fresh = try? await service.windows() { windows = fresh; hasWindowSnapshot = true }
+                if let fresh = try? await service.windows() { acceptWindowSnapshot(fresh) }
             }
             notice = L("Shortcut added. You can now choose its image and create a Dock shortcut.", "Ярлык добавлен. Теперь можно выбрать картинку и создать значок для Dock.")
             didChange?(); return true
@@ -297,7 +331,7 @@ import ProfileDockCore
             try await service.focus(name: shortcut.windowName)
             guard focusRequest == request else { return }
             permissionGranted = true; chromeRunning = true
-            UserDefaults.standard.set(true, forKey: "ChromePermissionGranted")
+            preferences.set(true, forKey: "ChromePermissionGranted")
         } catch {
             if focusRequest == request {
                 if let failure = error as? ChromeError, [-27001, -27002].contains(failure.code) {
@@ -307,7 +341,7 @@ import ProfileDockCore
                     // A cold background launch has no initial window snapshot.
                     // Fetch recovery choices on failure, never after success.
                     if let fresh = try? await service.windows(), focusRequest == request {
-                        windows = fresh; hasWindowSnapshot = true
+                        acceptWindowSnapshot(fresh)
                     }
                 }
                 if focusRequest == request {
@@ -343,7 +377,7 @@ import ProfileDockCore
                 if !demoMode { try? await service.rename(windowID: window.id, to: window.givenName) }
                 throw error
             }
-            if !demoMode, let fresh = try? await service.windows() { windows = fresh; hasWindowSnapshot = true }
+            if !demoMode, let fresh = try? await service.windows() { acceptWindowSnapshot(fresh) }
             notice = L("Window reconnected. Your existing Dock shortcut uses the new link.", "Окно перепривязано. Существующий ярлык в Dock использует новую связь.")
         } catch { handle(error) }
     }
@@ -497,7 +531,7 @@ import ProfileDockCore
     }
 
     private func loadProfiles() {
-        let root = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Library/Application Support/Google/Chrome")
+        let root = profileRoot
         guard let data = try? Data(contentsOf: root.appendingPathComponent("Local State")) else { profiles = []; return }
         profiles = (try? ChromeProfileDiscovery.decode(localState: data, root: root)) ?? []
     }
@@ -537,13 +571,13 @@ import ProfileDockCore
         guard !demoMode, let image = icon(for: shortcut) else { return }
         try LauncherMaintenance.updateAppearance(of: shortcut, image: image, store: store, controllerURL: Bundle.main.bundleURL)
     }
-    private func handle(_ error: Error) {
+    private func handle(_ error: Error, presentErrorGlobally: Bool = true) {
         if error is CancellationError { return }
         if let chrome = error as? ChromeError {
-            if chrome.code == -1743 { permissionGranted = false; UserDefaults.standard.set(false, forKey: "ChromePermissionGranted") }
+            if chrome.code == -1743 { permissionGranted = false; preferences.set(false, forKey: "ChromePermissionGranted") }
             if chrome.code == -600 { chromeRunning = false; windows = []; hasWindowSnapshot = false }
         }
-        errorMessage = error.localizedDescription
+        if presentErrorGlobally { errorMessage = error.localizedDescription }
     }
 }
 

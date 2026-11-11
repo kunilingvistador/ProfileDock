@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { ArrowRight, ArrowUpRight, BookOpen, Check, Download, Keyboard, LifeBuoy, ShieldCheck, BriefcaseBusiness, UserRound } from "lucide-react";
 import { guideCopy, guideMetadata, guidePath, guides, guideSlugs, type Guide, type GuideImage, type GuideSlug } from "@/lib/guides";
 import { guideDataFor, languageURLs, releaseURL, repositoryURL, serializeJSONLD, type SiteLanguage } from "@/lib/seo";
+import InstallInstructions, { installCopy } from "./InstallInstructions";
 
 function GuideShell({ language, slug, children }: { language: SiteLanguage; slug?: GuideSlug; children: ReactNode }) {
   const t = guideCopy[language];
@@ -36,12 +37,15 @@ function GuideShell({ language, slug, children }: { language: SiteLanguage; slug
         <h2>{t.allGuides}</h2>
         <ul>{guideSlugs.filter(item => item !== slug).map(item => <li key={item}><a href={guidePath(language, item)}>{guides[language][item].shortTitle}</a></li>)}</ul>
       </nav>}
-      <section className="guide-download" aria-labelledby="guide-download-title">
-        <div><h2 id="guide-download-title">{t.ctaTitle}</h2><p>{t.ctaBody}</p></div>
+      <section id="install-profiledock" className="guide-download" aria-labelledby="guide-download-title" tabIndex={-1}>
+        <div>
+          <h2 id="guide-download-title">{installCopy[language].title}</h2>
+          <InstallInstructions language={language} />
+        </div>
         <div className="guide-download-action">
           <a className="button button-primary" href={downloadURL}><Download size={17} aria-hidden="true" />{t.download}</a>
           <p>ZIP · {releaseVersion} · macOS 13+ · Apple Silicon / Intel</p>
-          <p>{t.beta} <a href={releaseURL}>{language === "ru" ? "Примечания к выпуску" : "Release notes"}</a></p>
+          <p><a href={releaseURL}>{language === "ru" ? "Примечания к выпуску" : "Release notes"}</a></p>
         </div>
       </section>
     </main>
@@ -131,6 +135,7 @@ export function GuideArticle({ language, slug }: { language: SiteLanguage; slug:
         <p className="eyebrow">{guide.category}</p>
         <h1>{guide.title}</h1>
         <p className="guide-lead">{guide.summary}</p>
+        <a className="text-link guide-install-jump" href="#install-profiledock">{installCopy[language].jump}<Download size={15} aria-hidden="true" /></a>
         <div className="guide-byline"><a href={repositoryURL}>{language === "ru" ? "Проект ProfileDock" : "The ProfileDock project"}</a><time dateTime={articleDate}>{dateLabel}</time><span>{t.version}</span></div>
       </header>
       <div className="guide-reading-layout">
