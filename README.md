@@ -124,6 +124,8 @@ open dist/ProfileDock.app --args --demo --demo-dark --demo-compact
 
 Run `swift test` for core model and parsing checks with a full Xcode installation selected: the XCTest framework is not included in the standalone Command Line Tools environment used for this project's initial build. The GitHub macOS runner has Xcode for these tests. Real window activation must also be checked on macOS: unit tests cannot verify Dock behavior or preservation of other windows. See the [architecture and integration checklist](docs/ARCHITECTURE.md).
 
+Run `python3 Tests/ProfileDockAppSmoke/run.py` with the Command Line Tools to check the window status and recovery paths against a simulated Chrome connection, without using real profiles or app settings.
+
 The original app icon is drawn with AppKit by `scripts/make-app-icon.swift`. The source and that artwork are covered by the [MIT license](LICENSE). Chrome and other product names belong to their respective owners; this is an independent project.
 
 ## По-русски

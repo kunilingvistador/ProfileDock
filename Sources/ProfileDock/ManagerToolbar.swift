@@ -151,7 +151,7 @@ final class ManagerToolbarController: NSObject, NSToolbarDelegate, NSSearchField
 
     func menuNeedsUpdate(_ menu: NSMenu) { update() }
     private func update() {
-        let connected = model.chromeRunning && model.permissionGranted && model.hasWindowSnapshot
+        let connected = model.chromeRunning && model.permissionGranted && model.hasFreshWindowSnapshot
         statusItem?.image = NSImage(systemSymbolName: connected ? "checkmark.circle" : "exclamationmark.circle",
                                    accessibilityDescription: L("Check connection status", "Проверить состояние подключения"))
         statusItem?.toolTip = connected

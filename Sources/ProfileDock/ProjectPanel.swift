@@ -76,10 +76,23 @@ struct ProjectPanel: View {
     }
     private var readyCount: Int { model.shortcuts.filter { model.status(for: $0) == .ready }.count }
     private var needsAttention: [Shortcut] {
-        model.shortcuts.filter { [.missing, .ambiguous].contains(model.status(for: $0)) }
+        // A failed read is a connection problem, not evidence to relink windows.
+        model.hasFreshWindowSnapshot
+            ? model.shortcuts.filter { [.missing, .ambiguous].contains(model.status(for: $0)) } : []
     }
-    private var connectionReady: Bool { model.chromeRunning && model.permissionGranted && model.hasWindowSnapshot }
+    private var connectionReady: Bool { model.chromeRunning && model.permissionGranted && model.hasFreshWindowSnapshot }
     private var healthy: Bool { connectionReady && needsAttention.isEmpty && model.hotKeyFailures.isEmpty && model.hotKeyStorageError == nil }
+    private var windowListDetail: String {
+        if model.isRefreshingWindows { return L("Checking the window list…", "Проверяем список окон…") }
+        if model.windowRefreshError != nil {
+            return model.hasWindowSnapshot
+                ? L("Previous window list · current state not verified", "Предыдущий список окон · текущее состояние не проверено")
+                : L("Window list unavailable · retry the check", "Список окон недоступен · повторите проверку")
+        }
+        return model.hasWindowSnapshot
+            ? L("\(readyCount) of \(model.shortcuts.count) ready to switch", "Готовы к переключению: \(readyCount) из \(model.shortcuts.count)")
+            : L("Refresh the window list to check", "Обновите список окон для проверки")
+    }
     private var diagnosticText: String {
         let os = ProcessInfo.processInfo.operatingSystemVersion
         // Explicit allowlist. No profile, account, window title, shortcut UUID,
@@ -131,7 +144,14 @@ struct ProjectPanel: View {
         .tint(.accentColor)
         .onAppear {
             if !availableSections.contains(selection) { selection = .status }
+            acknowledgeVisibleStatusError()
         }
+        .onChange(of: selection) { _ in acknowledgeVisibleStatusError() }
+        .onChange(of: model.errorMessage) { _ in acknowledgeVisibleStatusError() }
+    }
+
+    private func acknowledgeVisibleStatusError() {
+        if selection == .status { model.acknowledgeWindowRefreshError() }
     }
 
     private var sidebar: some View {
@@ -195,9 +215,8 @@ struct ProjectPanel: View {
                     ? L("Connected · window list received", "Подключён · список окон получен")
                     : L("Connection needs checking", "Нужно проверить подключение"), good: connectionReady)
                 Divider().padding(.leading, 44)
-                statusRow("macwindow.on.rectangle", title: L("Linked windows", "Привязанные окна"), detail: model.hasWindowSnapshot
-                    ? L("\(readyCount) of \(model.shortcuts.count) ready to switch", "Готовы к переключению: \(readyCount) из \(model.shortcuts.count)")
-                    : L("Refresh the window list to check", "Обновите список окон для проверки"), good: model.hasWindowSnapshot && needsAttention.isEmpty)
+                statusRow("macwindow.on.rectangle", title: L("Linked windows", "Привязанные окна"), detail: windowListDetail,
+                          good: connectionReady && needsAttention.isEmpty)
                 Divider().padding(.leading, 44)
                 statusRow("keyboard", title: L("Hotkeys", "Сочетания клавиш"), detail: !model.hotKeyDocument.enabled
                     ? L("Paused · assignments are saved", "Приостановлены · назначения сохранены")
@@ -206,6 +225,23 @@ struct ProjectPanel: View {
                         : L("Some combinations need attention", "Некоторые сочетания требуют проверки"), good: model.hotKeyDocument.enabled && model.hotKeyFailures.isEmpty && model.hotKeyStorageError == nil)
             }
             .padding(14).background(Color(nsColor: .controlBackgroundColor), in: RoundedRectangle(cornerRadius: 16))
+            if let error = model.windowRefreshError {
+                VStack(alignment: .leading, spacing: 9) {
+                    Label(L("Could not refresh the window list", "Не удалось обновить список окон"), systemImage: "exclamationmark.circle")
+                        .font(.system(size: 13, weight: .semibold))
+                    Text(error).font(.system(size: 12)).fixedSize(horizontal: false, vertical: true)
+                    if model.hasWindowSnapshot {
+                        Text(L("The previous list is kept. This error does not mean your windows were closed or their shortcuts need to be recreated.", "Предыдущий список сохранён. Эта ошибка не означает, что окна закрылись или ярлыки нужно создавать заново."))
+                            .font(.system(size: 12)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                    }
+                    if !model.permissionGranted && model.chromeRunning {
+                        Button(L("Open Automation settings", "Открыть настройки автоматизации")) { model.openPrivacySettings() }
+                            .buttonStyle(.link)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .leading).padding(16)
+                .background(Color.orange.opacity(0.065), in: RoundedRectangle(cornerRadius: 14))
+            }
             ForEach(needsAttention) { shortcut in
                 VStack(alignment: .leading, spacing: 9) {
                     Label(shortcut.name, systemImage: "link.badge.plus").font(.system(size: 13, weight: .semibold))
@@ -226,8 +262,11 @@ struct ProjectPanel: View {
                     .font(.system(size: 12)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             }
             HStack {
-                Button(L("Refresh status", "Обновить состояние")) { Task { await model.refresh() } }
+                Button(model.windowRefreshError == nil ? L("Refresh status", "Обновить состояние") : L("Retry check", "Повторить проверку")) {
+                    Task { await model.refresh(presentErrorGlobally: false) }
+                }
                     .disabled(model.demoMode || model.isBusy)
+                if model.isRefreshingWindows { ProgressView().controlSize(.small) }
                 Spacer()
                 Button(L("Permission details", "О разрешениях")) { onPrivacy() }.buttonStyle(.link)
             }
