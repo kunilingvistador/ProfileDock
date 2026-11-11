@@ -1,5 +1,11 @@
 # Validation record
 
+## 0.1.8 (19) validation
+
+On macOS 26.5.2 (Apple Silicon), the native status panel showed a simulated Chrome timeout, marked the previous window list as unverified, and returned to the ready state after clicking Retry. The isolated `Tests/ProfileDockAppSmoke/run.py` check exercises the production model with a simulated Chrome service. It covers timeout, interrupted connection, denied access, closed Chrome, an empty window list, retry and switching with an existing binding. The launcher compatibility suite passed **8 cases and 134 assertions** in temporary fixtures.
+
+The website export and SEO checks cover all **18 canonical pages**. The installation links were exercised with the keyboard in the local preview, and the guide layout was checked at desktop and mobile widths. The analytics tests passed. The native timeout check did not use a live Chrome process or exercise fresh Gatekeeper and Automation prompts, physical hotkeys, or Intel desktop behavior.
+
 ## 0.1.7 (18) validation
 
 Validated **22 October 2026** for **0.1.7, build 18**: universal arm64 + x86_64, macOS 13 minimum, release tag [v0.1.7-beta](https://github.com/kunilingvistador/ProfileDock/releases/tag/v0.1.7-beta). It remains **ad-hoc signed and unnotarized**, with manual updates. The records below distinguish local desktop observations, temporary fixtures, hosted CI and archive integrity.

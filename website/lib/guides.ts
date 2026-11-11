@@ -40,7 +40,7 @@ export const guideCopy = {
     intro: "Разберитесь с профилями и аккаунтами, разделите работу и личное, выберите удобный способ переключения. Семь практических инструкций — от одного значка Chrome до своих хоткеев.",
     hub: "Инструкции", home: "Главная", skip: "Перейти к содержанию", nav: "Навигация",
     download: "Скачать для Mac", source: "Код на GitHub", read: "Читать инструкцию", toc: "В этой статье",
-    published: "9 сентября 2026", version: `Интерфейс ProfileDock ${releaseVersion}`, related: "Следующий полезный шаг",
+    published: "9 сентября 2026", version: `Текущая версия ProfileDock ${releaseVersion}`, related: "Следующий полезный шаг",
     sources: "Источники и подробности", privacy: "Данные и разрешения", allGuides: "Все инструкции",
     feedback: "Не получилось? Опишите проблему на GitHub", feedbackHint: "Укажите версию macOS, Chrome и ProfileDock. Не прикладывайте личные страницы, адреса аккаунтов или несокрытые заголовки окон.",
     figureCaption: "Настоящий интерфейс ProfileDock с демонстрационными ярлыками. Название и картинка помогают узнать выбранное окно.",
@@ -53,7 +53,7 @@ export const guideCopy = {
     intro: "Understand profiles and accounts, separate work and personal browsing, and choose a way to switch. Seven practical guides, from one Chrome icon to your own hotkeys.",
     hub: "Guides", home: "Home", skip: "Skip to content", nav: "Navigation",
     download: "Download for Mac", source: "Source on GitHub", read: "Read the guide", toc: "In this guide",
-    published: "September 9, 2026", version: `ProfileDock ${releaseVersion} interface`, related: "One useful next step",
+    published: "September 9, 2026", version: `Current release of ProfileDock ${releaseVersion}`, related: "One useful next step",
     sources: "Sources and further reading", privacy: "Data and permissions", allGuides: "All guides",
     feedback: "Still stuck? Describe the problem on GitHub", feedbackHint: "Include your macOS, Chrome, and ProfileDock versions. Do not attach private pages, account addresses, or unredacted window titles.",
     figureCaption: "The real ProfileDock interface with sample shortcuts. A familiar name and picture help identify your chosen window.",
@@ -78,7 +78,7 @@ const setupRU: Guide = {
     ] },
     { id: "install", title: "1. Подготовьте Chrome и установите ProfileDock", paragraphs: [
       "Нужны Google Chrome и macOS 13 или новее. Откройте обычное окно нужного профиля. Инкогнито не подходит для постоянной привязки.",
-      "Скачайте ZIP из раздела Releases на GitHub, распакуйте и перенесите ProfileDock в постоянное место, например в «Программы». Версия 0.1.7 — бета с локальной подписью, без нотариализации Apple. macOS может запросить отдельное подтверждение запуска: следуйте инструкции именно в описании выпуска.",
+      "Скачайте ZIP из раздела Releases на GitHub, распакуйте и перенесите ProfileDock в постоянное место, например в «Программы». У бета-сборки локальная подпись, без нотариализации Apple. macOS может запросить отдельное подтверждение запуска: следуйте инструкции именно в описании выпуска.",
       "Если macOS не может проверить разработчика, после попытки запуска можно открыть «Системные настройки → Конфиденциальность и безопасность» и подтвердить запуск именно этого приложения кнопкой «Всё равно открыть». Делайте это только для доверенной копии с официальной страницы проекта. Сообщения о вредоносном или повреждённом приложении требуют отдельной проверки; этот шаг не предназначен для их обхода. Инструкция Apple приведена в источниках ниже.",
       "Откройте ProfileDock, нажмите «Подключить Chrome» и разрешите управление Google Chrome в запросе macOS. Приложение работает в строке меню; через его значок можно снова открыть панель настройки.",
     ] },
@@ -102,7 +102,7 @@ const setupRU: Guide = {
       "ProfileDock должен быть запущен в строке меню. После завершения приложения сочетания перестают действовать до следующего запуска. Общий выключатель находится в меню «Ещё» (⋯) верхней панели. Во время настройки сочетания приостановлены. Известные конфликты показываются при записи или сохранении; все команды других приложений заранее обнаружить нельзя."
     ] },
     { id: "manager-keyboard", title: "Найдите ярлык в новой панели", paragraphs: [
-      "В ProfileDock 0.1.7 ярлыки расположены карточками в две колонки. Нажмите ⌘F, введите часть имени, затем выберите карточку стрелками и нажмите Return. Поиск работает по имени ярлыка; он не ищет по содержимому вкладок или адресам сайтов.",
+      "В ProfileDock ярлыки расположены карточками в две колонки. Нажмите ⌘F, введите часть имени, затем выберите карточку стрелками и нажмите Return. Поиск работает по имени ярлыка; он не ищет по содержимому вкладок или адресам сайтов.",
       "Escape очищает поиск. Кнопка + или ⌘N создаёт новый ярлык, ⌘R обновляет список окон Chrome. Состояние подключения открывается кнопкой в левой части панели; общие действия и помощь — в меню «Ещё» (⋯) справа. Меню ⋯ самой карточки меняет именно этот ярлык.",
     ] },
     { id: "everyday-use", title: "Что меняется в повседневной работе", paragraphs: [
@@ -142,7 +142,7 @@ const setupEN: Guide = {
     ] },
     { id: "install", title: "1. Prepare Chrome and install ProfileDock", paragraphs: [
       "You need Google Chrome and macOS 13 or later. Open an ordinary window in the profile you want to reach. Incognito windows cannot become persistent shortcuts.",
-      "Download the ZIP from GitHub Releases, unpack it, and put ProfileDock in a stable location such as Applications. Version 0.1.7 is an ad-hoc-signed beta without Apple notarization. macOS may require manual approval to open it; follow the instructions in that release’s notes.",
+      "Download the ZIP from GitHub Releases, unpack it, and put ProfileDock in a stable location such as Applications. This beta is ad-hoc signed and has no Apple notarization. macOS may require manual approval to open it; follow the instructions in that release’s notes.",
       "For an unidentified-developer warning, after trying to open the app, System Settings → Privacy & Security may offer Open Anyway for that app. Use it only for a trusted copy from the official project. A warning about malware or a damaged app needs separate investigation; these steps are not a way around those warnings. Apple’s instructions are linked below.",
       "Open ProfileDock, click “Connect Chrome,” and allow it to control Google Chrome when macOS asks. ProfileDock runs in the menu bar; use its icon to reopen the setup panel.",
     ] },
@@ -166,7 +166,7 @@ const setupEN: Guide = {
       "ProfileDock must be running in the menu bar. Quitting the app disables its hotkeys until the next launch. The toolbar’s More (⋯) menu contains a switch to pause all hotkeys. They are paused while the hotkey editor is open. Known conflicts appear during recording or saving; commands in every other app cannot all be detected in advance."
     ] },
     { id: "manager-keyboard", title: "Find a shortcut in the new manager", paragraphs: [
-      "ProfileDock 0.1.7 arranges shortcuts as cards in two columns. Press ⌘F, type part of a name, then select a card with the arrow keys and press Return. Search matches shortcut names; it does not search tab contents or website addresses.",
+      "ProfileDock arranges shortcuts as cards in two columns. Press ⌘F, type part of a name, then select a card with the arrow keys and press Return. Search matches shortcut names; it does not search tab contents or website addresses.",
       "Escape clears the search. Click + or press ⌘N to add a shortcut; ⌘R refreshes Chrome’s window list. The left toolbar button opens connection status; the right-hand More (⋯) menu contains shared actions and help. A card’s own ⋯ menu changes that shortcut.",
     ] },
     { id: "everyday-use", title: "What happens in everyday use", paragraphs: [
@@ -228,7 +228,7 @@ const troubleshootRU: Guide = {
       "Обновление ProfileDock не восстанавливает закрытое окно Chrome. Если приложение найдено, но окно отсутствует, исправляется именно привязка. При неоднозначной цели приложение сообщает о проблеме; выбирать произвольное окно как будто переключение удалось оно не должно.",
     ] },
     { id: "limits", title: "Когда нужна дополнительная проверка", paragraphs: [
-      "Полноэкранные окна, разные Spaces, Stage Manager, несколько мониторов и скрытый целиком Chrome могут влиять на видимый результат переключения. Эти сочетания требуют более широких проверок; версия 0.1.7 остаётся бетой. Для диагностики сравните поведение того же окна в обычном режиме на текущем рабочем столе.",
+      "Полноэкранные окна, разные Spaces, Stage Manager, несколько мониторов и скрытый целиком Chrome могут влиять на видимый результат переключения. Эти сочетания требуют более широких проверок. ProfileDock пока в бета-версии. Для диагностики сравните поведение того же окна в обычном режиме на текущем рабочем столе.",
       "Если проблема сохраняется, запишите версии macOS, Chrome и ProfileDock, а также состояние окна: обычное, свёрнутое, полноэкранное или на другом рабочем столе. Опишите, какое действие ожидали и что увидели. Не публикуйте реальные заголовки окон, email и содержимое рабочих страниц в отчёте об ошибке.",
       "ProfileDock бесплатен и открыт, работает с Google Chrome на macOS 13+. Он не превращает профили в отдельные приложения в Command–Tab. Бета пока без нотариализации Apple; перед установкой прочитайте примечания к выпуску.",
     ] },
@@ -284,7 +284,7 @@ const troubleshootEN: Guide = {
       "Updating ProfileDock cannot restore a closed Chrome window. If the app is found but the window is missing, repair the window connection. An ambiguous target is reported as a problem; the app should not choose an arbitrary window and treat that as a successful switch.",
     ] },
     { id: "limits", title: "When further testing is needed", paragraphs: [
-      "Fullscreen windows, separate Spaces, Stage Manager, multiple monitors, and hiding Chrome as a whole can affect the visible result. Those combinations need broader testing; version 0.1.7 remains a beta. To diagnose a problem, compare the same window in ordinary mode on the current desktop.",
+      "Fullscreen windows, separate Spaces, Stage Manager, multiple monitors, and hiding Chrome as a whole can affect the visible result. Those combinations need broader testing. ProfileDock is still in beta. To diagnose a problem, compare the same window in ordinary mode on the current desktop.",
       "If the problem continues, record your macOS, Chrome, and ProfileDock versions and the window’s state: ordinary, minimized, fullscreen, or on another desktop. Describe what you expected and what appeared. Do not publish real window titles, email addresses, or the contents of work pages in a bug report.",
       "ProfileDock is free and open source, for Google Chrome on macOS 13 or later. It does not turn profiles into independent apps in Command–Tab. The beta is not yet notarized by Apple; read the release notes before installing.",
     ] },

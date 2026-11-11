@@ -4,7 +4,7 @@
 
 A small, open-source macOS utility for people who keep several Chrome profiles open. Give each working window a recognizable name and icon, then bring it forward with one click.
 
-[Download the beta](https://github.com/kunilingvistador/ProfileDock/releases) · [Website](https://kunilingvistador.github.io/ProfileDock/)
+[Download 0.1.8 beta](https://github.com/kunilingvistador/ProfileDock/releases/tag/v0.1.8-beta) · [Installation](https://kunilingvistador.github.io/ProfileDock/en/#install) · [Website](https://kunilingvistador.github.io/ProfileDock/)
 
 [Setup guide](https://kunilingvistador.github.io/ProfileDock/en/guides/chrome-profile-shortcuts-mac-dock/) · [Reconnect an existing window](https://kunilingvistador.github.io/ProfileDock/en/guides/chrome-shortcut-existing-window/) · [Interactive Dock demonstration](https://kunilingvistador.github.io/ProfileDock/en/#hero-title)
 
@@ -28,7 +28,8 @@ A small, open-source macOS utility for people who keep several Chrome profiles o
 - Keeps Chrome control in one app, so each shortcut does not need its own Automation permission.
 - Refreshes existing compatible Dock helpers when you open ProfileDock after an app update.
 - Keeps shortcut pictures, status and hotkeys together in compact cards, with native toolbar search and keyboard navigation.
-- Shows connection status and lets you prepare feedback without sending it automatically.
+- Shows Chrome connection errors and lets you retry a failed window check from the status panel.
+- Lets you prepare feedback without sending it automatically.
 
 The switching command does not open windows or tabs, change the selected tab, or resize/reposition windows. Native focus behavior still needs broader testing across macOS configurations; see [known limits](#known-limits).
 
