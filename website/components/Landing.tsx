@@ -1,6 +1,7 @@
 "use client";
 
 import AnalyticsControl from "./AnalyticsControl";
+import InstallInstructions, { installCopy } from "./InstallInstructions";
 import { useState } from "react";
 import {
   ArrowDown,
@@ -31,7 +32,7 @@ const copy = {
     download: "Скачать для Mac",
     see: "Посмотреть, как работает",
     details: "Бесплатно · macOS 13+ · Apple Silicon и Intel",
-    betaHint: "Бета-версия. При установке нужно подтверждение macOS.",
+    betaHint: "Бета-версия",
     demoBadge: "Попробуйте прямо здесь",
     demoTitle: "Три профиля. Три ярлыка.",
     demo: "Нажмите на значок в Dock",
@@ -81,9 +82,6 @@ const copy = {
         "В меню ⋯ карточки выберите «Создать ярлык для Dock» и перетащите приложение из Finder в Dock.",
       ],
     ],
-    installTitle: "Перед первым запуском",
-    installText:
-      "Скачайте ZIP кнопкой выше, распакуйте и перенесите ProfileDock в «Программы». Сборка пока без нотариализации Apple: если macOS блокирует запуск, следуйте инструкции в выпуске. Разрешите ProfileDock управлять Chrome, когда система попросит.",
     installLink: "Настроить первый ярлык",
     faqKicker: "ХОРОШИЕ ВОПРОСЫ",
     faqTitle: "Что стоит знать.",
@@ -153,7 +151,7 @@ const copy = {
     download: "Download for Mac",
     see: "See how it works",
     details: "Free · macOS 13+ · Apple Silicon & Intel",
-    betaHint: "Beta software. macOS approval is needed during installation.",
+    betaHint: "Beta software",
     demoBadge: "Give it a try",
     demoTitle: "Three profiles. Three shortcuts.",
     demo: "Click an icon in the Dock",
@@ -205,9 +203,6 @@ const copy = {
         "Choose Create Dock shortcut from the card’s ⋯ menu, then drag the app from Finder into your Dock.",
       ],
     ],
-    installTitle: "Before your first launch",
-    installText:
-      "Download the ZIP with the button above, unzip it and move ProfileDock to Applications. This build is not yet notarized by Apple. If macOS blocks it, follow the release instructions. Allow ProfileDock to control Chrome when macOS asks.",
     installLink: "Set up your first shortcut",
     faqKicker: "GOOD QUESTIONS",
     faqTitle: "A few things to know.",
@@ -355,7 +350,7 @@ export default function Landing({ initialLanguage }: { initialLanguage: "ru" | "
             </div>
             <p className="download-detail">{t.details}<br />ZIP · {releaseVersion}</p>
             <a className="beta-hint" href="#install">
-              {t.betaHint}
+              {t.betaHint} · {installCopy[initialLanguage].jump}
             </a>
           </div>
           <div className="demo-stage">
@@ -500,11 +495,11 @@ export default function Landing({ initialLanguage }: { initialLanguage: "ru" | "
               </article>
             ))}
           </div>
-          <aside className="install-note" id="install">
+          <aside className="install-note" id="install" aria-labelledby="install-title" tabIndex={-1}>
             <Download size={23} strokeWidth={1.6} aria-hidden="true" />
             <div>
-              <h3>{t.installTitle}</h3>
-              <p>{t.installText}</p>
+              <h3 id="install-title">{installCopy[initialLanguage].title}</h3>
+              <InstallInstructions language={initialLanguage} />
               <p className="release-links"><a href={release}>{initialLanguage === "ru" ? `Что нового в ${releaseVersion}` : `What’s new in ${releaseVersion}`}</a> · <a href={checksumURL}>SHA-256</a></p>
               <a className="text-link" href={`${home}guides/chrome-profile-shortcuts-mac-dock/`}>
                 {t.installLink}
